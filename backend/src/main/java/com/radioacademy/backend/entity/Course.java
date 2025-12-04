@@ -13,9 +13,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "courses")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Data // Genera getters, setters, toString, equals, y hashCode
+@NoArgsConstructor // Constructor sin argumentos
+@AllArgsConstructor // Constructor con todos los argumentos
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

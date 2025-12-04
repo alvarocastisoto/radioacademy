@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@Data // Lombok generates getters, setters, toString, equals, and hashCode methods
+@Data // Genera getters, setters, toString, equals, y hashCode
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
