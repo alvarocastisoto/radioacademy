@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "lessons")
 @Data
@@ -31,6 +33,7 @@ public class Lesson {
     // RELACIÓN: Una lección pertenece a un Módulo
     @ManyToOne(fetch = FetchType.LAZY) // LAZY: No te traigas el módulo entero si no te lo pido
     @JoinColumn(name = "module_id", nullable = false)
+    @JsonIgnore // Para evitar problemas de serialización (circular reference)
     private Module module;
 
 }
