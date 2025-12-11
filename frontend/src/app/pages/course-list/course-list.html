@@ -1,1 +1,32 @@
-<p>course-list works!</p>
+<div class="container mt-4">
+  <h2 class="text-primary mb-4">📚 Catálogo de Formación</h2>
+
+  <div class="row">
+    @for (course of courses(); track course.id) {
+      <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0 hover-effect">
+          <img src="https://placehold.co/600x400/20c997/ffffff?text=Radio" class="card-img-top" alt="Curso">
+          
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <span class="badge bg-primary">{{ course.hours }} Horas</span>
+              <h5 class="text-success fw-bold">{{ course.price | currency:'EUR' }}</h5>
+            </div>
+            
+            <h5 class="card-title fw-bold">{{ course.title }}</h5>
+            <p class="card-text text-muted small">{{ course.description }}</p>
+          </div>
+          
+          <div class="card-footer bg-white border-top-0 d-grid">
+            <button class="btn btn-outline-primary">Ver Temario</button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-12 text-center py-5">
+        <h3 class="text-muted">No hay cursos disponibles todavía 😢</h3>
+        <p>Vuelve más tarde o contacta con administración.</p>
+      </div>
+    }
+  </div>
+</div>
