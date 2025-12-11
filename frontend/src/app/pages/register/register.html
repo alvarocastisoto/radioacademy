@@ -1,1 +1,62 @@
-<p>register works!</p>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-lg border-0 rounded-3">
+        <div class="card-body p-5">
+          <h2 class="text-center text-primary mb-4 fw-bold">Crear Cuenta</h2>
+          
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+            
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">Nombre</label>
+                <input type="text" class="form-control" formControlName="name" placeholder="Lucía">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Apellidos</label>
+                <input type="text" class="form-control" formControlName="surname" placeholder="Gómez">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" formControlName="email" placeholder="lucia@email.com">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" class="form-control" formControlName="password">
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label">DNI</label>
+                <input type="text" class="form-control" formControlName="dni">
+              </div>
+              <div class="col-6">
+                <label class="form-label">Teléfono</label>
+                <input type="tel" class="form-control" formControlName="phone">
+              </div>
+            </div>
+
+            <div class="mb-3 form-check">
+              <input type="checkbox" class="form-check-input" id="terms" formControlName="termsAccepted">
+              <label class="form-check-label" for="terms">Acepto los términos y condiciones</label>
+            </div>
+
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-primary btn-lg" [disabled]="registerForm.invalid">
+                Registrarse
+              </button>
+            </div>
+
+            <div class="text-center mt-3">
+              <small>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></small>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

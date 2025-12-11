@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 // 1. AÑADE RouterLinkActive AQUÍ
 import { RouterLink, RouterLinkActive } from '@angular/router'; 
-
+import { AuthService } from '../../services/auth/auth';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -11,5 +11,9 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   styleUrl: './navbar.scss'
 })
 export class Navbar {
+public authService = inject(AuthService);
+  logout() {
+    this.authService.logout();
+  }
 
 }

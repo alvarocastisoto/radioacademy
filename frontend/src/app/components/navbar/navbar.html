@@ -14,12 +14,29 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/courses" routerLinkActive="active">Cursos</a>
         </li>
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
-        </li>
-        <li class="nav-item">
-          <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register">Regístrate</a>
-        </li>
+
+        @if (!authService.isLoggedIn()) {
+          <li class="nav-item ms-lg-3">
+            <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register">Regístrate</a>
+          </li>
+        } 
+        
+        @else {
+          <li class="nav-item ms-lg-3 dropdown">
+            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+              👤 Mi Cuenta
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#">Mis Cursos</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><button class="dropdown-item text-danger" (click)="logout()">Cerrar Sesión</button></li>
+            </ul>
+          </li>
+        }
+
       </ul>
     </div>
   </div>
