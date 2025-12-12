@@ -1,11 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CourseService } from '../../services/course/course';
 import { CurrencyPipe } from '@angular/common'; // Para formatear el precio (€)
-
+import { RouterLink } from '@angular/router';
 @Component({
   selector: 'app-course-list',
   standalone: true,
-  imports: [CurrencyPipe], // Importamos el formateador de moneda
+  imports: [CurrencyPipe, RouterLink], // Importamos el formateador de moneda
   templateUrl: './course-list.html',
   styleUrl: './course-list.scss',
 })

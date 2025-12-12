@@ -13,4 +13,14 @@ export class CourseService {
   getCourses(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+
+  // Obtener módulos de un curso
+  getCourseModules(courseId: string): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:8080/api/modules/course/${courseId}`);
+  }
+
+  // Obtener lecciones de un módulo
+  getModuleLessons(moduleId: string): Observable<any[]> {
+    return this.http.get<any[]>(`http://localhost:8080/api/lessons/module/${moduleId}`);
+  }
 }
