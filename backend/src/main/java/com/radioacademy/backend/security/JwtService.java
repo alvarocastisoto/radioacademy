@@ -35,9 +35,21 @@ public class JwtService {
         return claimsResolver.apply(claims);
     }
 
-    // Generar token solo con el usuario (sin datos extra)
+    // Generar token AUTOMÁTICAMENTE inyectando el rol del usuario
     public String generateToken(UserDetails userDetails) {
-        return generateToken(new HashMap<>(), userDetails);
+        Map<String, Object> extraClaims = new HashMap<>();
+
+        // 1. Buscamos el rol del usuario (ADMIN, STUDENT, etc.)
+        String role = userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(item -> item.getAuthority())
+                .orElse("STUDENT"); // Por si acaso no tuviera, ponemos uno por defecto
+
+        // 2. Lo metemos en el mapa
+        extraClaims.put("role", role);
+
+        // 3. Generamos el token con ese dato extra
+        return generateToken(extraClaims, userDetails);
     }
 
     // Generar token con datos extra (claims) y el usuario

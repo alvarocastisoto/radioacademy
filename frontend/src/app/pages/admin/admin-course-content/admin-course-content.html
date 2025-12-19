@@ -1,0 +1,77 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <button routerLink="/admin" class="btn btn-outline-secondary">⬅ Volver</button>
+    <h2 class="text-primary fw-bold">Gestionar Temario</h2>
+    <a [routerLink]="['/admin/courses', courseId, 'new-module']" class="btn btn-success">
+      + Añadir Módulo
+    </a>
+  </div>
+
+  <div class="accordion shadow-sm" id="adminAccordion">
+    @for (modulo of modules(); track modulo.id; let i = $index) {
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button
+          class="accordion-button"
+          type="button"
+          data-bs-toggle="collapse"
+          [attr.data-bs-target]="'#collapse' + i"
+        >
+          <span class="badge bg-dark me-3">Módulo {{ modulo.orderIndex }}</span>
+          <span class="fw-bold">{{ modulo.title }}</span>
+        </button>
+      </h2>
+
+      <div [id]="'collapse' + i" class="accordion-collapse collapse show">
+        <div class="accordion-body bg-light">
+          <ul class="list-group list-group-flush mb-3">
+            @for (lesson of modulo.lessons; track lesson.id) {
+            <li class="list-group-item bg-transparent border-bottom">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="fw-bold text-dark">🎥 {{ lesson.title }}</span>
+                <div>
+                  <button class="btn btn-sm btn-outline-danger" title="Borrar lección">🗑️</button>
+                </div>
+              </div>
+
+              @if (lesson.videoUrl) {
+              <div
+                class="ratio ratio-16x9 mt-2 mb-3 shadow-sm rounded overflow-hidden"
+                style="max-width: 480px"
+              >
+                <iframe
+                  [src]="lesson.videoUrl | safeVideo"
+                  title="YouTube video player"
+                  allowfullscreen
+                >
+                </iframe>
+              </div>
+              } @else {
+              <p class="text-muted small fst-italic">🚫 Sin vídeo asignado</p>
+              }
+            </li>
+            } @empty {
+            <li class="list-group-item bg-transparent text-muted small">
+              No hay lecciones en este módulo aún.
+            </li>
+            }
+          </ul>
+
+          <div class="text-end">
+            <a
+              [routerLink]="['/admin/modules', modulo.id, 'new-lesson']"
+              class="btn btn-sm btn-outline-primary"
+            >
+              + Añadir Lección aquí
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    } @empty {
+    <div class="alert alert-info text-center">
+      Este curso está vacío. ¡Añade el primer módulo arriba! 👆
+    </div>
+    }
+  </div>
+</div>

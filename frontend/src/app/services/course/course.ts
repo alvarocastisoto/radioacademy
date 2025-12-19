@@ -23,4 +23,29 @@ export class CourseService {
   getModuleLessons(moduleId: string): Observable<any[]> {
     return this.http.get<any[]>(`http://localhost:8080/api/lessons/module/${moduleId}`);
   }
+
+  // Crear un nuevo curso
+  createCourse(courseData: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, courseData);
+  }
+
+  // Borrar un curso, como es obligatorio pasar un id, ya no será opcional
+  deleteCourse(courseId: string): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/${courseId}`);
+  }
+
+  // Actualizar un curso
+  updateCourse(courseId: string, courseData: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/${courseId}`, courseData);
+  }
+
+  // crear módulo
+  createModule(moduleData: any): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/modules', moduleData);
+  }
+
+  // crear lección
+  createLesson(lessonData: any): Observable<any> {
+    return this.http.post<any>('http://localhost:8080/api/lessons', lessonData);
+  }
 }

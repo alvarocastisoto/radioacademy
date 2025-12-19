@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Importante
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -34,13 +35,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // 1. Acceso público (Login, Registro)
                         .requestMatchers("/api/auth/**").permitAll()
-                        // CAMBIO: Ahora los cursos requieren login para probar el token
-                        // .requestMatchers("/api/courses").permitAll() <--- BORRADO/COMENTADO
-                        .requestMatchers("/api/courses").authenticated() // <--- NUEVO: Protegido
+
+                        // 2. Acceso PÚBLICO para VER cursos (GET) - Para que los alumnos vean el
+                        // catálogo
+                        .requestMatchers(HttpMethod.GET, "/api/courses/**").authenticated()
+
+                        // 3. Acceso EXCLUSIVO ADMIN para CREAR/BORRAR (POST, DELETE, PUT)
+                        // Usamos hasAuthority porque en el paso 1 quitamos el prefijo ROLE_
+                        .requestMatchers(HttpMethod.POST, "/api/courses/**").hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyAuthority("ADMIN")
+
+                        // Igual para Módulos y Lecciones (solo Admin crea contenido)
+                        .requestMatchers(HttpMethod.POST, "/api/modules/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/lessons/**").hasAuthority("ADMIN")
+
+                        // 4. El resto requiere estar logueado al menos
                         .anyRequest().authenticated())
-                // NUEVO: Ejecutar nuestro filtro JWT antes del filtro de usuario/contraseña
-                // estándar
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
