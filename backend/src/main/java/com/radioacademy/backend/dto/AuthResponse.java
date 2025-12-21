@@ -1,4 +1,12 @@
-package com.radioacademy.backend.dto;
+package com.radioacademy.backend.dto; // O donde lo tengas
 
-public record AuthResponse(String token) {
+import com.radioacademy.backend.entity.User;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class AuthResponse {
+    private String token;
+    private User user; // <--- AÑADIR ESTE CAMPO
 }

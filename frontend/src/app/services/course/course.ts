@@ -7,45 +7,62 @@ import { Observable } from 'rxjs';
 })
 export class CourseService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://localhost:8080/api/courses';
+  
+  // 1. Definimos la raíz de la API para evitar errores de escritura
+  private readonly API_BASE = 'http://localhost:8080/api';
 
-  // Obtener todos los cursos
+  // --- CURSOS ---
   getCourses(): Observable<any[]> {
-    return this.http.get<any[]>(this.apiUrl);
+    return this.http.get<any[]>(`${this.API_BASE}/courses`);
   }
 
-  // Obtener módulos de un curso
-  getCourseModules(courseId: string): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/modules/course/${courseId}`);
-  }
-
-  // Obtener lecciones de un módulo
-  getModuleLessons(moduleId: string): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/lessons/module/${moduleId}`);
-  }
-
-  // Crear un nuevo curso
   createCourse(courseData: any): Observable<any> {
-    return this.http.post<any>(this.apiUrl, courseData);
+    return this.http.post<any>(`${this.API_BASE}/courses`, courseData);
   }
 
-  // Borrar un curso, como es obligatorio pasar un id, ya no será opcional
   deleteCourse(courseId: string): Observable<any> {
-    return this.http.delete<any>(`${this.apiUrl}/${courseId}`);
+    return this.http.delete<any>(`${this.API_BASE}/courses/${courseId}`);
   }
 
-  // Actualizar un curso
   updateCourse(courseId: string, courseData: any): Observable<any> {
-    return this.http.put<any>(`${this.apiUrl}/${courseId}`, courseData);
+    return this.http.put<any>(`${this.API_BASE}/courses/${courseId}`, courseData);
   }
 
-  // crear módulo
+  // --- MÓDULOS ---
   createModule(moduleData: any): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/modules', moduleData);
+    return this.http.post<any>(`${this.API_BASE}/modules`, moduleData);
   }
 
-  // crear lección
-  createLesson(lessonData: any): Observable<any> {
-    return this.http.post<any>('http://localhost:8080/api/lessons', lessonData);
+  getCourseModules(courseId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_BASE}/modules/course/${courseId}`);
+  }
+
+  deleteModule(moduleId: string): Observable<any> {
+    return this.http.delete<any>(`${this.API_BASE}/modules/${moduleId}`);
+  }
+
+  // --- LECCIONES ---
+  
+  // CORREGIDO: Ahora apunta a /api/lessons, no a /api/courses/lessons
+  createLesson(lessonData: FormData): Observable<any> {
+    return this.http.post(`${this.API_BASE}/lessons`, lessonData);
+  }
+
+  getModuleLessons(moduleId: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_BASE}/lessons/module/${moduleId}`);
+  }
+
+  deleteLesson(lessonId: string): Observable<any> {
+    return this.http.delete<any>(`${this.API_BASE}/lessons/${lessonId}`);
+  }
+
+  // CORREGIDO: Ahora apunta bien
+  getLessonById(lessonId: string): Observable<any> {
+    return this.http.get(`${this.API_BASE}/lessons/${lessonId}`);
+  }
+
+  // CORREGIDO: Ahora apunta bien
+  updateLesson(lessonId: string, lessonData: FormData): Observable<any> {
+    return this.http.put(`${this.API_BASE}/lessons/${lessonId}`, lessonData);
   }
 }

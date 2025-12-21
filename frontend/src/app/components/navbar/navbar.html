@@ -1,42 +1,61 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
   <div class="container">
     <a class="navbar-brand fw-bold" routerLink="/">☢️ RadioAcademy</a>
-    
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+    >
       <span class="navbar-toggler-icon"></span>
     </button>
-    
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav ms-auto align-items-center">
         <li class="nav-item">
-          <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
+          <a
+            class="nav-link"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            >Inicio</a
+          >
+        </li>
+        @if (!authService.isLoggedIn()) {
+        <li class="nav-item ms-lg-3">
+          <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" routerLink="/courses" routerLinkActive="active">Cursos</a>
+          <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register"
+            >Regístrate</a
+          >
         </li>
-
-        @if (!authService.isLoggedIn()) {
-          <li class="nav-item ms-lg-3">
-            <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
-          </li>
-          <li class="nav-item">
-            <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register">Regístrate</a>
-          </li>
-        } 
-        
-        @else {
-          <li class="nav-item ms-lg-3 dropdown">
-            <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              👤 Mi Cuenta
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Mis Cursos</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><button class="dropdown-item text-danger" (click)="logout()">Cerrar Sesión</button></li>
-            </ul>
-          </li>
+        } @else { @if (authService.currentUser()?.role === 'ADMIN') {
+        <li class="nav-item ms-lg-3">
+          <a class="btn btn-warning btn-sm fw-bold text-dark shadow-sm" routerLink="/admin">
+            🛠 Panel Admin
+          </a>
+        </li>
         }
 
+        <li class="nav-item ms-lg-3 dropdown">
+          <button
+            class="btn btn-outline-light btn-sm dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+          >
+            👤 {{ authService.currentUser()?.name || 'Mi Cuenta' }}
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" routerLink="/my-courses">📚 Mis Cursos</a></li>
+            <li><hr class="dropdown-divider" /></li>
+            <li>
+              <button class="dropdown-item text-danger" (click)="logout()">🚪 Cerrar Sesión</button>
+            </li>
+          </ul>
+        </li>
+        }
       </ul>
     </div>
   </div>

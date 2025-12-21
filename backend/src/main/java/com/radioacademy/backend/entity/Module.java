@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -30,5 +30,9 @@ public class Module {
     @JoinColumn(name = "course_id", nullable = false)
     @JsonIgnore // Para evitar problemas de serialización (circular reference)
     private Course course;
+
+    // 👇 MODIFICA ESTA PARTE 👇
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Lesson> lessons;
 
 }

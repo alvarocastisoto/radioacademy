@@ -16,14 +16,18 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; // Importante
 import org.springframework.http.HttpMethod;
 
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter; // NUEVO
+    private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
 
-    // NUEVO: Añadimos el filtro al constructor
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthenticationFilter jwtAuthFilter) {
         this.customUserDetailsService = customUserDetailsService;
         this.jwtAuthFilter = jwtAuthFilter;
@@ -33,34 +37,64 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                // 🔥 NUEVO: ACTIVAMOS CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Acceso público (Login, Registro)
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
 
-                        // 2. Acceso PÚBLICO para VER cursos (GET) - Para que los alumnos vean el
-                        // catálogo
+                        // GET PÚBLICO O AUTENTICADO (Como prefieras, aquí lo tienes autenticado)
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/modules/**").authenticated() // Añadido por si acaso
+                        .requestMatchers(HttpMethod.GET, "/api/lessons/**").authenticated() // Añadido por si acaso
 
-                        // 3. Acceso EXCLUSIVO ADMIN para CREAR/BORRAR (POST, DELETE, PUT)
-                        // Usamos hasAuthority porque en el paso 1 quitamos el prefijo ROLE_
-                        .requestMatchers(HttpMethod.POST, "/api/courses/**").hasAnyAuthority("ADMIN")
+                        // 1. CURSOS
+                        .requestMatchers(HttpMethod.POST, "/api/courses/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/courses/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // Igual para Módulos y Lecciones (solo Admin crea contenido)
-                        .requestMatchers(HttpMethod.POST, "/api/modules/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/api/lessons/**").hasAuthority("ADMIN")
+                        // 2. MÓDULOS
+                        .requestMatchers(HttpMethod.POST, "/api/modules/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/modules/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/modules/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 4. El resto requiere estar logueado al menos
+                        // 3. LECCIONES
+                        .requestMatchers(HttpMethod.POST, "/api/lessons/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/lessons/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/lessons/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ... (El resto de Beans: passwordEncoder, authenticationManager, etc. siguen
-    // igual) ...
+    // 🔥 NUEVO: DEFINIMOS LAS REGLAS DE CORS
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // 1. Permitir al Frontend (Angular)
+        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // 2. Permitir TODOS los métodos (incluyendo DELETE y PUT)
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // 3. Permitir las cabeceras (especialmente Authorization para el Token)
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+
+        // 4. Permitir credenciales
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
+
+    // ... (El resto de Beans: passwordEncoder, authenticationManager siguen igual)
+    // ...
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

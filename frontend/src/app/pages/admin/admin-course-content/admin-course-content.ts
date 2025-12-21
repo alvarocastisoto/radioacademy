@@ -47,4 +47,23 @@ export class AdminCourseContent implements OnInit {
       });
     });
   }
+
+  //Borrar módulo
+  deleteModule(moduleId: string) {
+    if (confirm('¿Estás seguro de que deseas borrar este módulo?')) {
+      this.courseService.deleteModule(moduleId).subscribe(() => {
+        // Recargar el temario después de borrar el módulo
+        this.loadSyllabus();
+      });
+    }
+  }
+  //Borrar lección
+  deleteLesson(lessonId: string) {
+    if (confirm('¿Estás seguro de que deseas borrar esta lección?')) {
+      this.courseService.deleteLesson(lessonId).subscribe(() => {
+        // Recargar el temario después de borrar la lección
+        this.loadSyllabus();
+      });
+    }
+  }
 }

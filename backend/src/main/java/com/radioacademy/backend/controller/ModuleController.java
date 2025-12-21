@@ -51,4 +51,15 @@ public class ModuleController {
         Module savedModule = moduleRepository.save(newModule);
         return new ResponseEntity<>(savedModule, HttpStatus.CREATED);
     }
+
+    // DELETE: Eliminar un módulo por su ID
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
+        if (!moduleRepository.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        moduleRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

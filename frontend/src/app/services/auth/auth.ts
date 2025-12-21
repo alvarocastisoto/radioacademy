@@ -1,45 +1,77 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core'; // <--- Importamos 'signal'
+import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { Router } from '@angular/router'; // <--- Importamos Router
+import { Router } from '@angular/router';
+
+// Definimos qué forma tiene un usuario
+export interface User {
+  id: string;
+  email: string;
+  name: string;
+  role: 'ADMIN' | 'USER';
+}
+
+// Definimos qué esperamos recibir del servidor al loguearnos
+interface LoginResponse {
+  token: string;
+  user: User; // <--- IMPORTANTE: Esperamos que el backend nos devuelva esto
+}
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
   private apiUrl = 'http://localhost:8080/api/auth';
 
-  // 1. EL INTERRUPTOR (Signal)
-  // Inicialmente comprobamos si ya existe el token en el navegador
-  isLoggedIn = signal<boolean>(!!localStorage.getItem('token'));
+  // 📡 SEÑAL PRINCIPAL: Guarda quién es el usuario actual (o null si no hay nadie)
+  currentUser = signal<User | null>(null);
 
-  constructor() { }
-
-  register(user: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, user);
+  constructor() {
+    // AL INICIAR: Recuperamos la sesión si existe
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        this.currentUser.set(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Datos corruptos en localStorage');
+        this.logout();
+      }
+    }
   }
 
-  login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
-      // 'tap' es para hacer cosas secundarias sin alterar la respuesta
-      tap((response: any) => {
-        // Guardamos el token
+  // REGISTRO
+  register(userData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, userData);
+  }
+
+  // LOGIN
+  login(credentials: any): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response) => {
+        // 1. Guardamos Token
         localStorage.setItem('token', response.token);
-        // ENCENDEMOS EL INTERRUPTOR
-        this.isLoggedIn.set(true);
+
+        // 2. Guardamos Usuario (para que no se borre al refrescar)
+        localStorage.setItem('user', JSON.stringify(response.user));
+
+        // 3. Actualizamos la señal (Angular se entera automáticamente)
+        this.currentUser.set(response.user);
       })
     );
   }
 
-  // 2. MÉTODO PARA CERRAR SESIÓN
+  // LOGOUT
   logout() {
-    // Borramos el token
     localStorage.removeItem('token');
-    // APAGAMOS EL INTERRUPTOR
-    this.isLoggedIn.set(false);
-    // Redirigimos al home o login
-    this.router.navigate(['/login']);
+    localStorage.removeItem('user');
+    this.currentUser.set(null); // Ponemos la señal en vacío
+    this.router.navigate(['/auth/login']);
+  }
+
+  // Ayuda para saber si hay token crudo
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
   }
 }

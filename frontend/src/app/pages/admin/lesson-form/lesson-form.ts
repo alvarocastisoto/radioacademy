@@ -2,46 +2,106 @@ import { Component, inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CourseService } from '../../../services/course/course';
-import { Location } from '@angular/common'; // Útil para el botón "Atrás"
+import { Location, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-lesson-form',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, CommonModule],
   templateUrl: './lesson-form.html',
   styleUrl: './lesson-form.scss',
 })
 export class LessonForm implements OnInit {
   private fb = inject(FormBuilder);
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private courseService = inject(CourseService);
-  private location = inject(Location); // Para volver atrás fácil
+  private location = inject(Location);
 
   moduleId: string = '';
+  lessonId: string = '';
+  isEditMode: boolean = false;
+  selectedFile: File | null = null; // 📂 AQUÍ GUARDAMOS EL ARCHIVO
 
   form: FormGroup = this.fb.group({
     title: ['', [Validators.required]],
-    videoUrl: ['', [Validators.required]], // Aquí pegarán el link de YouTube
+    videoUrl: [''],
+    pdfUrl: [''], // Este campo guardará la URL antigua si estamos editando
     orderIndex: [1, [Validators.required]],
   });
 
   ngOnInit() {
-    this.moduleId = this.route.snapshot.paramMap.get('moduleId') || '';
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.isEditMode = true;
+      this.lessonId = id;
+      this.loadLessonData(id);
+    } else {
+      this.moduleId = this.route.snapshot.paramMap.get('moduleId') || '';
+    }
+  }
+
+  loadLessonData(id: string) {
+    this.courseService.getLessonById(id).subscribe({
+      next: (lesson) => {
+        this.form.patchValue({
+          title: lesson.title,
+          videoUrl: lesson.videoUrl,
+          pdfUrl: lesson.pdfUrl, // Guardamos la referencia visual
+          orderIndex: lesson.orderIndex,
+        });
+      },
+      error: () => alert('Error al cargar'),
+    });
+  }
+
+  // 📂 DETECTAR CUANDO EL USUARIO ELIGE UN ARCHIVO
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      // 🔥 ESTA ES LA LÍNEA QUE TE FALTABA:
+      this.selectedFile = file; // Esto es solo cosmético para validaciones, pero no guarda el binario
+
+      this.form.patchValue({
+        pdfUrl: file.name,
+      });
+      this.form.get('pdfUrl')?.updateValueAndValidity();
+    }
   }
 
   onSubmit() {
-    if (this.form.valid && this.moduleId) {
-      const lessonData = {
-        ...this.form.value,
-        moduleId: this.moduleId,
-      };
+    if (this.form.invalid) return;
 
-      this.courseService.createLesson(lessonData).subscribe(() => {
-        // Volvemos atrás (al temario)
-        this.location.back();
-      });
+    const formData = new FormData();
+    formData.append('title', this.form.get('title')?.value);
+    formData.append('videoUrl', this.form.get('videoUrl')?.value || '');
+    formData.append('orderIndex', this.form.get('orderIndex')?.value);
+
+    if (!this.isEditMode) {
+      formData.append('moduleId', this.moduleId);
     }
+
+    if (this.selectedFile) {
+      // 👇 CHIVATO: Para confirmar en consola que el archivo va dentro
+      console.log('📎 Adjuntando archivo:', this.selectedFile.name);
+      formData.append('file', this.selectedFile);
+    } else {
+      console.log('⚠️ No hay archivo seleccionado para subir.');
+    } // ENVIAR AL SERVICIO CON MANEJO DE ERRORES
+
+    const request$ = this.isEditMode
+      ? this.courseService.updateLesson(this.lessonId, formData)
+      : this.courseService.createLesson(formData);
+
+    request$.subscribe({
+      next: () => {
+        console.log('✅ Lección guardada con éxito');
+        this.location.back();
+      },
+      error: (err) => {
+        console.error('❌ Error al guardar:', err);
+        alert('Hubo un error al guardar la lección. Revisa la consola.');
+      },
+    });
   }
 
   goBack() {

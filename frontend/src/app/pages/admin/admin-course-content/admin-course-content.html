@@ -11,15 +11,27 @@
     @for (modulo of modules(); track modulo.id; let i = $index) {
     <div class="accordion-item">
       <h2 class="accordion-header">
-        <button
-          class="accordion-button"
-          type="button"
-          data-bs-toggle="collapse"
-          [attr.data-bs-target]="'#collapse' + i"
-        >
-          <span class="badge bg-dark me-3">Módulo {{ modulo.orderIndex }}</span>
-          <span class="fw-bold">{{ modulo.title }}</span>
-        </button>
+        <div class="d-flex w-100 align-items-center">
+          <button
+            class="accordion-button"
+            type="button"
+            data-bs-toggle="collapse"
+            [attr.data-bs-target]="'#collapse' + i"
+            style="flex: 1; min-width: 0"
+          >
+            <span class="badge bg-dark me-3">Módulo {{ modulo.orderIndex }}</span>
+            <span class="fw-bold text-truncate">{{ modulo.title }}</span>
+          </button>
+
+          <button
+            class="btn btn-danger ms-2 me-2"
+            style="position: relative; z-index: 10"
+            (click)="$event.stopPropagation(); deleteModule(modulo.id)"
+            title="Borrar módulo completo"
+          >
+            🗑️
+          </button>
+        </div>
       </h2>
 
       <div [id]="'collapse' + i" class="accordion-collapse collapse show">
@@ -30,7 +42,13 @@
               <div class="d-flex justify-content-between align-items-center mb-2">
                 <span class="fw-bold text-dark">🎥 {{ lesson.title }}</span>
                 <div>
-                  <button class="btn btn-sm btn-outline-danger" title="Borrar lección">🗑️</button>
+                  <button
+                    class="btn btn-sm btn-outline-danger"
+                    title="Borrar lección"
+                    (click)="$event.stopPropagation(); deleteLesson(lesson.id)"
+                  >
+                    🗑️
+                  </button>
                 </div>
               </div>
 

@@ -6,27 +6,28 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   standalone: true,
 })
 export class SafeVideoPipe implements PipeTransform {
-  // Inyectamos el desinfectante de Angular 🧼
   private sanitizer = inject(DomSanitizer);
 
+  // Quitamos '| null' del tipo de retorno
   transform(url: string): SafeResourceUrl {
-    if (!url) return '';
+    if (!url) {
+      // Devolvemos una cadena vacía segura en vez de null
+      return this.sanitizer.bypassSecurityTrustResourceUrl('');
+    }
 
-    // 1. Extraer el ID del vídeo de YouTube
-    // Esta expresión regular (Regex) funciona para links largos (watch?v=) y cortos (youtu.be/)
+    // Regex para detectar YouTube
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
     const match = url.match(regExp);
 
     if (match && match[2].length === 11) {
       const videoId = match[2];
-      // 2. Convertir al formato EMBED
       const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-
-      // 3. Decirle a Angular: "Confía en mí, esta URL es segura"
       return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
     }
 
-    // Si no es un link de YouTube válido, devolvemos null o la url tal cual (aunque fallará)
-    return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    // 🛡️ CAMBIO CLAVE AQUÍ:
+    // Si no es un vídeo válido, devolvemos una cadena vacía pero "santificada".
+    // Esto hace que el iframe se quede en blanco (about:blank) sin lanzar errores rojos.
+    return this.sanitizer.bypassSecurityTrustResourceUrl('');
   }
 }
