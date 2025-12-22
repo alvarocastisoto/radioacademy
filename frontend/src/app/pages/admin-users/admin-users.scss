@@ -1,0 +1,171 @@
+// =========================================
+// 1. VARIABLES & UTILIDADES
+// =========================================
+$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+$purple-light: #f3e8ff;
+$purple-text: #7e22ce;
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.transition-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.ls-1 {
+  letter-spacing: 1px;
+}
+
+.border-dashed {
+  border: 2px dashed #cbd5e1 !important;
+}
+
+// =========================================
+// 2. TABLA Y ACCIONES DE FILA
+// =========================================
+
+// Estilo base de la fila
+.table-hover tbody tr:hover {
+  background-color: #f8fafc; // Gris muy suave
+  transform: translateY(-1px); // Pequeño levantamiento
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+  
+  // Cuando pasas el ratón por la fila, activamos la flecha
+  .btn-action-arrow {
+    background-color: #eff6ff; // Azul muy clarito
+    color: #4f46e5; // Azul primario
+    border-color: #bfdbfe;
+    
+    i {
+      transform: translateX(3px); // La flecha se mueve a la derecha 👉
+    }
+  }
+}
+
+// Botón de acción (Flecha)
+.btn-action-arrow {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8; // Gris suave por defecto (casi invisible)
+  background: transparent;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+
+  i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+  }
+}
+
+// =========================================
+// 3. AVATARES Y COLORES
+// =========================================
+
+.avatar-circle {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background-color: #e0e7ff;
+  color: #4f46e5;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.avatar-circle-lg {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem;
+  border: 4px solid rgba(255,255,255,0.3);
+}
+
+// Generador de colores aleatorios
+.bg-avatar-0 { background-color: #fee2e2; color: #991b1b; } // Rojo
+.bg-avatar-1 { background-color: #ffedd5; color: #9a3412; } // Naranja
+.bg-avatar-2 { background-color: #dcfce7; color: #166534; } // Verde
+.bg-avatar-3 { background-color: #dbeafe; color: #1e40af; } // Azul
+
+// =========================================
+// 4. BADGES Y ESTADOS
+// =========================================
+
+.bg-purple-subtle { background-color: $purple-light; }
+.text-purple { color: $purple-text; }
+.border-purple-subtle { border-color: darken($purple-light, 5%) !important; }
+
+.indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+// =========================================
+// 5. PANEL LATERAL & ELEMENTOS
+// =========================================
+
+.bg-primary-gradient {
+  background: $primary-gradient;
+}
+
+.btn-white-glass {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  &:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+}
+
+// =========================================
+// 6. TARJETAS DE CURSOS Y ACCIONES (NUEVO)
+// =========================================
+
+// La tarjeta del curso individual (Estilo Ticket)
+.course-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #4f46e5; // Borde izquierdo azul para destacar
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); // Sombra suave
+    transform: translateY(-2px); // Efecto elevación
+  }
+}
+
+// El botón de eliminar (Papelera Moderna)
+.btn-trash-modern {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px; // Cuadrado redondeado
+  border: 1px solid #fee2e2; // Borde rojo muy sutil
+  background-color: #fff1f2; // Fondo rojizo pastel
+  color: #e11d48; // Icono rojo
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: #e11d48; // Fondo rojo intenso
+    border-color: #e11d48;
+    color: white; // Icono blanco
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(225, 29, 72, 0.3); // Resplandor rojo
+  }
+
+  &:active {
+    transform: scale(0.95); // Efecto click
+  }
+}

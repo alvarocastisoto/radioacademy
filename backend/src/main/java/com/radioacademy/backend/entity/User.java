@@ -1,7 +1,7 @@
 package com.radioacademy.backend.entity;
 
 import com.radioacademy.backend.enums.Role;
-import com.fasterxml.jackson.annotation.JsonIgnore; // Importante para evitar bucles
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +24,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails { // ✅ Implementamos la interfaz
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -65,55 +65,61 @@ public class User implements UserDetails { // ✅ Implementamos la interfaz
     @Column(name = "terms_accepted", nullable = false)
     private boolean termsAccepted;
 
-    // ✅ RELACIÓN CON CURSOS (La habías perdido, la vuelvo a poner)
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "course_students", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "course_id"))
-    @JsonIgnore // Evita que al pedir el usuario se traiga los cursos infinitamente
+    // ✅ CORREGIDO: Relación bidireccional optimizada
+    // 1. fetch = LAZY: Para que no cargue los cursos al listar usuarios (Rápido)
+    // 2. mappedBy = "students": Porque la configuración de la tabla ya está en
+    // Course.java
+    @ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
+    @JsonIgnore // Evita bucle infinito JSON y carga innecesaria
     private Set<Course> enrolledCourses = new HashSet<>();
 
     // =================================================================
-    // 👇 MÉTODOS OBLIGATORIOS DE USER DETAILS (Para quitar el error) 👇
+    // 👇 MÉTODOS OBLIGATORIOS DE USER DETAILS 👇
     // =================================================================
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null)
             return List.of();
-        // Convertimos tu Enum ROLE a lo que Spring entiende
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getUsername() {
-        // Spring usa "Username" para el login, pero nosotros usamos el "email"
         return email;
+    }
+
+    // 🔥 SEGURIDAD: Evitamos que el hash del password viaje al frontend
+    @Override
+    @JsonIgnore
+    public String getPassword() {
+        return password;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // La cuenta nunca caduca
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // La cuenta nunca se bloquea
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // La contraseña no caduca
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // El usuario está activo
+        return true;
     }
 
     // =================================================================
     // 👆 FIN DE MÉTODOS OBLIGATORIOS 👆
     // =================================================================
 
-    // Tu setter personalizado para limpiar el teléfono
     public void setPhone(String phone) {
         if (phone != null) {
             this.phone = phone.trim().replaceAll("\\s+", "");

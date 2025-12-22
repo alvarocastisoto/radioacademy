@@ -8,10 +8,13 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import java.util.HashSet;
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.Set;
 
 @Entity
 @Table(name = "courses")
@@ -55,4 +58,11 @@ public class Course {
 
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "course_students", // Nombre de la tabla intermedia
+            joinColumns = @JoinColumn(name = "course_id"), // Columna del curso
+            inverseJoinColumns = @JoinColumn(name = "user_id") // Columna del alumno
+    )
+    private Set<User> students = new HashSet<>();
 }

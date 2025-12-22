@@ -10,7 +10,7 @@ import { AdminCourseContent } from './pages/admin/admin-course-content/admin-cou
 import { ModuleForm } from './pages/admin/module-form/module-form';
 import { LessonForm } from './pages/admin/lesson-form/lesson-form';
 import { authGuard } from './guards/auth-guard'; // Asegúrate de tener el guard
-
+import { AdminUsersComponent } from './pages/admin-users/admin-users';
 export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
   { path: 'login', component: Login }, // /login
@@ -37,5 +37,7 @@ export const routes: Routes = [
     component: ModuleForm,
     canActivate: [authGuard],
   },
+
+  { path: 'admin/users', component: AdminUsersComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }, // Si escriben algo raro -> volver a Home
 ];
