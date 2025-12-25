@@ -4,6 +4,7 @@
 $primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
 $purple-light: #f3e8ff;
 $purple-text: #7e22ce;
+@use "sass:color";
 
 .cursor-pointer {
   cursor: pointer;
@@ -100,8 +101,7 @@ $purple-text: #7e22ce;
 
 .bg-purple-subtle { background-color: $purple-light; }
 .text-purple { color: $purple-text; }
-.border-purple-subtle { border-color: darken($purple-light, 5%) !important; }
-
+.border-purple-subtle { border-color: color.adjust($purple-light, $lightness: -5%) !important; }
 .indicator {
   width: 8px;
   height: 8px;

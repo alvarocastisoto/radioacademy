@@ -65,6 +65,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/lessons/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/lessons/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
+                        .requestMatchers("/uploads/**").permitAll() // Permite ver las imágenes/PDFs sin token
+                                                                    // (opcional)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

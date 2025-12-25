@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 import java.util.List;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.Optional;
 
 @Repository
 public interface CourseRepository extends JpaRepository<Course, UUID> {
@@ -21,4 +22,6 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     @Transactional
     @Query(value = "DELETE FROM course_students WHERE user_id = :userId AND course_id = :courseId", nativeQuery = true)
     void deleteEnrollment(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
+
+    Optional<Course> findByIdAndStudents_Id(UUID courseId, UUID userId);
 }

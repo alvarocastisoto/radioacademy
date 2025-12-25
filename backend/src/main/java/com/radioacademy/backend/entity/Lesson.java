@@ -26,7 +26,7 @@ public class Lesson {
     private String videoUrl; // Soi hay URL del video se guarda (oculta)
 
     private String pdfUrl; // Si hay URL del PDF se guarda (oculta)
-
+    private Integer duration;
     @Column(nullable = false)
     private Integer orderIndex;
 

@@ -11,6 +11,9 @@ import { ModuleForm } from './pages/admin/module-form/module-form';
 import { LessonForm } from './pages/admin/lesson-form/lesson-form';
 import { authGuard } from './guards/auth-guard'; // Asegúrate de tener el guard
 import { AdminUsersComponent } from './pages/admin-users/admin-users';
+import { StudentDashboardComponent } from './pages/student-dashboard/student-dashboard';
+import { CoursePlayerComponent } from './pages/course-player/course-player';
+
 export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
   { path: 'login', component: Login }, // /login
@@ -36,6 +39,14 @@ export const routes: Routes = [
     path: 'admin/courses/:courseId/new-module',
     component: ModuleForm,
     canActivate: [authGuard],
+  },
+  {
+    path: 'student-dashboard',
+    component: StudentDashboardComponent,
+  },
+  {
+    path: 'course-player/:id', // 👈 Tiene que coincidir con lo que pedimos en el ngOnInit
+    component: CoursePlayerComponent,
   },
 
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [authGuard] },

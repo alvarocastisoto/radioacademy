@@ -27,9 +27,7 @@
           <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register"
-            >Regístrate</a
-          >
+          <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register">Regístrate</a>
         </li>
         } @else { @if (authService.currentUser()?.role === 'ADMIN') {
         <li class="nav-item ms-lg-3">
@@ -48,7 +46,7 @@
             👤 {{ authService.currentUser()?.name || 'Mi Cuenta' }}
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" routerLink="/my-courses">📚 Mis Cursos</a></li>
+            <li><a class="dropdown-item" routerLink="/student-dashboard">📚 Mis Cursos</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
               <button class="dropdown-item text-danger" (click)="logout()">🚪 Cerrar Sesión</button>

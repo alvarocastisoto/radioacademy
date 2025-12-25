@@ -59,6 +59,10 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules;
 
+    public List<Module> getModules() {
+        return modules;
+    }
+
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "course_students", // Nombre de la tabla intermedia
             joinColumns = @JoinColumn(name = "course_id"), // Columna del curso
