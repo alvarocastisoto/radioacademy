@@ -9,7 +9,7 @@
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Cargando...</span>
     </div>
-    <p class="mt-2 text-muted">Cargando tu aprendizaje...</p>
+    <p class="mt-2 text-muted">Calculando tu progreso...</p>
   </div>
   } @if (!loading && courses.length === 0) {
   <div
@@ -18,6 +18,7 @@
     <i class="bi bi-journal-x display-1 text-muted opacity-25"></i>
     <h4 class="mt-3 fw-bold text-muted">Aún no tienes cursos</h4>
     <p class="text-muted">Parece que no estás matriculado en ningún curso todavía.</p>
+    <button class="btn btn-primary mt-3" routerLink="/courses">Ver catálogo</button>
   </div>
   } @if (!loading && courses.length > 0) {
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -26,28 +27,34 @@
       <div class="card h-100 border-0 shadow-sm course-card overflow-hidden">
         <div
           class="course-cover bg-primary-gradient position-relative d-flex align-items-center justify-content-center text-white"
+          style="height: 180px"
         >
           @if (course.imageUrl) {
           <img
-            [src]="'http://localhost:8080/uploads/' + course.imageUrl"
+            [src]="UPLOADS_URL + course.imageUrl"
             alt="{{ course.title }}"
             class="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
-            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.classList.add('d-flex');"
           />
           <div
-            class="fallback-icon d-none w-100 h-100 align-items-center justify-content-center bg-primary-gradient"
+            class="fallback-icon d-none w-100 h-100 align-items-center justify-content-center bg-secondary"
           >
             <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
           </div>
           } @else {
-          <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
+          <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-secondary">
+            <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
+          </div>
           }
         </div>
 
         <div class="card-body p-4 d-flex flex-column">
-          <h5 class="card-title fw-bold mb-2">{{ course.title }}</h5>
+          <h5 class="card-title fw-bold mb-2 text-truncate" [title]="course.title">
+            {{ course.title }}
+          </h5>
+
           <p class="card-text text-muted small flex-grow-1 line-clamp-3">
-            {{ course.description || 'Sin descripción disponible para este curso.' }}
+            {{ course.description || 'Sin descripción disponible.' }}
           </p>
 
           <div class="mt-4">
@@ -55,11 +62,14 @@
               <span>Progreso</span>
               <span class="fw-bold">{{ course.progress }}%</span>
             </div>
-            <div class="progress" style="height: 6px">
+            <div class="progress" style="height: 8px; background-color: #e9ecef">
               <div
-                class="progress-bar bg-primary rounded-pill"
+                class="progress-bar bg-success rounded-pill"
                 role="progressbar"
                 [style.width.%]="course.progress"
+                [attr.aria-valuenow]="course.progress"
+                aria-valuemin="0"
+                aria-valuemax="100"
               ></div>
             </div>
           </div>
@@ -69,15 +79,17 @@
               class="btn btn-primary flex-grow-1 fw-bold py-2 rounded-3 shadow-sm btn-hover-effect"
               (click)="enterCourse(course.id)"
             >
-              Continuar <i class="bi bi-arrow-right ms-2"></i>
+              @if(course.progress > 0) { Continuar <i class="bi bi-play-fill ms-2"></i> } @else {
+              Empezar <i class="bi bi-arrow-right ms-2"></i>
+              }
             </button>
 
             @if (course.pdfUrl) {
             <a
-              [href]="'http://localhost:8080/uploads/' + course.pdfUrl"
+              [href]="UPLOADS_URL + course.pdfUrl"
               target="_blank"
               class="btn btn-outline-secondary py-2 rounded-3 shadow-sm"
-              title="Descargar PDF del temario"
+              title="Descargar PDF del curso"
             >
               <i class="bi bi-file-earmark-pdf-fill"></i>
             </a>

@@ -12,7 +12,7 @@ export class StudentService {
 
   // Obtener mis cursos
   getMyCourses(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/my-courses`);
+    return this.http.get<any[]>('http://localhost:8080/api/student/dashboard');
   }
 
   // Obtener el contenido COMPLETO del curso (Módulos + Lecciones)

@@ -1,28 +1,28 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.StudentCourseDTO;
-import com.radioacademy.backend.entity.Course; // Importante
-import com.radioacademy.backend.entity.User;
-import com.radioacademy.backend.repository.CourseRepository; // Importante
-import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.dto.CourseContentDTO;
-import com.radioacademy.backend.dto.CreateCourseRequest;
-import com.radioacademy.backend.dto.CreateModuleRequest;
+import com.radioacademy.backend.dto.CourseDashboardDTO;
 import com.radioacademy.backend.dto.LessonDTO;
 import com.radioacademy.backend.dto.ModuleDTO;
-
+import com.radioacademy.backend.entity.Course;
+import com.radioacademy.backend.entity.User;
+import com.radioacademy.backend.repository.CourseRepository;
+import com.radioacademy.backend.repository.LessonProgressRepository;
+import com.radioacademy.backend.repository.LessonRepository;
+import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import java.util.ArrayList;
 import java.util.List;
-import org.springframework.web.bind.annotation.RequestParam;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/student")
@@ -31,57 +31,79 @@ public class StudentController {
         @Autowired
         private UserRepository userRepository;
 
-        @Autowired // <--- Inyectamos esto
+        @Autowired
         private CourseRepository courseRepository;
 
-        @GetMapping("/my-courses")
-        public ResponseEntity<List<StudentCourseDTO>> getMyCourses(Authentication authentication) {
-                // 1. Obtenemos el email del token
-                String email = authentication.getName();
+        @Autowired
+        private LessonProgressRepository progressRepository;
 
-                // 2. Buscamos al usuario solo para tener su ID
-                User user = userRepository.findByEmail(email)
+        @Autowired
+        private LessonRepository lessonRepository;
+
+        // ✅ ESTE ES EL MÉTODO BUENO (DASHBOARD CON PROGRESO REAL)
+        @GetMapping("/dashboard")
+        public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard() {
+                // 1. Obtener usuario
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                User user = userRepository.findByEmail(auth.getName())
                                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-                // 3. 🔥 CORRECCIÓN: Usamos el Repositorio directamente
-                // "Búscame los cursos donde esté matriculado este ID de usuario"
-                // Esto evita el error de LazyInitializationException
-                List<Course> courses = courseRepository.findByStudents_Id(user.getId());
+                List<CourseDashboardDTO> response = new ArrayList<>();
 
-                // 4. Convertimos a DTO
-                List<StudentCourseDTO> dtos = courses.stream()
-                                .map(course -> new StudentCourseDTO(
-                                                course.getId(),
-                                                course.getTitle(),
-                                                course.getDescription(),
-                                                0 // Progreso dummy por ahora
-                                ))
-                                .toList();
+                // ⚠️ CAMBIO CLAVE AQUÍ:
+                // En vez de usar user.getEnrolledCourses(), buscamos directamente en BD.
+                // Esto evita que la lista salga vacía por problemas de sesión/transacción.
+                List<Course> myCourses = courseRepository.findByStudents_Id(user.getId());
 
-                return ResponseEntity.ok(dtos);
+                // 2. Iteramos sobre la lista que acabamos de recuperar
+                for (Course course : myCourses) {
+
+                        // A. Contar lecciones totales
+                        long totalLessons = lessonRepository.countByCourseId(course.getId());
+
+                        // B. Contar lecciones vistas
+                        long completedLessons = progressRepository.countCompletedLessons(user.getId(), course.getId());
+
+                        // Debug
+                        System.out.println("---- CURSO: " + course.getTitle() + " ----");
+                        System.out.println("   Vistas: " + completedLessons + " / " + totalLessons);
+
+                        // C. Calcular porcentaje
+                        int percentage = 0;
+                        if (totalLessons > 0) {
+                                percentage = (int) ((completedLessons * 100) / totalLessons);
+                        }
+                        if (percentage > 100)
+                                percentage = 100;
+
+                        // D. Añadir al DTO (con null en imagen)
+                        response.add(new CourseDashboardDTO(
+                                        course.getId(),
+                                        course.getTitle(),
+                                        course.getDescription(),
+                                        null,
+                                        percentage));
+                }
+
+                return ResponseEntity.ok(response);
         }
 
-        // ... imports
-
+        // ✅ MÉTODO PARA ENTRAR A VER EL CURSO (PLAYER)
         @GetMapping("/course/{courseId}/content")
         @Transactional(readOnly = true)
         public ResponseEntity<CourseContentDTO> getCourseContent(
                         @PathVariable UUID courseId,
                         Authentication authentication) {
-                String email = authentication.getName();
 
-                // 1. Obtenemos el usuario SOLO para sacar su ID (es seguro)
+                String email = authentication.getName();
                 User user = userRepository.findByEmail(email)
                                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-                // 2. 🔥 CONSULTA BLINDADA:
-                // Buscamos el curso Y verificamos matrícula al mismo tiempo.
-                // Si no está matriculado, esto devolverá "empty" y lanzaremos error.
+                // Buscamos curso y verificamos matrícula
                 Course course = courseRepository.findByIdAndStudents_Id(courseId, user.getId())
                                 .orElseThrow(() -> new RuntimeException("No tienes acceso a este curso o no existe"));
 
-                // 3. Mapeamos a DTO (Esto sigue igual que antes)
-                // Recuerda usar course.getModules() o getSections() según tu entidad
+                // Mapeo a DTOs
                 List<ModuleDTO> sectionDTOs = course.getModules().stream()
                                 .map(module -> new ModuleDTO(
                                                 module.getId(),
@@ -93,7 +115,7 @@ public class StudentController {
                                                                                 lesson.getTitle(),
                                                                                 lesson.getVideoUrl(),
                                                                                 lesson.getPdfUrl(),
-                                                                                0, // Duration 0
+                                                                                0, // Duration
                                                                                 false))
                                                                 .toList()))
                                 .toList();

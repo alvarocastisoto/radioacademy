@@ -1,7 +1,17 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // 1. IMPORTAR ChangeDetectorRef
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StudentService } from '../../services/student/student'; // Ajusta ruta si es necesario
+import { StudentService } from '../../services/student/student'; // Revisa que la ruta sea correcta
 import { Router, RouterModule } from '@angular/router';
+
+// 👇 1. INTERFAZ QUE COINCIDE CON EL DTO DE JAVA
+export interface DashboardCourse {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string | null;
+  pdfUrl: string | null;
+  progress: number; // Viene calculado del backend (0-100)
+}
 
 @Component({
   selector: 'app-student-dashboard',
@@ -13,25 +23,33 @@ import { Router, RouterModule } from '@angular/router';
 export class StudentDashboardComponent implements OnInit {
   private studentService = inject(StudentService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef); // 2. INYECTAR EL DETECTOR
+  private cdr = inject(ChangeDetectorRef);
 
-  courses: any[] = [];
+  // 👇 2. USAMOS LA INTERFAZ
+  courses: DashboardCourse[] = [];
   loading = true;
 
+  // Variable para la URL base de imágenes (más limpio que ponerlo en el HTML)
+  readonly UPLOADS_URL = 'http://localhost:8080/uploads/';
+
   ngOnInit() {
+    this.loadDashboard();
+  }
+
+  loadDashboard() {
+    this.loading = true;
     this.studentService.getMyCourses().subscribe({
       next: (data) => {
-        console.log('✅ Cursos recibidos:', data);
-        this.courses = data;
-        this.loading = false; // Apagamos loading
-
-        // 3. 🔥 ¡OBLIGAR A ANGULAR A PINTAR YA!
-        this.cdr.detectChanges();
+        console.log('✅ Cursos y progreso recibidos:', data);
+        // Cast manual por si acaso, aunque el backend debe enviarlo bien
+        this.courses = data as DashboardCourse[];
+        this.loading = false;
+        this.cdr.detectChanges(); // Forzamos actualización de vista
       },
       error: (e) => {
-        console.error('Error:', e);
+        console.error('🔥 Error cargando dashboard:', e);
         this.loading = false;
-        this.cdr.detectChanges(); // Aquí también por si acaso
+        this.cdr.detectChanges();
       },
     });
   }
