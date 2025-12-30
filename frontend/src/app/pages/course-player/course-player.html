@@ -36,21 +36,42 @@
             [class.active-lesson]="currentLesson?.id === lesson.id"
             (click)="selectLesson(lesson)"
           >
-            <div class="d-flex align-items-start">
-              <div class="me-3 mt-1">
-                @if (currentLesson?.id === lesson.id) {
-                <i class="bi bi-play-circle-fill text-primary"></i>
+            <div class="d-flex align-items-center">
+              <div
+                class="me-3 cursor-pointer"
+                (click)="$event.stopPropagation(); toggleLessonCompletion(lesson.id)"
+                title="Marcar como visto"
+              >
+                @if (isCompleted(lesson.id)) {
+                <i class="bi bi-check-circle-fill text-success fs-5"></i>
                 } @else {
-                <i class="bi bi-circle text-muted small"></i>
+                <i class="bi bi-circle text-muted fs-5"></i>
                 }
               </div>
 
-              <div>
-                <span class="d-block small fw-medium">{{ lesson.title }}</span>
-                <span class="text-muted" style="font-size: 0.7rem">
-                  <i class="bi bi-clock me-1"></i>
-                  {{ lesson.duration > 0 ? lesson.duration + ' min' : 'Video' }}
+              <div class="flex-grow-1">
+                <span
+                  class="d-block small fw-medium"
+                  [class.text-primary]="currentLesson?.id === lesson.id"
+                >
+                  {{ lesson.title }}
                 </span>
+                <span class="text-muted" style="font-size: 0.7rem">
+                  @if (currentLesson?.id === lesson.id) {
+                  <span class="text-primary me-2"
+                    ><i class="bi bi-play-fill"></i> Reproduciendo</span
+                  >
+                  }
+                  {{ lesson.duration > 0 ? lesson.duration + ' min' : '' }}
+                </span>
+              </div>
+
+              <div class="ms-2 text-muted">
+                @if (lesson.pdfUrl) {
+                <i class="bi bi-file-earmark-pdf" title="PDF Adjunto"></i>
+                } @else {
+                <i class="bi bi-camera-video" title="Video"></i>
+                }
               </div>
             </div>
           </div>
@@ -74,19 +95,54 @@
   </div>
 
   <div
-    class="flex-grow-1 bg-dark d-flex flex-column align-items-center justify-content-center position-relative overflow-auto p-4"
+    class="flex-grow-1 bg-dark d-flex flex-column align-items-center position-relative overflow-auto p-4"
   >
+    <div class="w-100 mb-4" style="max-width: 900px">
+      <div class="d-flex justify-content-between text-white-50 small mb-1">
+        <span>Tu progreso</span>
+        <span>{{ progressPercentage }}%</span>
+      </div>
+      <div class="progress" style="height: 8px; background-color: rgba(255, 255, 255, 0.1)">
+        <div
+          class="progress-bar bg-success"
+          role="progressbar"
+          [style.width.%]="progressPercentage"
+          [attr.aria-valuenow]="progressPercentage"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        ></div>
+      </div>
+    </div>
+
     @if (currentLesson) {
     <div class="w-100" style="max-width: 900px">
       <div
         class="ratio ratio-16x9 bg-black rounded-3 shadow-lg mb-4 overflow-hidden border border-secondary"
       >
         @if (safeVideoUrl) {
-        <iframe [src]="safeVideoUrl" allowfullscreen></iframe>
+        <div class="video-container">
+          @if (isYouTube) {
+          <iframe
+            [src]="safeVideoUrl"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            width="100%"
+            height="500px"
+          >
+          </iframe>
+          } @else {
+          <video [src]="safeVideoUrl" controls width="100%" height="500px">
+            Tu navegador no soporta el tag de video.
+          </video>
+          }
+        </div>
         } @else {
-        <div class="d-flex flex-column align-items-center justify-content-center h-100 text-white">
-          <i class="bi bi-camera-video-off display-4 mb-3 opacity-50"></i>
-          <p>Esta lección no tiene video asignado.</p>
+        <div class="d-flex align-items-center justify-content-center h-100 text-white-50">
+          <div class="text-center">
+            <i class="bi bi-file-earmark-pdf display-1"></i>
+            <p class="mt-2">Esta lección es material de lectura (PDF)</p>
+          </div>
         </div>
         }
       </div>
@@ -105,14 +161,23 @@
           </a>
           }
 
-          <button class="btn btn-outline-light d-flex align-items-center">
-            Marcar como Visto <i class="bi bi-check-lg ms-2"></i>
+          <button
+            class="btn d-flex align-items-center"
+            [class.btn-success]="isCompleted(currentLesson.id)"
+            [class.btn-outline-light]="!isCompleted(currentLesson.id)"
+            (click)="toggleLessonCompletion(currentLesson.id)"
+          >
+            @if (isCompleted(currentLesson.id)) {
+            <span><i class="bi bi-check-circle-fill me-2"></i> Completada</span>
+            } @else {
+            <span>Marcar como Visto <i class="bi bi-check-lg ms-2"></i></span>
+            }
           </button>
         </div>
       </div>
     </div>
     } @else {
-    <div class="text-center text-white opacity-50">
+    <div class="text-center text-white opacity-50 mt-5">
       <i class="bi bi-collection-play display-1 mb-3"></i>
       <h3>Selecciona una lección para empezar</h3>
     </div>

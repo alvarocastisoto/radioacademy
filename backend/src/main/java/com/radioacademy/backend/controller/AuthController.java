@@ -38,6 +38,8 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody User user) {
         // 1. Ciframos la contraseña
+        System.out.println("📦 USUARIO RECIBIDO: " + user.toString());
+        System.out.println("🔑 PASSWORD RAW: " + user.getPassword());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         // 2. Guardamos en BD

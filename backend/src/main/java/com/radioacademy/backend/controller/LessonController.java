@@ -12,13 +12,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.Normalizer; // 👈 IMPORTANTE
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern; // 👈 IMPORTANTE
 
 @RestController
 @RequestMapping("/api/lessons")
@@ -30,8 +33,8 @@ public class LessonController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    // Carpeta donde se guardarán los archivos (en la raíz del proyecto)
-    private static final String UPLOAD_DIR = "uploads/";
+    // Carpeta física (sin barra inicial para que sea relativa a la raíz)
+    private static final String UPLOAD_DIR = "uploads";
 
     // 1. GET: Lecciones por módulo
     @GetMapping("/module/{moduleId}")
@@ -48,17 +51,14 @@ public class LessonController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 3. POST: Crear lección (CON GUARDADO DE ARCHIVO REAL)
+    // 3. POST: Crear lección
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Lesson> createLesson(
             @RequestParam("title") String title,
             @RequestParam("videoUrl") String videoUrl,
             @RequestParam("moduleId") UUID moduleId,
             @RequestParam("orderIndex") Integer orderIndex,
-            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException { // Se añade throws
-                                                                                                     // IOException para
-                                                                                                     // el manejo de
-                                                                                                     // archivos
+            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
         Optional<Module> moduleOptional = moduleRepository.findById(moduleId);
 
@@ -72,25 +72,26 @@ public class LessonController {
         newLesson.setOrderIndex(orderIndex);
         newLesson.setModule(moduleOptional.get());
 
-        // LÓGICA DE GUARDADO DE ARCHIVO
+        // GUARDADO DE ARCHIVO
         if (file != null && !file.isEmpty()) {
-            String fileName = saveFile(file); // Guarda en disco
-            newLesson.setPdfUrl(fileName); // Guarda la ruta en BD
+            // saveFile ahora devuelve SOLO el nombre (ej: "uuid_alvaro.pdf")
+            // sin la carpeta "uploads/" delante.
+            String fileName = saveFile(file);
+            newLesson.setPdfUrl(fileName);
         }
 
         Lesson savedLesson = lessonRepository.save(newLesson);
         return new ResponseEntity<>(savedLesson, HttpStatus.CREATED);
     }
 
-    // 4. PUT: Actualizar lección (CON GUARDADO DE ARCHIVO REAL)
+    // 4. PUT: Actualizar lección
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Lesson> updateLesson(
             @PathVariable UUID id,
             @RequestParam("title") String title,
             @RequestParam("videoUrl") String videoUrl,
             @RequestParam("orderIndex") Integer orderIndex,
-            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException { // Se añade throws
-                                                                                                     // IOException
+            @RequestParam(value = "file", required = false) MultipartFile file) throws IOException {
 
         Lesson lesson = lessonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Lección no encontrada"));
@@ -99,9 +100,10 @@ public class LessonController {
         lesson.setVideoUrl(videoUrl);
         lesson.setOrderIndex(orderIndex);
 
-        // Si envían un archivo nuevo, lo guardamos y actualizamos la URL
-        // Si no envían nada, mantenemos el PDF que ya tenía (no hacemos nada)
         if (file != null && !file.isEmpty()) {
+            // Borrar archivo antiguo si quisieras (Opcional, para no llenar el disco)
+            // deleteFile(lesson.getPdfUrl());
+
             String fileName = saveFile(file);
             lesson.setPdfUrl(fileName);
         }
@@ -115,53 +117,81 @@ public class LessonController {
         if (!lessonRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // Opcional: Aquí podrías añadir lógica para borrar también el archivo físico
-        // del disco si quisieras
+        // Aquí podrías borrar el archivo físico si quisieras
         lessonRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // --- MÉTODO PRIVADO AUXILIAR PARA GUARDAR EN DISCO ---
+    // ==========================================
+    // 🛠️ MÉTODOS AUXILIARES (LA MAGIA)
+    // ==========================================
+
     private String saveFile(MultipartFile file) throws IOException {
-        // DIAGNÓSTICO 1: ¿Llega el archivo?
-        if (file == null || file.isEmpty()) {
-            System.out.println("🔴 ERROR: El archivo ha llegado NULO o VACÍO al método saveFile.");
+        if (file == null || file.isEmpty())
             return null;
-        }
 
-        System.out.println("🟢 Archivo recibido: " + file.getOriginalFilename() + " (" + file.getSize() + " bytes)");
+        // 1. Obtener nombre original y limpiarlo
+        String originalFilename = file.getOriginalFilename();
+        String sanitizedFilename = sanitizeFileName(originalFilename);
 
-        // 1. Verificar/Crear directorio
-        // Usamos user.dir para asegurarnos de que apunta a la raíz del proyecto
+        // 2. Generar nombre único: UUID + Nombre Limpio
+        // Resultado: "550e8400..._alvaro_castineira.pdf"
+        String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFilename;
+
+        // 3. Preparar ruta
         String projectRoot = System.getProperty("user.dir");
         Path uploadPath = Paths.get(projectRoot, UPLOAD_DIR);
 
-        // DIAGNÓSTICO 2: ¿Dónde está intentando guardar EXACTAMENTE?
-        System.out.println("📂 Ruta absoluta de guardado: " + uploadPath.toAbsolutePath().toString());
-
         if (!Files.exists(uploadPath)) {
-            System.out.println("✨ La carpeta no existía. Creándola ahora...");
             Files.createDirectories(uploadPath);
-        } else {
-            System.out.println("✅ La carpeta ya existe.");
         }
 
-        // 2. Generar nombre único
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        // 4. Guardar
+        Path filePath = uploadPath.resolve(uniqueFileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        // 3. Ruta completa
-        Path filePath = uploadPath.resolve(fileName);
+        System.out.println("✅ Archivo guardado: " + uniqueFileName);
 
-        // 4. Copiar archivo
-        try {
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            System.out.println("🚀 ÉXITO: Archivo guardado en: " + filePath.toAbsolutePath());
-        } catch (IOException e) {
-            System.out.println("🔥 ERROR CRÍTICO al escribir en disco: " + e.getMessage());
-            throw e;
+        // 5. RETORNO IMPORTANTE:
+        // Devolvemos SOLO el nombre del archivo.
+        // NO devolvemos "uploads/" + nombre.
+        // Así la base de datos queda limpia: "uuid_archivo.pdf"
+        return uniqueFileName;
+    }
+
+    /**
+     * Limpia el nombre del archivo:
+     * - Quita acentos (Á -> A)
+     * - Quita caracteres raros (ñ -> n)
+     * - Reemplaza espacios por guiones bajos
+     * - Mantiene solo letras, números, puntos, guiones y guiones bajos
+     */
+    private String sanitizeFileName(String originalFilename) {
+        if (originalFilename == null)
+            return "archivo_sin_nombre";
+
+        // 1. Separar extensión
+        String extension = "";
+        int i = originalFilename.lastIndexOf('.');
+        String nameWithoutExtension = originalFilename;
+
+        if (i > 0) {
+            extension = originalFilename.substring(i); // .pdf
+            nameWithoutExtension = originalFilename.substring(0, i);
         }
 
-        // 5. Retornar la ruta relativa
-        return UPLOAD_DIR + fileName;
+        // 2. Normalizar (Álvaro -> Alvaro)
+        String normalized = Normalizer.normalize(nameWithoutExtension, Normalizer.Form.NFD);
+        Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
+        String slug = pattern.matcher(normalized).replaceAll("");
+
+        // 3. Reemplazar espacios y caracteres no permitidos
+        // Todo a minúsculas, espacios a _, quita todo lo que no sea a-z, 0-9, - ó _
+        slug = slug.toLowerCase()
+                .replaceAll("\\s+", "_") // Espacios a guion bajo
+                .replaceAll("[^a-z0-9\\-_]", ""); // Borrar caracteres raros
+
+        // 4. Reconstruir
+        return slug + extension.toLowerCase();
     }
 }
