@@ -2,16 +2,17 @@ package com.radioacademy.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
+import lombok.Setter;
+import java.util.Objects; // 👈 Importa esto
 import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "lessons")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Lesson {
@@ -23,17 +24,31 @@ public class Lesson {
     @Column(nullable = false)
     private String title;
 
-    private String videoUrl; // Soi hay URL del video se guarda (oculta)
-
-    private String pdfUrl; // Si hay URL del PDF se guarda (oculta)
+    private String videoUrl;
+    private String pdfUrl;
     private Integer duration;
+
     @Column(nullable = false)
     private Integer orderIndex;
 
-    // RELACIÓN: Una lección pertenece a un Módulo
-    @ManyToOne(fetch = FetchType.LAZY) // LAZY: No te traigas el módulo entero si no te lo pido
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "module_id", nullable = false)
-    @JsonIgnore // Para evitar problemas de serialización (circular reference)
+    @JsonIgnore
     private Module module;
 
+    // 👇 AÑADE ESTO
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Lesson lesson = (Lesson) o;
+        return Objects.equals(id, lesson.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

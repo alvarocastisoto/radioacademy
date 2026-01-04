@@ -1,0 +1,139 @@
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="mb-4 animate__animated animate__fadeInDown">
+        <h2 class="fw-bold text-dark">👤 Mi Perfil</h2>
+        <p class="text-muted">Gestiona tu información personal y seguridad.</p>
+      </div>
+
+      <div class="card border-0 shadow-sm rounded-4 animate__animated animate__fadeInUp">
+        <div class="card-body p-4 p-md-5">
+          @if (successMessage) {
+          <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ successMessage }}
+          </div>
+          } @if (errorMessage) {
+          <div class="alert alert-danger d-flex align-items-center mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ errorMessage }}
+          </div>
+          }
+
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+            <h5 class="fw-bold text-primary mb-3">Información Personal</h5>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    formControlName="name"
+                    placeholder="Nombre"
+                  />
+                  <label for="name">Nombre</label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="surname"
+                    formControlName="surname"
+                    placeholder="Apellidos"
+                  />
+                  <label for="surname">Apellidos</label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="email"
+                    class="form-control"
+                    id="email"
+                    formControlName="email"
+                    placeholder="nombre@ejemplo.com"
+                  />
+                  <label for="email">Correo Electrónico</label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="tel"
+                    class="form-control"
+                    id="phone"
+                    formControlName="phone"
+                    placeholder="Teléfono"
+                  />
+                  <label for="phone">Teléfono</label>
+                </div>
+              </div>
+            </div>
+
+            <hr class="my-4 border-secondary opacity-10" />
+
+            <h5 class="fw-bold text-primary mb-3">Seguridad</h5>
+            <p class="text-muted small">
+              Deja estos campos vacíos si no quieres cambiar tu contraseña.
+            </p>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="newPass"
+                    formControlName="newPassword"
+                    placeholder="Nueva contraseña"
+                  />
+                  <label for="newPass">Nueva Contraseña</label>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="confirmPass"
+                    formControlName="confirmPassword"
+                    placeholder="Repetir contraseña"
+                    [class.is-invalid]="
+                      profileForm.value.newPassword !== profileForm.value.confirmPassword &&
+                      profileForm.value.confirmPassword
+                    "
+                  />
+                  <label for="confirmPass">Confirmar Contraseña</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-5">
+              <button
+                type="submit"
+                class="btn btn-primary px-5 py-2 fw-bold rounded-3 shadow-sm"
+                [disabled]="profileForm.invalid || loading"
+              >
+                @if (loading) {
+                <span
+                  class="spinner-border spinner-border-sm me-2"
+                  role="status"
+                  aria-hidden="true"
+                ></span>
+                Guardando... } @else { Guardar Cambios }
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

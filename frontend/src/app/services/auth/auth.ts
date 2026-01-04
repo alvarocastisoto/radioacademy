@@ -8,7 +8,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'USER';
+  role: 'ADMIN' | 'USER' | 'ROLE_ADMIN' | 'ROLE_USER';
 }
 
 // Definimos qué esperamos recibir del servidor al loguearnos
@@ -73,5 +73,20 @@ export class AuthService {
   // Ayuda para saber si hay token crudo
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
+  }
+
+  // Método para actualizar los datos del usuario manualmente
+  updateUserFields(newData: any) {
+    const current = this.currentUser(); // Obtenemos valor actual
+    if (current) {
+      // Fusionamos lo viejo con lo nuevo
+      const updatedUser = { ...current, ...newData };
+
+      // 1. Actualizamos la Señal (Signal)
+      this.currentUser.set(updatedUser);
+
+      // 2. Actualizamos el LocalStorage para que persista al recargar
+      localStorage.setItem('user', JSON.stringify(updatedUser)); // OJO: Revisa si tu clave es 'user_session' o 'user_data'
+    }
   }
 }

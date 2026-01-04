@@ -3,19 +3,20 @@ package com.radioacademy.backend.entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
+import java.util.Objects; // 👈 Importa esto
 import java.util.UUID;
 
 @Entity
 @Table(name = "lesson_progress", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "user_id", "lesson_id" }) // Un usuario solo puede tener un registro por
-                                                                    // lección
+        @UniqueConstraint(columnNames = { "user_id", "lesson_id" })
 })
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,4 +39,20 @@ public class LessonProgress {
 
     @CreationTimestamp
     private LocalDateTime completedAt;
+
+    // 👇 AÑADE ESTO
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        LessonProgress that = (LessonProgress) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

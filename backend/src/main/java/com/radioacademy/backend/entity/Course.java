@@ -2,8 +2,10 @@ package com.radioacademy.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -13,14 +15,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.Set;
 
 @Entity
 @Table(name = "courses")
-@Data // Genera getters, setters, toString, equals, y hashCode
-@NoArgsConstructor // Constructor sin argumentos
-@AllArgsConstructor // Constructor con todos los argumentos
+@Getter
+@Setter
+// ❌ @EqualsAndHashCode <--- ¡BORRADO!
+@NoArgsConstructor
+@AllArgsConstructor
 public class Course {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -29,25 +34,21 @@ public class Course {
     @Column(nullable = false)
     private String title;
 
-    @Column(columnDefinition = "TEXT") // Permite textos largos
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @Column(nullable = false)
     private BigDecimal price;
 
     @Column(nullable = false)
-    private Integer hours; // Duración estimada
+    private Integer hours;
 
     @Column(nullable = false)
-    private Boolean active; // Para ocultar cursos sin borrarlos
-
-    // La relación
-    // Un curso tiene UN PROFESOR
-    // FetchType.EAGER: Siempre que se cargue un curso, se carga también su profesor
+    private Boolean active;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "teacher_id", nullable = false)
-    @JsonIgnore // Para evitar problemas de serialización (circular reference)
+    @JsonIgnore
     private User teacher;
 
     @CreationTimestamp
@@ -56,17 +57,34 @@ public class Course {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
+    // Los módulos SÍ queremos que salgan en el JSON, así que NO ponemos JsonIgnore
+    // aquí
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Module> modules;
 
-    public List<Module> getModules() {
-        return modules;
-    }
+    // getModules manual no es necesario si usas @Getter, pero no hace daño dejarlo.
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "course_students", // Nombre de la tabla intermedia
-            joinColumns = @JoinColumn(name = "course_id"), // Columna del curso
-            inverseJoinColumns = @JoinColumn(name = "user_id") // Columna del alumno
-    )
+    @JoinTable(name = "course_students", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
+    @JsonIgnore // 👈 VITAL: Evita que al pedir un curso se descarguen todos los alumnos
     private Set<User> students = new HashSet<>();
+
+    // =================================================================
+    // 👇 IMPLEMENTACIÓN MANUAL SEGURA (SOLO ID) 👇
+    // =================================================================
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        Course course = (Course) o;
+        return Objects.equals(id, course.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

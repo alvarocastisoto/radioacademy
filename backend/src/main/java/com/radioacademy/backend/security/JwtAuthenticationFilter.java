@@ -31,50 +31,55 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
 
-        // 1. Buscamos el token en la cabecera "Authorization"
         final String authHeader = request.getHeader("Authorization");
-        System.out.println("1. Cabecera recibida: " + authHeader);
         final String jwt;
         final String userEmail;
 
-        // Si no hay cabecera o no empieza por "Bearer ", no es para nosotros. Sigue.
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Extraemos el token (quitamos "Bearer ")
         jwt = authHeader.substring(7);
-
-        // 3. Extraemos el email del token
         userEmail = jwtService.extractUsername(jwt);
-        System.out.println("3. Token detectado. Usuario extraído: " + userEmail);
-        // 4. Si hay email y el usuario no está ya autenticado en el contexto...
+
+        // ... dentro de doFilterInternal ...
+
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            // Cargamos los datos del usuario de la BD
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+            // 1. Cargamos el usuario "sucio" (conectado a BD)
+            UserDetails dbUser = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 5. Validamos si el token es correcto
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                System.out.println("4. ¡Token VÁLIDO! Autenticando usuario...");
-                // 6. Creamos la "Ficha de Autenticación" oficial de Spring
+            if (jwtService.isTokenValid(jwt, dbUser)) {
+
+                // 👇👇👇 EL CAMBIO MAGICO EMPIEZA AQUI 👇👇👇
+                // Creamos un usuario "limpio" que es una copia tonta, sin conexión a BD.
+                // Esto evita que Spring intente leer la base de datos cuando ya se ha cerrado.
+
+                UserDetails safeUser = org.springframework.security.core.userdetails.User.builder()
+                        .username(dbUser.getUsername())
+                        .password(dbUser.getPassword())
+                        .authorities(dbUser.getAuthorities()) // Copiamos los roles
+                        .accountExpired(!dbUser.isAccountNonExpired())
+                        .accountLocked(!dbUser.isAccountNonLocked())
+                        .credentialsExpired(!dbUser.isCredentialsNonExpired())
+                        .disabled(!dbUser.isEnabled())
+                        .build();
+                // 👆👆👆 EL CAMBIO MAGICO TERMINA AQUI 👆👆👆
+
+                // AHORA USAMOS 'safeUser' EN LUGAR DE 'dbUser'
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
+                        safeUser, // <--- Aquí va el usuario seguro
                         null,
-                        userDetails.getAuthorities());
+                        safeUser.getAuthorities());
 
                 authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // 7. ¡MAGIA! Ponemos al usuario en el Contexto de Seguridad
-                // A partir de aquí, Spring sabe quién es y qué roles tiene.
                 SecurityContextHolder.getContext().setAuthentication(authToken);
-            } else {
-                System.out.println("4. Token INVÁLIDO o Caducado.");
             }
         }
+        // ... resto del código igual ...
 
-        // Continuamos con el siguiente filtro
         filterChain.doFilter(request, response);
     }
 }

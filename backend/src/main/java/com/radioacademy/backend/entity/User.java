@@ -3,9 +3,10 @@ package com.radioacademy.backend.entity;
 import com.radioacademy.backend.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,12 +17,14 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter // 👈 USA ESTO
+@Setter // 👈 Y ESTO
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
@@ -65,23 +68,41 @@ public class User implements UserDetails {
     @Column(name = "terms_accepted", nullable = false)
     private boolean termsAccepted;
 
-    // ✅ CORREGIDO: Relación bidireccional optimizada
-    // 1. fetch = LAZY: Para que no cargue los cursos al listar usuarios (Rápido)
-    // 2. mappedBy = "students": Porque la configuración de la tabla ya está en
-    // Course.java
     @ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
-    @JsonIgnore // Evita bucle infinito JSON y carga innecesaria
+    @JsonIgnore
     private Set<Course> enrolledCourses = new HashSet<>();
 
     // =================================================================
-    // 👇 MÉTODOS OBLIGATORIOS DE USER DETAILS 👇
+    // 👇 SOLUCIÓN AL BUCLE INFINITO DE MEMORIA 👇
+    // =================================================================
+
+    // Sobrescribimos equals y hashCode para que SOLO miren el ID.
+    // Así rompemos el bucle al comparar objetos.
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
+    // =================================================================
+    // USER DETAILS IMPLEMENTATION
     // =================================================================
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null)
             return List.of();
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return List.of(new SimpleGrantedAuthority(role.name())); // Ojo: Si en BD es ROLE_ADMIN, aquí llegará bien
     }
 
     @Override
@@ -89,7 +110,6 @@ public class User implements UserDetails {
         return email;
     }
 
-    // 🔥 SEGURIDAD: Evitamos que el hash del password viaje al frontend
     @Override
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     public String getPassword() {
@@ -116,19 +136,7 @@ public class User implements UserDetails {
         return true;
     }
 
-    // Y haz lo mismo para el Email por si acaso:
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    // =================================================================
-    // 👆 FIN DE MÉTODOS OBLIGATORIOS 👆
-    // =================================================================
-
+    // Helpers manuales si Lombok falla en algo específico
     public void setPhone(String phone) {
         if (phone != null) {
             this.phone = phone.trim().replaceAll("\\s+", "");

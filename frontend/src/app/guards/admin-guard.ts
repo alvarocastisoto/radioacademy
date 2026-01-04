@@ -2,18 +2,18 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   const user = authService.currentUser();
 
-  // ✅ SOLO miramos si hay usuario (sea alumno o admin)
-  if (user) {
+  //  Aquí SÍ exigimos ser ADMIN
+  if (user && (user.role === 'ADMIN' || user.role === 'ROLE_ADMIN')) {
     return true;
   }
 
-  // Si no está logueado, al login
-  router.navigate(['/login']); // Ojo: verifica si tu ruta es /login o /auth/login
+  // Si intenta entrar pero no es admin, lo mandamos al inicio
+  router.navigate(['/']);
   return false;
 };
