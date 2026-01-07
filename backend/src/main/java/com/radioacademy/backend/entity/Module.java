@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects; // 👈 Importa esto
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "modules")
@@ -32,7 +33,8 @@ public class Module {
     @JsonIgnore
     private Course course;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference // Asegúrate de tener esto para evitar bucles infinitos
     private List<Lesson> lessons;
 
     // 👇 AÑADE ESTO (Obligatorio al quitar @Data)

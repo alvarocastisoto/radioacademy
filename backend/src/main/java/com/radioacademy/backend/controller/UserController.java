@@ -73,7 +73,14 @@ public class UserController {
             newEmail = profileData.email();
         }
         if (profileData.newPassword() != null && !profileData.newPassword().isEmpty()) {
+            // Verificar la contraseña actual
+            if (profileData.currentPassword() == null || profileData.currentPassword().isEmpty()
+                    || !passwordEncoder.matches(profileData.currentPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "La contraseña actual es incorrecta"));
+            }
             newPassword = passwordEncoder.encode(profileData.newPassword());
+
         }
 
         System.out.println("🚩 2. LLAMANDO A BD (BYPASS)...");
@@ -107,9 +114,4 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @GetMapping("test-alive")
-    public ResponseEntity<String> testAlive() {
-        System.out.println("🚩 TEST LLAMADO");
-        return ResponseEntity.ok("Estoy vivo");
-    }
 }

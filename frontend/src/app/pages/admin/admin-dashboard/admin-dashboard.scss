@@ -1,0 +1,114 @@
+/* teacher-panel.scss */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.teacher-panel-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.teacher-wrap {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* Header */
+.page-header {
+  gap: 12px;
+}
+
+h2 {
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+
+.header-btn {
+  white-space: nowrap;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* Card */
+.panel-card {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* Table */
+.panel-table {
+  thead {
+    background: #f9fafb;
+
+    th {
+      font-weight: 700;
+      color: #374151;
+      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
+      padding-top: 0.9rem;
+      padding-bottom: 0.9rem;
+      white-space: nowrap;
+    }
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease;
+  }
+
+  tbody tr:hover {
+    background: rgba(79, 70, 229, 0.04); /* hover suave */
+  }
+
+  td {
+    vertical-align: middle;
+    padding-top: 0.9rem;
+    padding-bottom: 0.9rem;
+    border-top: 1px solid rgba(17, 24, 39, 0.06);
+  }
+}
+
+/* Badges */
+.badge.bg-secondary {
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 12px;
+}
+
+.btn-outline-primary,
+.btn-outline-danger {
+  border-width: 2px;
+}
+
+.btn-warning {
+  border: none;
+  font-weight: 700;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    flex-wrap: wrap;
+
+    .header-btn {
+      width: 100%;
+    }
+  }
+
+  /* En móvil, las acciones ocupan mucho: bajamos un poco */
+  .panel-table {
+    th:nth-child(2),
+    td:nth-child(2),
+    th:nth-child(3),
+    td:nth-child(3) {
+      white-space: nowrap;
+    }
+  }
+}

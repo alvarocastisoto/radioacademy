@@ -1,40 +1,54 @@
-<div class="bg-light rounded-3 p-5 mb-5 shadow-sm text-center">
-  <h1 class="display-4 fw-bold text-primary">Domina la Radiología ☢️</h1>
-  <p class="lead text-muted mb-4">
-    La plataforma líder para preparar tu OPE y mejorar tu carrera técnica.
-  </p>
-  <div class="d-flex justify-content-center gap-3">
-    <a routerLink="/register" class="btn btn-primary btn-lg px-4">Empezar Gratis</a>
-    <a routerLink="/courses" class="btn btn-outline-secondary btn-lg px-4">Ver Cursos</a>
-  </div>
-</div>
+<!-- home.html -->
+<div class="home-page">
+  <div class="container-fluid px-3 px-lg-5">
+    <div class="home-wrap">
+      <!-- HERO -->
+      <section class="hero-card">
+        <h1 class="hero-title">Domina la Radiología ☢️</h1>
+        <p class="hero-subtitle">
+          La plataforma líder para preparar tu OPE y mejorar tu carrera técnica.
+        </p>
 
-<div class="row text-center mt-5">
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 border-0 shadow-sm p-3">
-      <div class="card-body">
-        <h3 class="h2 text-primary">🎓</h3>
-        <h4 class="card-title">Temario Actualizado</h4>
-        <p class="card-text text-muted">Contenido adaptado a las últimas convocatorias OPE de tu comunidad.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 border-0 shadow-sm p-3">
-      <div class="card-body">
-        <h3 class="h2 text-primary">📹</h3>
-        <h4 class="card-title">Clases en Vídeo</h4>
-        <p class="card-text text-muted">Aprende a tu ritmo con lecciones grabadas en alta definición.</p>
-      </div>
-    </div>
-  </div>
-  <div class="col-md-4 mb-4">
-    <div class="card h-100 border-0 shadow-sm p-3">
-      <div class="card-body">
-        <h3 class="h2 text-primary">📝</h3>
-        <h4 class="card-title">Tests Reales</h4>
-        <p class="card-text text-muted">Practica con miles de preguntas de exámenes oficiales anteriores.</p>
-      </div>
+        <div class="hero-actions">
+          <a routerLink="/register" class="btn btn-primary btn-lg px-4">Empezar Gratis</a>
+          <a routerLink="/courses" class="btn btn-outline-secondary btn-lg px-4">Ver Cursos</a>
+        </div>
+      </section>
+
+      <!-- FEATURES -->
+      <section class="features">
+        <div class="row g-4 text-center">
+          <div class="col-12 col-md-4">
+            <div class="feature-card">
+              <div class="feature-icon">🎓</div>
+              <h4 class="feature-title">Temario Actualizado</h4>
+              <p class="feature-text">
+                Contenido adaptado a las últimas convocatorias OPE de tu comunidad.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="feature-card">
+              <div class="feature-icon">📹</div>
+              <h4 class="feature-title">Clases en Vídeo</h4>
+              <p class="feature-text">
+                Aprende a tu ritmo con lecciones grabadas en alta definición.
+              </p>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="feature-card">
+              <div class="feature-icon">📝</div>
+              <h4 class="feature-title">Tests Reales</h4>
+              <p class="feature-text">
+                Practica con miles de preguntas de exámenes oficiales anteriores.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </div>

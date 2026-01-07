@@ -60,6 +60,7 @@ public class Course {
     // Los módulos SÍ queremos que salgan en el JSON, así que NO ponemos JsonIgnore
     // aquí
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // 👈 Evita referencia circular al serializar
     private List<Module> modules;
 
     // getModules manual no es necesario si usas @Getter, pero no hace daño dejarlo.

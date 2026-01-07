@@ -1,61 +1,72 @@
-<div class="container mt-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="card shadow-sm border-0">
-        <div class="card-header bg-white border-0 pt-4 px-4">
-          <h2 class="text-primary fw-bold">Nuevo Curso</h2>
-        </div>
-
-        <div class="card-body p-4">
-          <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
-            <div class="mb-3">
-              <label class="form-label fw-bold">Título del Curso</label>
-              <input
-                type="text"
-                class="form-control"
-                formControlName="title"
-                placeholder="Ej: OPE Enfermería 2025"
-              />
+<!-- course-new.html -->
+<div class="course-new-page">
+  <div class="container-fluid px-3 px-lg-5">
+    <div class="course-new-wrap">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
+          <div class="card form-card">
+            <div class="card-header form-header">
+              <h2 class="fw-bold m-0">Nuevo Curso</h2>
             </div>
 
-            <div class="mb-3">
-              <label class="form-label fw-bold">Descripción Corta</label>
-              <textarea
-                class="form-control"
-                rows="3"
-                formControlName="description"
-                placeholder="Resumen del contenido..."
-              ></textarea>
+            <div class="card-body p-4">
+              <form [formGroup]="courseForm" (ngSubmit)="onSubmit()" novalidate>
+                <div class="mb-3">
+                  <label class="form-label" for="title">Título del Curso</label>
+                  <input
+                    id="title"
+                    type="text"
+                    class="form-control"
+                    formControlName="title"
+                    placeholder="Ej: OPE Enfermería 2025"
+                  />
+                </div>
+
+                <div class="mb-3">
+                  <label class="form-label" for="description">Descripción Corta</label>
+                  <textarea
+                    id="description"
+                    class="form-control"
+                    rows="3"
+                    formControlName="description"
+                    placeholder="Resumen del contenido..."
+                  ></textarea>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="price">Precio (€)</label>
+                    <input id="price" type="number" class="form-control" formControlName="price" />
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="hours">Horas Lectivas</label>
+                    <input id="hours" type="number" class="form-control" formControlName="hours" />
+                  </div>
+
+                  <div class="col-12 col-md-4">
+                    <label class="form-label" for="level">Nivel</label>
+                    <select id="level" class="form-select" formControlName="level">
+                      <option value="BEGINNER">Principiante</option>
+                      <option value="INTERMEDIATE">Intermedio</option>
+                      <option value="ADVANCED">Avanzado</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                  <a routerLink="/admin" class="btn btn-outline-secondary">Cancelar</a>
+                  <button
+                    type="submit"
+                    class="btn btn-primary px-4"
+                    [disabled]="courseForm.invalid"
+                  >
+                    Guardar Curso
+                  </button>
+                </div>
+              </form>
             </div>
-
-            <div class="row">
-              <div class="col-md-4 mb-3">
-                <label class="form-label fw-bold">Precio (€)</label>
-                <input type="number" class="form-control" formControlName="price" />
-              </div>
-
-              <div class="col-md-4 mb-3">
-                <label class="form-label fw-bold">Horas Lectivas</label>
-                <input type="number" class="form-control" formControlName="hours" />
-              </div>
-
-              <div class="col-md-4 mb-3">
-                <label class="form-label fw-bold">Nivel</label>
-                <select class="form-select" formControlName="level">
-                  <option value="BEGINNER">Principiante</option>
-                  <option value="INTERMEDIATE">Intermedio</option>
-                  <option value="ADVANCED">Avanzado</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <a routerLink="/admin" class="btn btn-outline-secondary">Cancelar</a>
-              <button type="submit" class="btn btn-primary px-4" [disabled]="courseForm.invalid">
-                Guardar Curso
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>

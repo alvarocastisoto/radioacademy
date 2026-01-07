@@ -1,0 +1,153 @@
+/* admin-syllabus.scss (más ancho) */
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.admin-syllabus-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.admin-wrap {
+  max-width: 1500px;   // 👈 aquí está el “más ancho”
+  margin: 0 auto;
+}
+
+/* Header */
+.page-header {
+  gap: 12px;
+}
+
+.header-btn {
+  min-width: 160px;    // evita que el título “baile” y se vea estrecho
+  white-space: nowrap;
+}
+
+h2 {
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+
+/* Accordion */
+.accordion {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: #fff;
+}
+
+.accordion-item {
+  border: 0;
+}
+
+.accordion-header {
+  background: #fff;
+}
+
+.accordion-button {
+  background: #fff;
+  font-weight: 600;
+  padding: 1rem 1.25rem;
+  border: 0;
+  box-shadow: none !important;
+
+  &:not(.collapsed) {
+    color: #111827;
+    background: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12) !important;
+  }
+}
+
+.accordion-button::after {
+  transform: scale(0.95);
+  opacity: 0.75;
+}
+
+.badge.bg-dark {
+  background: #111827 !important;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.accordion-body {
+  padding: 1.25rem;
+  background: #f9fafb;
+}
+
+/* Lecciones */
+.list-group-item {
+  padding: 0.9rem 0;
+}
+
+/* Video */
+.video-frame {
+  max-width: 720px;  // antes 480 inline. Ahora se ve mejor en admin widescreen
+  border-radius: 14px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: #fff;
+}
+
+.video-frame iframe {
+  border: 0;
+}
+
+/* Botones */
+.btn {
+  border-radius: 12px;
+}
+
+.btn-outline-secondary,
+.btn-outline-primary,
+.btn-outline-danger {
+  border-width: 2px;
+}
+
+.btn-success {
+  font-weight: 700;
+}
+
+.btn-danger {
+  border: none;
+  border-radius: 12px;
+}
+
+.btn-danger:hover,
+.btn-outline-danger:hover {
+  filter: brightness(0.95);
+}
+
+/* Alert */
+.alert-info {
+  border-radius: 14px;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(59, 130, 246, 0.08);
+  color: #1f2937;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    flex-wrap: wrap;
+    gap: 10px;
+
+    h2 {
+      width: 100%;
+      text-align: center;
+      margin: 6px 0;
+    }
+  }
+
+  .header-btn {
+    min-width: 0;
+    width: auto;
+  }
+
+  .video-frame {
+    max-width: 100%;
+  }
+}

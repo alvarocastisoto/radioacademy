@@ -1,0 +1,24 @@
+/* app.component.scss */
+:host {
+  display: block;
+  height: 100%;
+}
+
+.app-shell {
+  min-height: calc(100vh - 70px); // mantén esto si mantienes el padding-top del body
+  display: flex;
+  flex-direction: column;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  min-height: 0; // clave
+}
+
+.app-content {
+  flex: 1;
+  display: flex;
+  min-height: 0;     // clave
+  overflow: hidden;  // clave: evita scroll del body, cada página gestiona su scroll
+}

@@ -1,35 +1,51 @@
-<div class="container mt-5">
-  <div class="card shadow-sm col-md-6 mx-auto">
-    <div class="card-body p-4">
-      <h3 class="mb-4">Nuevo Módulo</h3>
+<!-- module-new.html -->
+<div class="module-form-page">
+  <div class="container-fluid px-3 px-lg-5">
+    <div class="module-form-wrap">
+      <div class="card form-card mx-auto">
+        <div class="card-body">
+          <div class="form-title">
+            <h3 class="m-0">Nuevo Módulo</h3>
+            <p class="text-muted mb-0">Crea un módulo dentro del curso y define su orden.</p>
+          </div>
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div class="mb-3">
-          <label class="form-label">Título del Módulo</label>
-          <input
-            type="text"
-            formControlName="title"
-            class="form-control"
-            placeholder="Ej: Introducción a la Anatomía"
-          />
-        </div>
+          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+            <div class="mb-3">
+              <label class="form-label" for="title">Título del Módulo</label>
+              <input
+                id="title"
+                type="text"
+                formControlName="title"
+                class="form-control"
+                placeholder="Ej: Introducción a la Anatomía"
+              />
+            </div>
 
-        <div class="mb-3">
-          <label class="form-label">Orden</label>
-          <input type="number" formControlName="orderIndex" class="form-control" />
-        </div>
+            <div class="mb-3">
+              <label class="form-label" for="orderIndex">Orden</label>
+              <input
+                id="orderIndex"
+                type="number"
+                formControlName="orderIndex"
+                class="form-control"
+              />
+            </div>
 
-        <div class="d-flex justify-content-end gap-2">
-          <a
-            [routerLink]="['/admin/courses', courseId, 'content']"
-            class="btn btn-outline-secondary"
-            >Cancelar</a
-          >
-          <button type="submit" class="btn btn-primary" [disabled]="form.invalid">
-            Guardar Módulo
-          </button>
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <a
+                [routerLink]="['/admin/courses', courseId, 'content']"
+                class="btn btn-outline-secondary"
+              >
+                Cancelar
+              </a>
+
+              <button type="submit" class="btn btn-primary px-4" [disabled]="form.invalid">
+                Guardar Módulo
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>

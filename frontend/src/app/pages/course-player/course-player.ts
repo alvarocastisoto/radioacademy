@@ -70,8 +70,6 @@ export class CoursePlayerComponent implements OnInit {
         console.log('📚 Temario RAW recibido:', data); // <--- MIRA ESTO EN CONSOLA
         this.course = data;
 
-        // 🔴 ERROR PROBABLE AQUÍ: Cambia 'sections' por 'modules'
-        // Tu backend Java seguramente devuelve "modules"
         const modulesList = this.course.modules || this.course.sections || [];
 
         this.totalLessons = 0;

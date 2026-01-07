@@ -1,39 +1,174 @@
-$primary-gradient: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+/* my-courses.scss */
 
+$primary-color: #4f46e5;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.my-courses-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.my-courses-wrap {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* Header */
+.page-head {
+  margin-bottom: 1.25rem;
+
+  .page-title {
+    font-weight: 900;
+    letter-spacing: -0.4px;
+    color: #111827;
+    margin: 0 0 0.25rem;
+    font-size: clamp(1.6rem, 2.2vw, 2.1rem);
+  }
+
+  .page-subtitle {
+    margin: 0;
+    color: #6b7280;
+    font-size: clamp(1rem, 1.1vw, 1.25rem);
+  }
+}
+
+/* States */
+.state {
+  border-radius: 18px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: rgba(255, 255, 255, 0.75);
+  padding: 2.25rem 1.25rem;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+}
+
+.state-loading {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.state-empty {
+  border-style: dashed;
+}
+
+/* Card */
 .course-card {
-  border-radius: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  background: white;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background: #fff;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.09);
   }
 }
 
 .course-cover {
-  height: 160px;
-  background: $primary-gradient;
-  // Si en el futuro pones imágenes reales:
-  // background-image: url(...);
-  // background-size: cover;
+  height: 180px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.9), rgba(79, 70, 229, 0.55));
+  position: relative;
 }
 
+.course-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.fallback-icon {
+  position: absolute;
+  inset: 0;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.2);
+  color: #fff;
+}
+
+/* Body */
+.course-body {
+  padding: 1.25rem !important;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.course-title {
+  font-weight: 900;
+  color: #111827;
+  letter-spacing: -0.2px;
+  margin: 0;
+}
+
+.course-desc {
+  color: #6b7280;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Progress */
+.progress-block {
+  margin-top: 0.25rem;
+}
+
+.progress-rail {
+  height: 8px;
+  background: #e9ecef;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* Actions */
+.actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  border-radius: 12px;
+  font-weight: 900;
+}
+
+.btn-enter {
+  flex: 1;
+  padding: 0.85rem 1rem;
+  box-shadow: 0 12px 28px rgba($primary-color, 0.18);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 34px rgba($primary-color, 0.24);
+  }
+}
+
+.btn-pdf {
+  width: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Line clamp (sin depender de plugin) */
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.btn-hover-effect {
-  transition: all 0.2s;
-  &:hover {
-    transform: scale(1.02);
+/* Responsive */
+@media (max-width: 768px) {
+  .my-courses-page {
+    padding: 1rem 0 1.5rem;
   }
-}
 
-.border-dashed {
-  border-style: dashed !important;
+  .course-cover {
+    height: 170px;
+  }
 }

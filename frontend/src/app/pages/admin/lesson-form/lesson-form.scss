@@ -1,0 +1,120 @@
+/* lesson-new.scss */
+
+$primary-color: #4f46e5;
+$error-color: #ef4444;
+$input-bg: #f9fafb;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.lesson-form-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.lesson-form-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card */
+.form-card {
+  width: 100%;
+  max-width: 880px;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+  background: #fff;
+}
+
+.card-body {
+  padding: 2rem !important;
+}
+
+.form-title {
+  margin-bottom: 1.25rem;
+
+  h3 {
+    color: #111827;
+    letter-spacing: -0.2px;
+    font-weight: 800;
+  }
+}
+
+/* Labels */
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Inputs */
+.form-control {
+  background-color: $input-bg;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #374151;
+  transition: all 0.2s ease;
+
+  &:focus {
+    background-color: #fff;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 4px rgba($primary-color, 0.15);
+  }
+
+  &.is-invalid {
+    background-color: #fef2f2;
+    border-color: lighten($error-color, 20%);
+    background-image: none;
+
+    &:focus {
+      box-shadow: 0 0 0 4px rgba($error-color, 0.12);
+      border-color: $error-color;
+    }
+  }
+}
+
+.invalid-feedback {
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+}
+
+/* Form text */
+.form-text {
+  color: #6b7280;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 12px;
+}
+
+.btn-outline-secondary {
+  border-width: 2px;
+}
+
+.btn-primary {
+  font-weight: 800;
+  background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+  border: none;
+
+  &:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem !important;
+  }
+}

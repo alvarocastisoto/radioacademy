@@ -1,1 +1,18 @@
-/* You can add global styles to this file, and also import other style files */
+/* styles.scss */
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  padding-top: 70px; // ok si tu navbar es fixed-top
+}
+
+.navbar {
+  z-index: 1050 !important;
+}
+
+.hover-white:hover {
+  color: #fff !important;
+  transition: color 0.2s;
+}

@@ -1,0 +1,155 @@
+/* course-syllabus.scss */
+
+$primary-color: #4f46e5;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.course-syllabus-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.course-syllabus-wrap {
+  max-width: 1500px;
+  margin: 0 auto;
+}
+
+/* Header */
+.page-header {
+  gap: 12px;
+}
+
+h2 {
+  color: #111827;
+  letter-spacing: -0.3px;
+}
+
+.header-btn {
+  min-width: 200px;
+  white-space: nowrap;
+  border-radius: 12px;
+  border-width: 2px;
+}
+
+.header-spacer {
+  min-width: 200px; /* para centrar el título (simetría con el botón) */
+}
+
+/* Accordion */
+.syllabus-accordion {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  background: #fff;
+}
+
+.accordion-item {
+  border: 0;
+}
+
+.accordion-header {
+  background: #fff;
+}
+
+.accordion-button {
+  background: #fff;
+  font-weight: 700;
+  padding: 1rem 1.25rem;
+  border: 0;
+  box-shadow: none !important;
+
+  &:not(.collapsed) {
+    color: #111827;
+    background: #fff;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 4px rgba($primary-color, 0.12) !important;
+  }
+}
+
+.accordion-button::after {
+  transform: scale(0.95);
+  opacity: 0.75;
+}
+
+.badge.bg-primary {
+  background: $primary-color !important;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+/* Body */
+.accordion-body {
+  padding: 1.25rem;
+  background: #f9fafb;
+}
+
+/* Lessons */
+.lesson-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0.75rem 0;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.lesson-left {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lesson-title {
+  color: #111827;
+}
+
+.lesson-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .page-header {
+    flex-wrap: wrap;
+  }
+
+  .header-btn,
+  .header-spacer {
+    min-width: 0;
+  }
+
+  h2 {
+    width: 100%;
+    text-align: center;
+    margin: 0.25rem 0 0.5rem;
+  }
+
+  .lesson-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .lesson-actions {
+    width: 100%;
+    gap: 8px;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}

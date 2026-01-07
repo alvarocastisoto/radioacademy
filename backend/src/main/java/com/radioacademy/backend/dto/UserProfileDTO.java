@@ -9,7 +9,7 @@ public record UserProfileDTO(
                 String surname,
                 String email,
                 String phone,
-                String password,
+                String currentPassword,
                 String newPassword
 
 ) {

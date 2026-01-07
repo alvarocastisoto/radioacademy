@@ -1,12 +1,13 @@
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="mb-4 animate__animated animate__fadeInDown">
-        <h2 class="fw-bold text-dark">👤 Mi Perfil</h2>
-        <p class="text-muted">Gestiona tu información personal y seguridad.</p>
+<!-- profile.html -->
+<div class="profile-page">
+  <div class="container-fluid px-3 px-lg-5">
+    <div class="profile-wrap">
+      <div class="page-head">
+        <h2 class="fw-bold text-dark m-0">👤 Mi Perfil</h2>
+        <p class="text-muted mb-0">Gestiona tu información personal y seguridad.</p>
       </div>
 
-      <div class="card border-0 shadow-sm rounded-4 animate__animated animate__fadeInUp">
+      <div class="card profile-card border-0">
         <div class="card-body p-4 p-md-5">
           @if (successMessage) {
           <div class="alert alert-success d-flex align-items-center mb-4" role="alert">
@@ -21,7 +22,7 @@
           }
 
           <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-            <h5 class="fw-bold text-primary mb-3">Información Personal</h5>
+            <h5 class="section-title mb-3">Información Personal</h5>
 
             <div class="row g-3">
               <div class="col-md-6">
@@ -77,14 +78,28 @@
               </div>
             </div>
 
-            <hr class="my-4 border-secondary opacity-10" />
+            <hr class="divider" />
 
-            <h5 class="fw-bold text-primary mb-3">Seguridad</h5>
-            <p class="text-muted small">
-              Deja estos campos vacíos si no quieres cambiar tu contraseña.
+            <h5 class="section-title mb-2">Seguridad</h5>
+            <p class="text-muted small mb-3">
+              Para cambiar tu contraseña, introduce la actual y la nueva.
             </p>
 
             <div class="row g-3">
+              <div class="col-12">
+                <div class="form-floating">
+                  <input
+                    type="password"
+                    class="form-control"
+                    id="currentPass"
+                    formControlName="currentPassword"
+                    placeholder="Contraseña Actual"
+                    autocomplete="current-password"
+                  />
+                  <label for="currentPass">Contraseña Actual (Requerida para cambios)</label>
+                </div>
+              </div>
+
               <div class="col-md-6">
                 <div class="form-floating">
                   <input
@@ -93,6 +108,7 @@
                     id="newPass"
                     formControlName="newPassword"
                     placeholder="Nueva contraseña"
+                    autocomplete="new-password"
                   />
                   <label for="newPass">Nueva Contraseña</label>
                 </div>
@@ -106,20 +122,26 @@
                     id="confirmPass"
                     formControlName="confirmPassword"
                     placeholder="Repetir contraseña"
+                    autocomplete="new-password"
                     [class.is-invalid]="
                       profileForm.value.newPassword !== profileForm.value.confirmPassword &&
                       profileForm.value.confirmPassword
                     "
                   />
                   <label for="confirmPass">Confirmar Contraseña</label>
+
+                  @if ( profileForm.value.newPassword !== profileForm.value.confirmPassword &&
+                  profileForm.value.confirmPassword ) {
+                  <div class="invalid-feedback d-block mt-2">Las contraseñas no coinciden.</div>
+                  }
                 </div>
               </div>
             </div>
 
-            <div class="d-flex justify-content-end mt-5">
+            <div class="d-flex justify-content-end mt-4 mt-md-5">
               <button
                 type="submit"
-                class="btn btn-primary px-5 py-2 fw-bold rounded-3 shadow-sm"
+                class="btn btn-primary btn-save"
                 [disabled]="profileForm.invalid || loading"
               >
                 @if (loading) {

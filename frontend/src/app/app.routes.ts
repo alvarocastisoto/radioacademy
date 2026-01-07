@@ -19,44 +19,25 @@ export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
   { path: 'login', component: Login }, // /login
   { path: 'register', component: Register }, // /register
+
+  // Course routes
   { path: 'courses', component: CourseList }, // /courses
   { path: 'courses/:id', component: CourseDetails }, // Los dos puntos ':' indican que 'id' es una variable
+  { path: 'course-player/:id', component: CoursePlayerComponent, canActivate: [authGuard] },
+
+  // Student Routes
+  { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [authGuard] },
+  { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  // Admin Routes
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] }, // /admin
+  { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },
   { path: 'admin/courses/new', component: CourseForm, canActivate: [adminGuard] }, // /admin/new para crear
   { path: 'admin/courses/:id/content', component: AdminCourseContent, canActivate: [adminGuard] },
   { path: 'admin/modules/new', component: ModuleForm, canActivate: [adminGuard] },
   { path: 'admin/lessons/new', component: LessonForm, canActivate: [adminGuard] },
-  {
-    path: 'admin/lessons/:id/edit',
-    component: LessonForm,
-    canActivate: [adminGuard],
-  },
-  {
-    path: 'admin/modules/:moduleId/new-lesson',
-    component: LessonForm,
-    canActivate: [adminGuard],
-  },
-  {
-    path: 'admin/courses/:courseId/new-module',
-    component: ModuleForm,
-    canActivate: [adminGuard],
-  },
-  {
-    path: 'student-dashboard',
-    component: StudentDashboardComponent,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'course-player/:id', // 👈 Tiene que coincidir con lo que pedimos en el ngOnInit
-    component: CoursePlayerComponent,
-    canActivate: [authGuard],
-  },
+  { path: 'admin/lessons/:id/edit', component: LessonForm, canActivate: [adminGuard] },
+  { path: 'admin/modules/:moduleId/new-lesson', component: LessonForm, canActivate: [adminGuard] },
+  { path: 'admin/courses/:courseId/new-module', component: ModuleForm, canActivate: [adminGuard] },
 
-  { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },
-  {
-    path: 'profile',
-    component: ProfileComponent,
-    canActivate: [authGuard], // 🔒 ¡Vital! Solo usuarios logueados
-  },
   { path: '**', redirectTo: '' }, // Si escriben algo raro -> volver a Home
 ];

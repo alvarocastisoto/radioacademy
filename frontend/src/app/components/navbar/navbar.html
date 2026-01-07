@@ -1,55 +1,82 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
-  <div class="container">
-    <a class="navbar-brand fw-bold" routerLink="/">☢️ RadioAcademy</a>
+<!-- navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow fixed-top ra-navbar">
+  <div class="container-fluid px-3 px-lg-5">
+    <a class="navbar-brand fw-bold ra-brand" routerLink="/">☢️ RadioAcademy</a>
 
     <button
       class="navbar-toggler"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Abrir menú"
     >
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto align-items-center">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2 ra-nav">
         <li class="nav-item">
           <a
-            class="nav-link"
+            class="nav-link ra-link"
             routerLink="/"
             routerLinkActive="active"
             [routerLinkActiveOptions]="{ exact: true }"
-            >Inicio</a
           >
+            Inicio
+          </a>
         </li>
+
+        <li class="nav-item">
+          <a
+            class="nav-link ra-link"
+            routerLink="/courses"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            Cursos
+          </a>
+        </li>
+
         @if (!authService.isLoggedIn()) {
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-outline-light btn-sm me-2" routerLink="/login">Iniciar Sesión</a>
+        <li class="nav-item ms-lg-2">
+          <a class="btn btn-outline-light btn-sm ra-btn" routerLink="/login">Iniciar Sesión</a>
         </li>
         <li class="nav-item">
-          <a class="btn btn-light text-primary btn-sm fw-bold" routerLink="/register">Regístrate</a>
+          <a class="btn btn-light text-primary btn-sm fw-bold ra-btn" routerLink="/register">
+            Regístrate
+          </a>
         </li>
         } @else { @if (authService.currentUser()?.role === 'ADMIN') {
-        <li class="nav-item ms-lg-3">
-          <a class="btn btn-warning btn-sm fw-bold text-dark shadow-sm" routerLink="/admin">
+        <li class="nav-item ms-lg-2">
+          <a class="btn btn-warning btn-sm fw-bold text-dark ra-btn shadow-sm" routerLink="/admin">
             🛠 Panel Admin
           </a>
         </li>
         }
 
-        <li class="nav-item ms-lg-3 dropdown">
+        <li class="nav-item ms-lg-2 dropdown">
           <button
-            class="btn btn-outline-light btn-sm dropdown-toggle"
+            class="btn btn-outline-light btn-sm dropdown-toggle ra-btn"
             type="button"
             data-bs-toggle="dropdown"
+            aria-expanded="false"
           >
             👤 {{ authService.currentUser()?.name || 'Mi Cuenta' }}
           </button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" routerLink="/student-dashboard">📚 Mis Cursos</a></li>
+
+          <ul class="dropdown-menu dropdown-menu-end ra-menu">
+            <li>
+              <a class="dropdown-item ra-item" routerLink="/student-dashboard">📚 Mis Cursos</a>
+            </li>
+            <li><hr class="dropdown-divider" /></li>
+            <li><a class="dropdown-item ra-item" routerLink="/profile">Mi Perfil</a></li>
             <li><hr class="dropdown-divider" /></li>
             <li>
-              <button class="dropdown-item text-danger" (click)="logout()">🚪 Cerrar Sesión</button>
+              <button class="dropdown-item ra-item text-danger" (click)="logout()">
+                🚪 Cerrar Sesión
+              </button>
             </li>
           </ul>
         </li>

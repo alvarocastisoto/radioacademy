@@ -1,0 +1,98 @@
+/* profile.scss */
+
+$primary-color: #4f46e5;
+$input-bg: #f9fafb;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.profile-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.profile-wrap {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.page-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  color: $primary-color;
+  font-weight: 900;
+  letter-spacing: -0.2px;
+}
+
+/* Card */
+.profile-card {
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+/* Divider */
+.divider {
+  margin: 1.75rem 0;
+  border: 0;
+  height: 1px;
+  background: rgba(17, 24, 39, 0.08);
+}
+
+/* Floating inputs tuning */
+.form-control {
+  background: $input-bg;
+  border: 2px solid transparent;
+  border-radius: 14px;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+  &:focus {
+    background: #fff;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 4px rgba($primary-color, 0.14);
+  }
+
+  &.is-invalid {
+    border-color: #ef4444;
+    box-shadow: none;
+  }
+}
+
+.form-floating > label {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+/* Alerts a poco más “premium” sin romper bootstrap */
+.alert {
+  border-radius: 14px;
+  border-width: 1px;
+}
+
+/* Save button */
+.btn-save {
+  border-radius: 12px;
+  padding: 0.9rem 1.4rem;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  box-shadow: 0 12px 28px rgba($primary-color, 0.22);
+}
+
+.btn {
+  border-radius: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 1rem 0 1.5rem;
+  }
+}

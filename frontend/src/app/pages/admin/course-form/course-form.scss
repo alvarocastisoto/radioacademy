@@ -1,0 +1,103 @@
+/* course-new.scss */
+
+$primary-color: #4f46e5;
+$input-bg: #f9fafb;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.course-new-page {
+  width: 100%;
+  padding: 1.25rem 0 2rem;
+}
+
+.course-new-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Card */
+.form-card {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+  background: #fff;
+}
+
+.form-header {
+  background: #fff;
+  border: 0;
+  padding: 1.5rem 1.5rem 0.5rem;
+
+  h2 {
+    color: #111827;
+    letter-spacing: -0.3px;
+  }
+}
+
+/* Labels */
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #6b7280;
+  margin-bottom: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Inputs */
+.form-control,
+.form-select {
+  background-color: $input-bg;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  color: #374151;
+  transition: all 0.2s ease;
+
+  &:focus {
+    background-color: #fff;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 4px rgba($primary-color, 0.15);
+  }
+}
+
+/* Textarea */
+textarea.form-control {
+  resize: vertical;
+}
+
+/* Buttons */
+.btn {
+  border-radius: 12px;
+}
+
+.btn-outline-secondary {
+  border-width: 2px;
+}
+
+.btn-primary {
+  font-weight: 800;
+  background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
+  border: none;
+
+  &:disabled {
+    background: #e5e7eb;
+    color: #9ca3af;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-header {
+    padding: 1.25rem 1.25rem 0.25rem;
+  }
+
+  .card-body {
+    padding: 1.25rem !important;
+  }
+}

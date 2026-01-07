@@ -41,23 +41,24 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 1. RUTAS PÚBLICAS (Sin token)
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/uploads/**").permitAll() // Para ver las imágenes subidas
 
-                        // 2. 🚨 REGLA CRÍTICA: PERFIL DE USUARIO
-                        // Esta línea DEBE ir antes que cualquier otra regla de /api/users
-                        // Permitimos GET y PUT a cualquier usuario autenticado (Admin o Student)
+                        // 👇👇👇 AQUÍ ESTÁ EL CAMBIO CLAVE 👇👇👇
+                        // Permitimos ver cursos (GET) a todo el mundo (Logueado o no)
+                        .requestMatchers(HttpMethod.GET, "/api/courses").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
+
+                        // 2. PERFIL DE USUARIO
                         .requestMatchers("/api/users/profile").authenticated()
 
-                        // 3. ADMINISTRACIÓN DE USUARIOS (El resto de /api/users)
-                        // Solo el Admin puede ver la lista completa o crear usuarios manualmente
+                        // 3. ADMINISTRACIÓN DE USUARIOS
                         .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 4. RUTAS DE CONTENIDO (Cursos, Módulos, Lecciones)
-                        // Lectura (GET) -> Para todos los autenticados
-                        .requestMatchers(HttpMethod.GET, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
-                        .authenticated()
+                        // 4. CONTENIDO PROTEGIDO (Módulos y Lecciones)
+                        // 🛑 HE QUITADO "/api/courses/**" DE AQUÍ ABAJO PARA QUE NO HAYA CONFLICTO
+                        .requestMatchers(HttpMethod.GET, "/api/modules/**", "/api/lessons/**").authenticated()
 
-                        // Escritura (POST, PUT, DELETE) -> Solo Admin
+                        // Escritura (Solo Admin)
                         .requestMatchers(HttpMethod.POST, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
@@ -65,7 +66,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 5. CUALQUIER OTRA COSA -> REQUIERE LOGIN
+                        // 5. RESTO BLOQUEADO
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -73,16 +74,13 @@ public class SecurityConfig {
         return http.build();
     }
 
+    // ... El resto del archivo (Cors, Beans, etc.) sigue igual ...
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Permitir el origen de Angular
         configuration.setAllowedOrigins(List.of("http://localhost:4200"));
-        // Permitir todos los métodos
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        // Permitir cabeceras de autorización
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
-        // Permitir credenciales
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
