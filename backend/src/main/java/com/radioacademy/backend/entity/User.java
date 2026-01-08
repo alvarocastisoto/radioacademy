@@ -136,6 +136,18 @@ public class User implements UserDetails {
         return true;
     }
 
+    @Column(name = "avatar")
+    private String avatar;
+
+    // 👇 Y SUS GETTERS Y SETTERS
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
     // Helpers manuales si Lombok falla en algo específico
     public void setPhone(String phone) {
         if (phone != null) {
