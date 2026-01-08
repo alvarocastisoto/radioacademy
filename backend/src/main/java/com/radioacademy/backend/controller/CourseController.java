@@ -5,6 +5,8 @@ import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.CourseRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.service.StorageService; // 👈 IMPRESCINDIBLE
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/courses")
@@ -25,6 +26,10 @@ public class CourseController {
     @Autowired
     private UserRepository userRepository;
 
+    // 👇 Inyectamos el servicio de archivos para poder borrar
+    @Autowired
+    private StorageService storageService;
+
     @GetMapping
     public List<Course> getAllCourses() {
         return courseRepository.findAll();
@@ -33,14 +38,9 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<Course> createCourse(@RequestBody CreateCourseRequest request) {
 
-        // --- 🕵️‍♂️ ZONA DE DEBUG (CHIVATOS) ---
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(">>> INTENTO DE CREAR CURSO");
-        System.out.println(">>> USUARIO: " + auth.getName());
-        System.out.println(">>> ROLES DETECTADOS: " + auth.getAuthorities());
-        // ------------------------------------
 
-        // 1. Buscamos al profesor usando el email del token (Mucho más seguro)
+        // 1. Buscamos al profesor
         String userEmail = auth.getName();
         User teacher = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado en BD"));
@@ -51,54 +51,73 @@ public class CourseController {
         newCourse.setDescription(request.description());
         newCourse.setPrice(request.price());
         newCourse.setHours(request.hours());
-        // newCourse.setLevel(request.level()); // Descomenta si tu Entidad Course tiene
-        // este campo
+        // 👇 Guardamos la imagen si viene en el request
+        newCourse.setCoverImage(request.coverImage());
         newCourse.setActive(true);
-        newCourse.setTeacher(teacher); // Asignamos el profesor que hemos encontrado
+        newCourse.setTeacher(teacher);
 
         Course savedCourse = courseRepository.save(newCourse);
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
     }
 
-    // En CourseController.java
-
-    // ... (Métodos anteriores: getAllCourses y createCourse) ...
-
-    // 1. MÉTODO BORRAR (DELETE)
+    // 1. MÉTODO BORRAR (DELETE) - CON LIMPIEZA DE IMAGEN
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
-        // Convertimos el String "abc-123..." a un objeto UUID real
         java.util.UUID uuid = java.util.UUID.fromString(id);
 
-        // Verificamos si existe antes de borrar (opcional, pero buena práctica)
-        if (!courseRepository.existsById(uuid)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        // Recuperamos el curso para ver si tiene imagen antes de borrarlo
+        return courseRepository.findById(uuid).map(course -> {
 
-        courseRepository.deleteById(uuid);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // 204: Todo bien, pero no devuelvo nada
+            // 🗑️ Si tiene portada, borramos el archivo físico
+            String imageUrl = course.getCoverImage();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                try {
+                    String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+                    storageService.delete(filename);
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error borrando imagen al eliminar curso: " + e.getMessage());
+                }
+            }
+
+            courseRepository.delete(course);
+            return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
+        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    // 2. MÉTODO EDITAR (PUT)
+    // 2. MÉTODO EDITAR (PUT) - CON GARBAGE COLLECTION
     @PutMapping("/{id}")
     public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody CreateCourseRequest request) {
         java.util.UUID uuid = java.util.UUID.fromString(id);
 
-        // Buscamos el curso existente
         Course existingCourse = courseRepository.findById(uuid)
                 .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
 
-        // Actualizamos solo los datos que nos envían
+        // --- LÓGICA DE LIMPIEZA DE IMAGEN ---
+        // Si nos envían una nueva imagen y es distinta a la que había...
+        if (request.coverImage() != null && !request.coverImage().isEmpty()
+                && !request.coverImage().equals(existingCourse.getCoverImage())) {
+
+            // Borramos la vieja del disco
+            String oldUrl = existingCourse.getCoverImage();
+            if (oldUrl != null && !oldUrl.isEmpty()) {
+                try {
+                    String filename = oldUrl.substring(oldUrl.lastIndexOf("/") + 1);
+                    storageService.delete(filename);
+                } catch (Exception e) {
+                    System.err.println("⚠️ Error borrando imagen antigua del curso");
+                }
+            }
+            // Asignamos la nueva
+            existingCourse.setCoverImage(request.coverImage());
+        }
+        // -------------------------------------
+
         existingCourse.setTitle(request.title());
         existingCourse.setDescription(request.description());
         existingCourse.setPrice(request.price());
         existingCourse.setHours(request.hours());
-        // existingCourse.setLevel(request.level()); // Descomenta si usas level
 
-        // Guardamos los cambios
         Course updatedCourse = courseRepository.save(existingCourse);
-
         return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
     }
-
 }

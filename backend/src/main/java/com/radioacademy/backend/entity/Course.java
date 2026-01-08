@@ -23,7 +23,6 @@ import java.util.Set;
 @Table(name = "courses")
 @Getter
 @Setter
-// ❌ @EqualsAndHashCode <--- ¡BORRADO!
 @NoArgsConstructor
 @AllArgsConstructor
 public class Course {
@@ -57,21 +56,22 @@ public class Course {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // Los módulos SÍ queremos que salgan en el JSON, así que NO ponemos JsonIgnore
-    // aquí
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // 👈 Evita referencia circular al serializar
+    @JsonIgnore
     private List<Module> modules;
-
-    // getModules manual no es necesario si usas @Getter, pero no hace daño dejarlo.
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "course_students", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @JsonIgnore // 👈 VITAL: Evita que al pedir un curso se descarguen todos los alumnos
+    @JsonIgnore
     private Set<User> students = new HashSet<>();
 
+    // 📸 CAMPO NUEVO: Portada del curso
+    // Lo llamamos 'cover_image' en BD para que sea semántico
+    @Column(name = "cover_image")
+    private String coverImage;
+
     // =================================================================
-    // 👇 IMPLEMENTACIÓN MANUAL SEGURA (SOLO ID) 👇
+    // IMPLEMENTACIÓN MANUAL SEGURA (SOLO ID)
     // =================================================================
 
     @Override
