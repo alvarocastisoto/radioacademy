@@ -100,4 +100,18 @@ textarea.form-control {
   .card-body {
     padding: 1.25rem !important;
   }
+
+  .cover-upload-area {
+  transition: all 0.2s ease;
+  cursor: pointer;
+  
+  &:hover {
+    border-color: $primary-color !important; // Ilumina el borde al pasar el ratón
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
 }

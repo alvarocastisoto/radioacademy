@@ -45,7 +45,6 @@ public class StorageService {
             }
 
             String storedFilename = filename + extension;
-
             // 2. Copiamos el archivo a la carpeta destino
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, this.rootLocation.resolve(storedFilename),

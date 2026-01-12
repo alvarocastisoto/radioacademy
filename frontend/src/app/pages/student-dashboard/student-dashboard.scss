@@ -1,6 +1,7 @@
 /* my-courses.scss */
 
 $primary-color: #4f46e5;
+$bg-color: #f9fafb;
 
 :host {
   display: block;
@@ -10,6 +11,8 @@ $primary-color: #4f46e5;
 .my-courses-page {
   width: 100%;
   padding: 1.25rem 0 2rem;
+  background-color: $bg-color;
+  min-height: 100vh;
 }
 
 .my-courses-wrap {
@@ -19,13 +22,13 @@ $primary-color: #4f46e5;
 
 /* Header */
 .page-head {
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
 
   .page-title {
     font-weight: 900;
     letter-spacing: -0.4px;
     color: #111827;
-    margin: 0 0 0.25rem;
+    margin: 0 0 0.5rem;
     font-size: clamp(1.6rem, 2.2vw, 2.1rem);
   }
 
@@ -36,12 +39,12 @@ $primary-color: #4f46e5;
   }
 }
 
-/* States */
+/* States (Empty / Loading) */
 .state {
   border-radius: 18px;
   border: 1px solid rgba(17, 24, 39, 0.08);
   background: rgba(255, 255, 255, 0.75);
-  padding: 2.25rem 1.25rem;
+  padding: 3rem 1.25rem;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
 }
 
@@ -51,6 +54,7 @@ $primary-color: #4f46e5;
 
 .state-empty {
   border-style: dashed;
+  background: #fff;
 }
 
 /* Card */
@@ -59,61 +63,68 @@ $primary-color: #4f46e5;
   overflow: hidden;
   border: 1px solid rgba(17, 24, 39, 0.08);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   background: #fff;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.09);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
 }
 
+/* Imagen y Portada */
 .course-cover {
   height: 180px;
-  background: linear-gradient(135deg, rgba(79, 70, 229, 0.9), rgba(79, 70, 229, 0.55));
+  background: #e5e7eb; /* Fondo gris por si tarda en cargar */
   position: relative;
+  overflow: hidden;
 }
 
 .course-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: cover; /* CLAVE: Recorta la imagen sin deformarla */
   display: block;
 }
 
 .fallback-icon {
   position: absolute;
   inset: 0;
+  display: flex; /* Para centrar el icono */
   align-items: center;
   justify-content: center;
-  background: rgba(17, 24, 39, 0.2);
-  color: #fff;
+  background: linear-gradient(135deg, rgba($primary-color, 0.1), rgba($primary-color, 0.05));
+  color: lighten($primary-color, 20%);
 }
 
 /* Body */
 .course-body {
-  padding: 1.25rem !important;
+  padding: 1.5rem !important;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.75rem;
+  height: calc(100% - 180px); /* Resto de altura */
 }
 
 .course-title {
-  font-weight: 900;
+  font-weight: 800;
   color: #111827;
   letter-spacing: -0.2px;
   margin: 0;
+  line-height: 1.3;
 }
 
 .course-desc {
   color: #6b7280;
   margin: 0;
   font-size: 0.95rem;
+  flex-grow: 1; /* Empuja el contenido hacia abajo */
 }
 
 /* Progress */
 .progress-block {
-  margin-top: 0.25rem;
+  margin-top: auto; /* Se pega al fondo del contenido si hay espacio */
+  padding-top: 0.5rem;
 }
 
 .progress-rail {
@@ -132,29 +143,31 @@ $primary-color: #4f46e5;
 
 .btn {
   border-radius: 12px;
-  font-weight: 900;
-}
-
-.btn-enter {
-  flex: 1;
-  padding: 0.85rem 1rem;
-  box-shadow: 0 12px 28px rgba($primary-color, 0.18);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 16px 34px rgba($primary-color, 0.24);
-  }
-}
-
-.btn-pdf {
-  width: 48px;
-  display: inline-flex;
+  font-weight: 700;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Line clamp (sin depender de plugin) */
+.btn-enter {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 4px 6px -1px rgba($primary-color, 0.2);
+  transition: all 0.2s;
+
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba($primary-color, 0.3);
+    transform: translateY(-1px);
+  }
+}
+
+.btn-pdf {
+  width: 46px;
+  padding: 0;
+  font-size: 1.1rem;
+}
+
+/* Utilidades */
 .line-clamp-3 {
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -169,6 +182,10 @@ $primary-color: #4f46e5;
   }
 
   .course-cover {
-    height: 170px;
+    height: 160px;
+  }
+  
+  .course-body {
+      padding: 1.25rem !important;
   }
 }

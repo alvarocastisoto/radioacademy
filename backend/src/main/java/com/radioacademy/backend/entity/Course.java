@@ -5,12 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashSet;
 import java.util.List;
 import java.math.BigDecimal;
@@ -65,14 +62,10 @@ public class Course {
     @JsonIgnore
     private Set<User> students = new HashSet<>();
 
-    // 📸 CAMPO NUEVO: Portada del curso
-    // Lo llamamos 'cover_image' en BD para que sea semántico
+    // ✅ Lombok ya genera getCoverImage y setCoverImage.
+    // Borramos los manuales.
     @Column(name = "cover_image")
     private String coverImage;
-
-    // =================================================================
-    // IMPLEMENTACIÓN MANUAL SEGURA (SOLO ID)
-    // =================================================================
 
     @Override
     public boolean equals(Object o) {

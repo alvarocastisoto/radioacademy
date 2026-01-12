@@ -8,8 +8,10 @@ import com.radioacademy.backend.repository.CourseRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.List;
 import java.util.UUID;
 
@@ -72,20 +74,19 @@ public class AdminController {
         // ==========================================
         @PostMapping("/enroll")
         public ResponseEntity<?> enrollUser(@RequestParam UUID userId, @RequestParam UUID courseId) {
-                // Buscamos ambos o lanzamos error si no existen
-                User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-                Course course = courseRepository.findById(courseId)
-                                .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
+                // Verificamos que existan (opcional, pero recomendado)
+                if (!userRepository.existsById(userId) || !courseRepository.existsById(courseId)) {
+                        throw new RuntimeException("Datos inválidos");
+                }
 
-                // Añadimos el usuario al Set de estudiantes del curso.
-                // Al ser un Set, si ya estaba matriculado, no se duplica (genial, ¿no?).
-                course.getStudents().add(user);
-
-                // Guardamos el CURSO (él es el dueño de la relación en el @JoinTable)
-                courseRepository.save(course);
-
-                return ResponseEntity.ok().body("{\"message\": \"Usuario matriculado correctamente\"}");
+                // Insertamos directo (Rapidísimo ⚡)
+                try {
+                        courseRepository.addEnrollment(courseId, userId);
+                        return ResponseEntity.ok(Map.of("message", "Usuario matriculado correctamente"));
+                } catch (Exception e) {
+                        return ResponseEntity.badRequest()
+                                        .body(Map.of("message", "El usuario ya estaba matriculado o error interno"));
+                }
         }
 
         // ==========================================

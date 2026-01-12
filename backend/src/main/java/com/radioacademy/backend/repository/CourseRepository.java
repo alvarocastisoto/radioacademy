@@ -24,4 +24,10 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     void deleteEnrollment(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
 
     Optional<Course> findByIdAndStudents_Id(UUID courseId, UUID userId);
+
+    // Añade esto
+    @Modifying
+    @Transactional
+    @Query(value = "INSERT INTO course_students (course_id, user_id) VALUES (:courseId, :userId)", nativeQuery = true)
+    void addEnrollment(UUID courseId, UUID userId);
 }

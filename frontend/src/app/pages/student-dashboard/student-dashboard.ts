@@ -8,7 +8,7 @@ export interface DashboardCourse {
   id: string;
   title: string;
   description: string;
-  imageUrl: string | null;
+  coverImage: string | null;
   pdfUrl: string | null;
   progress: number; // Viene calculado del backend (0-100)
 }
