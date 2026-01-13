@@ -40,27 +40,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         // 1. RUTAS PÚBLICAS (Sin token)
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/uploads/**").permitAll() // Imágenes
-                        // Permitimos ver el catálogo de cursos a todo el mundo
-                        .requestMatchers(HttpMethod.GET, "/api/courses").permitAll()
+                        .requestMatchers("/api/auth/**").permitAll() // Cubre login, register y test-email
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+
+                        // Catálogo público
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 
-                        // 2. PERFIL DE USUARIO (Cualquier usuario logueado)
-                        .requestMatchers("/api/users/profile").authenticated()
-
-                        // 👇👇👇 3. ZONA ADMIN (LA SOLUCIÓN AL 403) 👇👇👇
-                        // Damos acceso TOTAL a los admins en sus rutas, sea GET o POST.
-                        // Al poner esto aquí, evitamos conflictos con reglas posteriores.
+                        // 2. ZONA ADMIN
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
-                        .requestMatchers("/api/users/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 4. CONTENIDO DEL CURSO (Módulos y Lecciones) - Solo lectura para logueados
-                        .requestMatchers(HttpMethod.GET, "/api/modules/**", "/api/lessons/**").authenticated()
-
-                        // 5. GESTIÓN DE CURSOS (Crear, Editar, Borrar) - Solo Admin
-                        // Nota: Ya no hace falta incluir /api/admin aquí porque lo cubrimos en el punto
-                        // 3
+                        // Gestión de cursos (Admin)
                         .requestMatchers(HttpMethod.POST, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
@@ -68,7 +58,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 6. CUALQUIER OTRA COSA -> AUTENTICADO
+                        // 3. TODO LO DEMÁS -> AUTENTICADO
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -79,10 +69,14 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Ajusta esto si tu puerto de Angular cambia
-        configuration.setAllowedOrigins(List.of("http://localhost:4200"));
+
+        // ⚠️ CAMBIO IMPORTANTE: Permitimos TODO (*) para evitar problemas en desarrollo
+        // Usamos allowedOriginPatterns en lugar de allowedOrigins para que funcione con
+        // allowCredentials
+        configuration.setAllowedOriginPatterns(List.of("*"));
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Cache-Control"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

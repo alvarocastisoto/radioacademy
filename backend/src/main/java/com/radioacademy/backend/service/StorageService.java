@@ -34,26 +34,22 @@ public class StorageService {
                 throw new RuntimeException("Error: El archivo está vacío.");
             }
 
-            // 1. Generar nombre único
+            // Nombre único
             String originalFilename = file.getOriginalFilename();
-            String extension = "";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            } else {
-                extension = ".jpg"; // Fallback por defecto
-            }
-            
-            String filename = UUID.randomUUID().toString() + extension;
+            String extension = (originalFilename != null && originalFilename.contains("."))
+                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                    : ".jpg";
 
-            // 2. Guardar archivo físico
+            String filename = java.util.UUID.randomUUID().toString() + extension;
+
+            // Guardar físico
             Path destinationFile = this.rootLocation.resolve(filename).normalize().toAbsolutePath();
-            
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // 3. RETORNAR URL COMPLETA (Crucial para que Angular muestre la foto)
-            // Genera: http://localhost:8080/uploads/images/tu-archivo.jpg
+            // 👇👇👇 ESTO ES LO QUE ARREGLA LA VISTA PREVIA 👇👇👇
+            // Devolvemos la URL HTTP completa, no solo el nombre del archivo
             return ServletUriComponentsBuilder.fromCurrentContextPath()
                     .path("/uploads/images/")
                     .path(filename)

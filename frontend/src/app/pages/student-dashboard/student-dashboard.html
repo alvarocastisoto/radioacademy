@@ -25,42 +25,58 @@
         @for (course of courses; track course.id) {
         <div class="col-12 col-md-6 col-xl-4">
           <div class="card course-card h-100">
-            <div class="course-cover">
+            <div
+              class="course-cover position-relative bg-light"
+              style="height: 200px; overflow: hidden"
+            >
               @if (course.coverImage) {
               <img
                 [src]="course.coverImage"
-                alt="{{ course.title }}"
-                class="course-img"
+                [alt]="course.title"
+                class="course-img w-100 h-100 object-fit-cover"
                 onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.classList.add('d-flex');"
               />
-              <div class="fallback-icon d-none">
+
+              <div
+                class="fallback-icon d-none w-100 h-100 align-items-center justify-content-center text-muted"
+              >
                 <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
               </div>
               } @else {
-              <div class="fallback-icon d-flex">
+              <div
+                class="fallback-icon d-flex w-100 h-100 align-items-center justify-content-center text-muted"
+              >
                 <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
               </div>
               }
             </div>
 
-            <div class="card-body course-body">
-              <h5 class="course-title text-truncate" [title]="course.title">
+            <div class="card-body course-body d-flex flex-column">
+              <h5 class="course-title text-truncate fw-bold mb-2" [title]="course.title">
                 {{ course.title }}
               </h5>
 
-              <p class="course-desc line-clamp-3">
+              <p
+                class="course-desc text-muted small mb-3 flex-grow-1"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 3;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
                 {{ course.description || 'Sin descripción disponible.' }}
               </p>
 
-              <div class="progress-block">
+              <div class="progress-block mb-3">
                 <div class="d-flex justify-content-between text-muted small mb-1">
                   <span>Progreso</span>
                   <span class="fw-bold">{{ course.progress }}%</span>
                 </div>
 
-                <div class="progress progress-rail">
+                <div class="progress progress-rail" style="height: 6px">
                   <div
-                    class="progress-bar bg-success"
+                    class="progress-bar bg-success rounded-pill"
                     role="progressbar"
                     [style.width.%]="course.progress"
                     [attr.aria-valuenow]="course.progress"
@@ -70,10 +86,10 @@
                 </div>
               </div>
 
-              <div class="actions">
-                <button class="btn btn-primary btn-enter" (click)="enterCourse(course.id)">
-                  @if(course.progress > 0) { Continuar <i class="bi bi-play-fill ms-2"></i> } @else
-                  { Empezar <i class="bi bi-arrow-right ms-2"></i>
+              <div class="actions d-flex gap-2">
+                <button class="btn btn-primary flex-grow-1" (click)="enterCourse(course.id)">
+                  @if(course.progress > 0) { Continuar <i class="bi bi-play-fill ms-1"></i> } @else
+                  { Empezar <i class="bi bi-arrow-right ms-1"></i>
                   }
                 </button>
 
@@ -82,7 +98,7 @@
                   [href]="course.pdfUrl"
                   target="_blank"
                   rel="noopener"
-                  class="btn btn-outline-secondary btn-pdf"
+                  class="btn btn-outline-secondary"
                   title="Descargar PDF del curso"
                 >
                   <i class="bi bi-file-earmark-pdf-fill"></i>

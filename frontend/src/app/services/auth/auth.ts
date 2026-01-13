@@ -89,4 +89,12 @@ export class AuthService {
       localStorage.setItem('user', JSON.stringify(updatedUser)); // OJO: Revisa si tu clave es 'user_session' o 'user_data'
     }
   }
+
+  requestPasswordReset(email: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/forgot-password`, { email });
+  }
+
+  resetPassword(token: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { token, password });
+  }
 }

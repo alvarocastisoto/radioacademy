@@ -1,4 +1,3 @@
-<!-- courses-catalog.html -->
 <div class="courses-page">
   <div class="container-fluid px-3 px-lg-5">
     <div class="courses-wrap">
@@ -11,23 +10,46 @@
         @for (course of courses(); track course.id) {
         <div class="col-12 col-md-6 col-xl-4">
           <div class="card course-card h-100">
-            <div class="course-media">
-              <img src="https://placehold.co/1200x800/20c997/ffffff?text=Radio" alt="Curso" />
+            <div class="course-media position-relative bg-light" style="height: 220px">
+              @if (course.coverImage) {
+              <img
+                [src]="course.coverImage"
+                alt="{{ course.title }}"
+                class="w-100 h-100 object-fit-cover"
+                onerror="this.onerror=null; this.src='https://placehold.co/1200x800/e9ecef/6c757d?text=Sin+Imagen';"
+              />
+              } @else {
+              <img
+                src="https://placehold.co/1200x800/20c997/ffffff?text=Radio"
+                alt="Placeholder"
+                class="w-100 h-100 object-fit-cover"
+              />
+              }
             </div>
 
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start mb-2">
                 <span class="badge bg-primary">{{ course.hours }} Horas</span>
-                <div class="price">{{ course.price | currency : 'EUR' }}</div>
+                <div class="price fw-bold text-dark">{{ course.price | currency : 'EUR' }}</div>
               </div>
 
-              <h5 class="card-title fw-bold mb-2">{{ course.title }}</h5>
-              <p class="card-text text-muted small mb-0">
-                {{ course.description }}
+              <h5 class="card-title fw-bold mb-2 text-truncate" title="{{ course.title }}">
+                {{ course.title }}
+              </h5>
+              <p
+                class="card-text text-muted small mb-0"
+                style="
+                  display: -webkit-box;
+                  -webkit-line-clamp: 2;
+                  -webkit-box-orient: vertical;
+                  overflow: hidden;
+                "
+              >
+                {{ course.description || 'Sin descripción disponible.' }}
               </p>
             </div>
 
-            <div class="card-footer course-footer">
+            <div class="card-footer course-footer bg-transparent border-top-0 pt-0 pb-3">
               <a [routerLink]="['/courses', course.id]" class="btn btn-outline-primary w-100">
                 Ver Temario
               </a>

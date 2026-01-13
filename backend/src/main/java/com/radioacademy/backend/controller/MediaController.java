@@ -5,9 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/media")
@@ -18,17 +15,14 @@ public class MediaController {
     private StorageService storageService;
 
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        // 1. Guardamos el archivo
-        String filename = storageService.store(file);
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
 
-        // 2. Generamos la URL pública para acceder a él
-        // Esto crea algo como: http://localhost:8080/uploads/nombre-fichero.jpg
-        String url = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/uploads/images/")
-                .path(filename)
-                .toUriString();
+        // 1. El servicio ya nos devuelve la URL COMPLETA
+        // (http://localhost:8080/uploads/images/foto.jpg)
+        String fullUrl = storageService.store(file);
 
-        return ResponseEntity.ok(Map.of("url", url));
+        // 2. Devolvemos la URL tal cual (Texto plano).
+        // NADA de Maps, NADA de JSON, NADA de ServletUriComponentsBuilder aquí.
+        return ResponseEntity.ok(fullUrl);
     }
 }

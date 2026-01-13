@@ -35,50 +35,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
+        // 1. Si no hay token, pasa la pelota (Correcto)
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
+        // 2. Intentamos procesar el token de forma SEGURA
+        try {
+            jwt = authHeader.substring(7);
+            userEmail = jwtService.extractUsername(jwt);
 
-        // ... dentro de doFilterInternal ...
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails dbUser = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 1. Cargamos el usuario "sucio" (conectado a BD)
-            UserDetails dbUser = this.userDetailsService.loadUserByUsername(userEmail);
+                if (jwtService.isTokenValid(jwt, dbUser)) {
+                    // Tu lógica del "Safe User" (Muy buena práctica, por cierto)
+                    UserDetails safeUser = org.springframework.security.core.userdetails.User.builder()
+                            .username(dbUser.getUsername())
+                            .password(dbUser.getPassword())
+                            .authorities(dbUser.getAuthorities())
+                            .accountExpired(!dbUser.isAccountNonExpired())
+                            .accountLocked(!dbUser.isAccountNonLocked())
+                            .credentialsExpired(!dbUser.isCredentialsNonExpired())
+                            .disabled(!dbUser.isEnabled())
+                            .build();
 
-            if (jwtService.isTokenValid(jwt, dbUser)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            safeUser,
+                            null,
+                            safeUser.getAuthorities());
 
-                // 👇👇👇 EL CAMBIO MAGICO EMPIEZA AQUI 👇👇👇
-                // Creamos un usuario "limpio" que es una copia tonta, sin conexión a BD.
-                // Esto evita que Spring intente leer la base de datos cuando ya se ha cerrado.
-
-                UserDetails safeUser = org.springframework.security.core.userdetails.User.builder()
-                        .username(dbUser.getUsername())
-                        .password(dbUser.getPassword())
-                        .authorities(dbUser.getAuthorities()) // Copiamos los roles
-                        .accountExpired(!dbUser.isAccountNonExpired())
-                        .accountLocked(!dbUser.isAccountNonLocked())
-                        .credentialsExpired(!dbUser.isCredentialsNonExpired())
-                        .disabled(!dbUser.isEnabled())
-                        .build();
-                // 👆👆👆 EL CAMBIO MAGICO TERMINA AQUI 👆👆👆
-
-                // AHORA USAMOS 'safeUser' EN LUGAR DE 'dbUser'
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        safeUser, // <--- Aquí va el usuario seguro
-                        null,
-                        safeUser.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
+        } catch (Exception e) {
+            // 🔥 AQUÍ ESTÁ EL ARREGLO 🔥
+            // Si el token está caducado o mal formado, NO lanzamos error.
+            // Simplemente no autenticamos y dejamos que la petición siga.
+            // Si va a /register (público), pasará. Si va a /admin (privado), rebotará
+            // después.
+            System.out.println("⚠️ Token inválido ignorado: " + e.getMessage());
         }
-        // ... resto del código igual ...
 
         filterChain.doFilter(request, response);
     }

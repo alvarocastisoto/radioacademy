@@ -15,6 +15,9 @@ import { StudentDashboardComponent } from './pages/student-dashboard/student-das
 import { CoursePlayerComponent } from './pages/course-player/course-player';
 import { ProfileComponent } from './pages/profile/profile'; // 👈 Importa esto
 import { adminGuard } from './guards/admin-guard';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password';
+
 export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
   { path: 'login', component: Login }, // /login
@@ -28,6 +31,8 @@ export const routes: Routes = [
   // Student Routes
   { path: 'student-dashboard', component: StudentDashboardComponent, canActivate: [authGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
+  { path: 'reset-password', component: ResetPasswordComponent },
   // Admin Routes
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] }, // /admin
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },

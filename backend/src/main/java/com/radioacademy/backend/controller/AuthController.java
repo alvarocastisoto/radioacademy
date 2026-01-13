@@ -2,10 +2,16 @@ package com.radioacademy.backend.controller;
 
 import com.radioacademy.backend.dto.AuthResponse;
 import com.radioacademy.backend.dto.LoginRequest;
+import com.radioacademy.backend.entity.PasswordResetToken;
 import com.radioacademy.backend.entity.User;
+import com.radioacademy.backend.event.PasswordResetEvent;
+import com.radioacademy.backend.event.UserRegistrationEvent;
+import com.radioacademy.backend.repository.PasswordResetTokenRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.security.JwtService;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -17,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -38,17 +45,22 @@ public class AuthController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    @Autowired
+    private PasswordResetTokenRepository tokenRepository;
+
     // Endpoint de Registro
     // Usamos ResponseEntity<?> (con interrogación) para poder devolver
     // AuthResponse si va bien, o un Map de error si va mal.
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
 
-        // 1. 🛡️ VALIDACIÓN PREVIA: Comprobar si el email ya existe
-        // Esto evita el error 500 de PostgreSQL
+        // 1. 🛡️ VALIDACIÓN PREVIA
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity
-                    .status(HttpStatus.CONFLICT) // 409 Conflict
+                    .status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "El email ya está registrado. Por favor, inicia sesión."));
         }
 
@@ -58,13 +70,13 @@ public class AuthController {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         } else {
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST) // 400 Bad Request
+                    .status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "La contraseña no es lo suficientemente fuerte. " +
                             "Debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, " +
                             "números y caracteres especiales."));
         }
 
-        // 3. Ponemos fecha de creación si no viene
+        // 3. Ponemos fecha de creación
         if (user.getCreatedAt() == null) {
             user.setCreatedAt(LocalDateTime.now());
         }
@@ -72,13 +84,11 @@ public class AuthController {
         // 4. Guardamos en BD
         User savedUser = userRepository.save(user);
 
-        // 5. Generamos token
-        // IMPORTANTE: Cargamos el UserDetails desde el servicio para asegurar
-        // compatibilidad
+        // 6. Generamos token
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
         String token = jwtService.generateToken(userDetails);
-
-        // Devuelve Token + Usuario
+        eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
+        // 7. Devuelve Token + Usuario
         return ResponseEntity.ok(new AuthResponse(token, savedUser));
     }
 
@@ -106,4 +116,56 @@ public class AuthController {
         String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!._*-])(?=\\S+$).{8,}$";
         return password.matches(regex);
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+
+        // Buscamos usuario. Si no existe, NO decimos "no existe" por seguridad,
+        // devolvemos OK igual para que los hackers no sepan qué emails tenemos.
+        userRepository.findByEmail(email).ifPresent(user -> {
+            // 1. Generar token aleatorio
+            String token = UUID.randomUUID().toString();
+
+            // 2. Guardarlo en BD (Borramos anteriores si hubiera)
+            // Nota: En una app real, haz esto transaccional, pero para el prototipo vale.
+            PasswordResetToken myToken = new PasswordResetToken(token, user);
+            tokenRepository.save(myToken);
+
+            // 3. Lanzar evento
+            eventPublisher.publishEvent(new PasswordResetEvent(this, user, token));
+        });
+
+        return ResponseEntity.ok(Map.of("message", "Si el email existe, recibirás un correo."));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+        String newPassword = request.get("password");
+
+        // 1. Buscar token
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token inválido"));
+
+        // 2. Verificar caducidad
+        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "El token ha caducado"));
+        }
+
+        // 3. Cambiar contraseña
+        User user = resetToken.getUser();
+        if (isPasswordStrong(newPassword)) {
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Contraseña débil"));
+        }
+
+        // 4. Borrar el token usado (Para que no se pueda reusar)
+        tokenRepository.delete(resetToken);
+
+        return ResponseEntity.ok(Map.of("message", "Contraseña restablecida con éxito"));
+    }
+
 }

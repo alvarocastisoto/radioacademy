@@ -1,29 +1,35 @@
 package com.radioacademy.backend.config;
 
 import org.springframework.context.annotation.Configuration;
-import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.nio.file.Paths;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
     @Override
-    public void addResourceHandlers(@NonNull ResourceHandlerRegistry registry) {
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        // 1. Obtenemos la ruta absoluta de la carpeta "uploads" en la raíz del proyecto
-        // Nota: Apuntamos a "uploads", no a "uploads/images", para tener flexibilidad
-        String projectRoot = System.getProperty("user.dir");
-        String uploadPath = Paths.get(projectRoot, "uploads").toUri().toString();
+        // 1. Obtenemos la ruta del proyecto
+        String projectDir = System.getProperty("user.dir");
 
-        System.out.println("🌍 MAPEANDO RECURSOS ESTÁTICOS A: " + uploadPath);
+        // 2. Construimos la ruta "file:///" a mano para evitar errores de Windows
+        // La estructura debe ser: file:///C:/Users/.../uploads/images/
+        String uploadPath = "file:///" + projectDir + "/uploads/images/";
 
-        // 2. Configuración del mapeo
-        // Cuando alguien pida /uploads/images/foto.jpg -> Busca en
-        // {Proyecto}/uploads/images/foto.jpg
-        registry.addResourceHandler("/uploads/**")
+        // 3. ⚠️ CORRECCIÓN VITAL PARA WINDOWS:
+        // Cambiamos las contrabarras (\) por barras normales (/)
+        uploadPath = uploadPath.replace("\\", "/");
+
+        // Nos aseguramos de que termine en / si o si
+        if (!uploadPath.endsWith("/")) {
+            uploadPath += "/";
+        }
+
+        System.out.println("🌍 STATIC RESOURCES MAPEADOS A: " + uploadPath);
+
+        // 4. Mapeamos
+        registry.addResourceHandler("/uploads/images/**")
                 .addResourceLocations(uploadPath);
     }
 }
