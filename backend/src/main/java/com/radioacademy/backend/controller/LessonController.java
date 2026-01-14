@@ -12,16 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.Normalizer; // 👈 IMPORTANTE
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Pattern; // 👈 IMPORTANTE
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/api/lessons")
@@ -33,8 +32,8 @@ public class LessonController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    // Carpeta física (sin barra inicial para que sea relativa a la raíz)
-    private static final String UPLOAD_DIR = "uploads";
+    // ✅ CAMBIO AQUÍ: Ahora guardamos en una subcarpeta específica
+    private static final String UPLOAD_DIR = "uploads/pdfs";
 
     // 1. GET: Lecciones por módulo
     @GetMapping("/module/{moduleId}")
@@ -74,8 +73,6 @@ public class LessonController {
 
         // GUARDADO DE ARCHIVO
         if (file != null && !file.isEmpty()) {
-            // saveFile ahora devuelve SOLO el nombre (ej: "uuid_alvaro.pdf")
-            // sin la carpeta "uploads/" delante.
             String fileName = saveFile(file);
             newLesson.setPdfUrl(fileName);
         }
@@ -101,9 +98,6 @@ public class LessonController {
         lesson.setOrderIndex(orderIndex);
 
         if (file != null && !file.isEmpty()) {
-            // Borrar archivo antiguo si quisieras (Opcional, para no llenar el disco)
-            // deleteFile(lesson.getPdfUrl());
-
             String fileName = saveFile(file);
             lesson.setPdfUrl(fileName);
         }
@@ -117,81 +111,59 @@ public class LessonController {
         if (!lessonRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // Aquí podrías borrar el archivo físico si quisieras
         lessonRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     // ==========================================
-    // 🛠️ MÉTODOS AUXILIARES (LA MAGIA)
+    // 🛠️ MÉTODOS AUXILIARES
     // ==========================================
 
     private String saveFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty())
             return null;
 
-        // 1. Obtener nombre original y limpiarlo
         String originalFilename = file.getOriginalFilename();
         String sanitizedFilename = sanitizeFileName(originalFilename);
-
-        // 2. Generar nombre único: UUID + Nombre Limpio
-        // Resultado: "550e8400..._alvaro_castineira.pdf"
         String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFilename;
 
-        // 3. Preparar ruta
         String projectRoot = System.getProperty("user.dir");
         Path uploadPath = Paths.get(projectRoot, UPLOAD_DIR);
 
+        // Esto crea "uploads" Y TAMBIÉN "uploads/pdfs" si no existen
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // 4. Guardar
         Path filePath = uploadPath.resolve(uniqueFileName);
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        System.out.println("✅ Archivo guardado: " + uniqueFileName);
+        System.out.println("✅ Archivo guardado en: " + filePath.toString());
 
-        // 5. RETORNO IMPORTANTE:
-        // Devolvemos SOLO el nombre del archivo.
-        // NO devolvemos "uploads/" + nombre.
-        // Así la base de datos queda limpia: "uuid_archivo.pdf"
         return uniqueFileName;
     }
 
-    /**
-     * Limpia el nombre del archivo:
-     * - Quita acentos (Á -> A)
-     * - Quita caracteres raros (ñ -> n)
-     * - Reemplaza espacios por guiones bajos
-     * - Mantiene solo letras, números, puntos, guiones y guiones bajos
-     */
     private String sanitizeFileName(String originalFilename) {
         if (originalFilename == null)
             return "archivo_sin_nombre";
 
-        // 1. Separar extensión
         String extension = "";
         int i = originalFilename.lastIndexOf('.');
         String nameWithoutExtension = originalFilename;
 
         if (i > 0) {
-            extension = originalFilename.substring(i); // .pdf
+            extension = originalFilename.substring(i);
             nameWithoutExtension = originalFilename.substring(0, i);
         }
 
-        // 2. Normalizar (Álvaro -> Alvaro)
         String normalized = Normalizer.normalize(nameWithoutExtension, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         String slug = pattern.matcher(normalized).replaceAll("");
 
-        // 3. Reemplazar espacios y caracteres no permitidos
-        // Todo a minúsculas, espacios a _, quita todo lo que no sea a-z, 0-9, - ó _
         slug = slug.toLowerCase()
-                .replaceAll("\\s+", "_") // Espacios a guion bajo
-                .replaceAll("[^a-z0-9\\-_]", ""); // Borrar caracteres raros
+                .replaceAll("\\s+", "_")
+                .replaceAll("[^a-z0-9\\-_]", "");
 
-        // 4. Reconstruir
         return slug + extension.toLowerCase();
     }
 }

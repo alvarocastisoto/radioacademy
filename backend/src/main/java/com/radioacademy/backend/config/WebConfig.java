@@ -10,26 +10,28 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 
-        // 1. Obtenemos la ruta del proyecto
         String projectDir = System.getProperty("user.dir");
 
-        // 2. Construimos la ruta "file:///" a mano para evitar errores de Windows
-        // La estructura debe ser: file:///C:/Users/.../uploads/images/
-        String uploadPath = "file:///" + projectDir + "/uploads/images/";
+        // 1. CONFIGURACIÓN IMÁGENES
+        String imagesPath = "file:///" + projectDir + "/uploads/images/";
+        imagesPath = imagesPath.replace("\\", "/");
+        if (!imagesPath.endsWith("/"))
+            imagesPath += "/";
 
-        // 3. ⚠️ CORRECCIÓN VITAL PARA WINDOWS:
-        // Cambiamos las contrabarras (\) por barras normales (/)
-        uploadPath = uploadPath.replace("\\", "/");
-
-        // Nos aseguramos de que termine en / si o si
-        if (!uploadPath.endsWith("/")) {
-            uploadPath += "/";
-        }
-
-        System.out.println("🌍 STATIC RESOURCES MAPEADOS A: " + uploadPath);
-
-        // 4. Mapeamos
         registry.addResourceHandler("/uploads/images/**")
-                .addResourceLocations(uploadPath);
+                .addResourceLocations(imagesPath);
+
+        System.out.println("🌍 STATIC IMAGES MAPEADAS A: " + imagesPath);
+
+        // 2. CONFIGURACIÓN PDFs (✅ NUEVO)
+        String pdfsPath = "file:///" + projectDir + "/uploads/pdfs/";
+        pdfsPath = pdfsPath.replace("\\", "/");
+        if (!pdfsPath.endsWith("/"))
+            pdfsPath += "/";
+
+        registry.addResourceHandler("/uploads/pdfs/**")
+                .addResourceLocations(pdfsPath);
+
+        System.out.println("🌍 STATIC PDFS MAPEADOS A: " + pdfsPath);
     }
 }

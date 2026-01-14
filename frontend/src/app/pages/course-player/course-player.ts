@@ -2,8 +2,9 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { StudentService } from '../../services/student/student';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { ProgressService } from '../../services/progress'; // Asegúrate de que la ruta sea correcta
-import { CommonModule } from '@angular/common'; // Recomendado aunque uses @if para pipes como json o async
+import { ProgressService } from '../../services/progress';
+import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-course-player',
@@ -21,8 +22,10 @@ export class CoursePlayerComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
   private cdr = inject(ChangeDetectorRef);
 
-  // 🔧 CONFIGURACIÓN
-  private readonly UPLOADS_BASE_URL = 'http://localhost:8080/uploads/';
+  // 🔧 CONFIGURACIÓN DINÁMICA DE UPLOADS
+  // Esto coge "http://localhost:8080/api", le quita "/api" y le pega "/uploads/pdfs/"
+  // Resultado: "http://localhost:8080/uploads/pdfs/"
+  private readonly UPLOADS_BASE_URL = environment.apiUrl.replace(/\/api\/?$/, '') + '/uploads/pdfs/';
 
   // VARIABLES DE DATOS
   course: any = null;
@@ -43,10 +46,10 @@ export class CoursePlayerComponent implements OnInit {
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
-      // ✅ CORREGIDO: Buscamos 'id' porque así se llama en tu app.routes.ts
       this.courseId = params.get('id') || '';
 
       console.log('🆔 ID RECIBIDO:', this.courseId);
+      console.log('🌍 URL BASE DE ARCHIVOS:', this.UPLOADS_BASE_URL); // Para depurar
 
       if (this.courseId) {
         this.loadCourseData();
@@ -61,13 +64,11 @@ export class CoursePlayerComponent implements OnInit {
   // 1. LOGICA DE DATOS DEL CURSO
   // ==========================================
 
-  // EN course-player.component.ts
-
   loadCourseData() {
     this.loading = true;
     this.studentService.getCourseContent(this.courseId).subscribe({
       next: (data) => {
-        console.log('📚 Temario RAW recibido:', data); // <--- MIRA ESTO EN CONSOLA
+        console.log('📚 Temario RAW recibido:', data);
         this.course = data;
 
         const modulesList = this.course.modules || this.course.sections || [];
@@ -81,7 +82,7 @@ export class CoursePlayerComponent implements OnInit {
           });
         }
 
-        // Autoselección
+        // Autoselección de la primera lección
         if (modulesList.length > 0) {
           const firstModule = modulesList[0];
           this.toggleModule(firstModule.id);
@@ -92,24 +93,23 @@ export class CoursePlayerComponent implements OnInit {
         }
 
         this.calculateProgress();
-        this.loading = false; // <--- AQUÍ SE QUITA EL SPINNER
+        this.loading = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('🔥 Error cargando curso:', err); // <--- ¿SALE ESTO?
+        console.error('🔥 Error cargando curso:', err);
         this.loading = false;
       },
     });
   }
 
   // ==========================================
-  // 2. LOGICA DE PROGRESO (Checks y Barra)
+  // 2. LOGICA DE PROGRESO
   // ==========================================
 
   loadProgress() {
     this.progressService.getCourseProgress(this.courseId).subscribe({
       next: (ids) => {
-        // Convertimos el array en un Set para búsquedas rápidas (O(1))
         this.completedLessonIds = new Set(ids);
         this.calculateProgress();
       },
@@ -118,7 +118,6 @@ export class CoursePlayerComponent implements OnInit {
   }
 
   toggleLessonCompletion(lessonId: string) {
-    // A. OPTIMISTIC UPDATE: Actualizamos UI inmediatamente
     const wasCompleted = this.completedLessonIds.has(lessonId);
 
     if (wasCompleted) {
@@ -128,21 +127,17 @@ export class CoursePlayerComponent implements OnInit {
     }
     this.calculateProgress();
 
-    // B. Llamada al Backend
     this.progressService.toggleProgress(lessonId).subscribe({
       next: (isCompletedBackend) => {
-        // Sincronización final con lo que diga el servidor
         if (isCompletedBackend) this.completedLessonIds.add(lessonId);
         else this.completedLessonIds.delete(lessonId);
         this.calculateProgress();
       },
       error: (err) => {
-        // C. ROLLBACK: Si falla, deshacemos el cambio visual
         console.error('Error guardando progreso', err);
         if (wasCompleted) this.completedLessonIds.add(lessonId);
         else this.completedLessonIds.delete(lessonId);
         this.calculateProgress();
-        // Opcional: Mostrar Toast o alerta suave
       },
     });
   }
@@ -158,8 +153,6 @@ export class CoursePlayerComponent implements OnInit {
     }
     const completedCount = this.completedLessonIds.size;
     this.progressPercentage = Math.round((completedCount / this.totalLessons) * 100);
-
-    // Evitar que pase del 100% por si acaso
     if (this.progressPercentage > 100) this.progressPercentage = 100;
   }
 
@@ -185,23 +178,31 @@ export class CoursePlayerComponent implements OnInit {
       this.safeVideoUrl = null;
     }
 
-    // B. GESTIÓN DEL PDF
+    // B. GESTIÓN DEL PDF (CORREGIDO PARA NUEVA ESTRUCTURA)
     if (lesson.pdfUrl) {
       let fullPath = '';
+      
+      // Si ya viene con http (ej: S3 externo), lo usamos tal cual
       if (lesson.pdfUrl.startsWith('http')) {
         fullPath = lesson.pdfUrl;
       } else {
-        // Limpiamos duplicados 'uploads/uploads/' por si acaso
-        const cleanFileName = lesson.pdfUrl.replace(/^\/?uploads\//, '');
+        // Si es local, usamos nuestra variable calculada.
+        // El backend ahora devuelve solo el nombre (ej: "uuid_archivo.pdf")
+        // UPLOADS_BASE_URL ya incluye el "/uploads/pdfs/"
+        
+        // Limpieza extra por si acaso el backend antiguo mandaba paths sucios
+        const cleanFileName = lesson.pdfUrl
+          .replace(/^\/?uploads\/pdfs\//, '') // Quita uploads/pdfs/ si viniera
+          .replace(/^\/?uploads\//, '');      // Quita uploads/ si viniera
+
         fullPath = this.UPLOADS_BASE_URL + cleanFileName;
       }
+      
+      console.log('📄 PDF URL GENERADA:', fullPath); // Debug
       this.safePdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(fullPath);
     } else {
       this.safePdfUrl = null;
     }
-
-    // Marcar como detectado cambio manual (útil si hay OnPush)
-    // this.cdr.detectChanges();
   }
 
   // --- Helpers YouTube ---
@@ -223,7 +224,7 @@ export class CoursePlayerComponent implements OnInit {
   }
 
   // ==========================================
-  // 4. LOGICA DE ACORDEÓN (Sidebar)
+  // 4. LOGICA DE ACORDEÓN
   // ==========================================
 
   toggleModule(moduleId: string) {
