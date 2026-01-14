@@ -113,25 +113,27 @@ export class AdminUsersComponent implements OnInit {
 
     this.adminService.enrollUser(this.selectedUser.id, this.selectedCourseIdToAdd).subscribe({
       next: () => {
-        // Recargamos lista
         this.loadUserCourses(this.selectedUser.id);
         this.selectedCourseIdToAdd = null;
 
-        // 🔥 ALERTA DE ÉXITO
         Swal.fire({
           title: '¡Matriculado!',
           text: `El usuario ahora tiene acceso al curso.`,
           icon: 'success',
-          confirmButtonColor: '#4f46e5', // Tu color primario
-          timer: 2000, // Se cierra sola a los 2 segundos
+          confirmButtonColor: '#4f46e5',
+          timer: 2000,
           timerProgressBar: true,
         });
       },
-      error: () => {
-        // 🔥 ALERTA DE ERROR
+      error: (err) => {
+        console.error('Error matriculando:', err);
+
+        // 👇 AQUÍ ESTÁ LA CLAVE: Leemos el mensaje del backend
+        const msg = err.error?.message || 'Error desconocido al matricular.';
+
         Swal.fire({
-          title: 'Error',
-          text: 'No se pudo realizar la matrícula. Puede que ya esté inscrito.',
+          title: 'No se pudo matricular',
+          text: msg, // 👈 Mostramos "Este usuario YA está matriculado..."
           icon: 'error',
           confirmButtonColor: '#4f46e5',
         });
@@ -140,25 +142,22 @@ export class AdminUsersComponent implements OnInit {
   }
 
   removeCourse(courseId: any) {
-    // 🔥 PREGUNTA DE SEGURIDAD MODERNA
     Swal.fire({
       title: '¿Revocar acceso?',
       text: 'El usuario perderá el acceso a este curso inmediatamente.',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ef4444', // Rojo (Peligro)
-      cancelButtonColor: '#94a3b8', // Gris (Cancelar)
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#94a3b8',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
-      reverseButtons: true, // Pone el cancelar a la izquierda (más seguro UX)
+      reverseButtons: true,
     }).then((result) => {
-      // SOLO SI EL USUARIO DIJO "SÍ"
       if (result.isConfirmed) {
         this.adminService.unenrollUser(this.selectedUser.id, courseId).subscribe({
           next: () => {
             this.loadUserCourses(this.selectedUser.id);
 
-            // Feedback visual rápido
             const Toast = Swal.mixin({
               toast: true,
               position: 'top-end',
@@ -167,7 +166,11 @@ export class AdminUsersComponent implements OnInit {
             });
             Toast.fire({ icon: 'success', title: 'Acceso eliminado correctamente' });
           },
-          error: () => Swal.fire('Error', 'No se pudo eliminar el curso', 'error'),
+          error: (err) => {
+            // 👇 También aquí leemos el error real
+            const msg = err.error?.message || 'No se pudo eliminar el curso.';
+            Swal.fire('Error', msg, 'error');
+          },
         });
       }
     });

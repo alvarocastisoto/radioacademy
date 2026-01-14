@@ -3,16 +3,21 @@ package com.radioacademy.backend.controller;
 import com.radioacademy.backend.dto.CourseDropdownDTO;
 import com.radioacademy.backend.dto.UserListDTO;
 import com.radioacademy.backend.entity.Course;
+import com.radioacademy.backend.entity.Enrollment; // 👈 Usamos la Entidad
 import com.radioacademy.backend.entity.User;
+import com.radioacademy.backend.enums.Role;
 import com.radioacademy.backend.repository.CourseRepository;
+import com.radioacademy.backend.repository.EnrollmentRepository; // 👈 INYECCIÓN CLAVE
 import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -25,110 +30,128 @@ public class AdminController {
         @Autowired
         private CourseRepository courseRepository;
 
-        // ==========================================
-        // 1. LISTADO DE USUARIOS (OPTIMIZADO)
-        // ==========================================
+        @Autowired
+        private EnrollmentRepository enrollmentRepository; // 👈 NECESARIO
+
+        // 1. LISTADO DE USUARIOS
         @GetMapping("/users")
         public ResponseEntity<List<UserListDTO>> getAllUsers() {
-                // 1. Hibernate hace una sola consulta SELECT * FROM users
                 List<User> users = userRepository.findAll();
-
-                // 2. Transformamos la entidad pesada (User) en un objeto ligero (DTO)
-                // Esto evita que se envíen contraseñas, fechas innecesarias o relaciones
-                // cíclicas.
                 List<UserListDTO> dtos = users.stream()
                                 .map(u -> new UserListDTO(
                                                 u.getId(),
-                                                u.getName() + " " + u.getSurname(), // Concatenamos para facilitar la
-                                                                                    // vista
+                                                u.getName() + " " + u.getSurname(),
                                                 u.getEmail(),
                                                 u.getDni(),
                                                 u.getRole().toString(),
                                                 u.isEnabled()))
                                 .toList();
-
                 return ResponseEntity.ok(dtos);
         }
 
-        // ==========================================
-        // 2. LISTADO DE CURSOS LIGERO (NUEVO)
-        // ==========================================
-        // Este endpoint es vital para el <select> del frontend.
-        // Evita cargar módulos, lecciones y videos cuando solo queremos el Título.
+        // 2. LISTADO DE CURSOS (DROPDOWN)
         @GetMapping("/courses-dropdown")
         public ResponseEntity<List<CourseDropdownDTO>> getCoursesForDropdown() {
                 List<Course> courses = courseRepository.findAll();
-
                 List<CourseDropdownDTO> dtos = courses.stream()
-                                .map(c -> new CourseDropdownDTO(
-                                                c.getId(), // ID del curso (UUID)
-                                                c.getTitle() // Título del curso
-                                ))
+                                .map(c -> new CourseDropdownDTO(c.getId(), c.getTitle()))
                                 .toList();
-
                 return ResponseEntity.ok(dtos);
         }
 
-        // ==========================================
-        // 3. MATRICULAR (ENROLL)
-        // ==========================================
+        // =======================================================
+        // 3. MATRICULAR (CORREGIDO: Usando Enrollment Entity)
+        // =======================================================
         @PostMapping("/enroll")
         public ResponseEntity<?> enrollUser(@RequestParam UUID userId, @RequestParam UUID courseId) {
-                // Verificamos que existan (opcional, pero recomendado)
-                if (!userRepository.existsById(userId) || !courseRepository.existsById(courseId)) {
-                        throw new RuntimeException("Datos inválidos");
+
+                // Validaciones
+                User user = userRepository.findById(userId).orElse(null);
+                Course course = courseRepository.findById(courseId).orElse(null);
+
+                if (user == null || course == null) {
+                        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                        .body(Map.of("message", "Usuario o Curso no encontrados"));
                 }
 
-                // Insertamos directo (Rapidísimo ⚡)
+                // Validación de duplicados usando el Repository
+                if (enrollmentRepository.existsByUserIdAndCourseId(userId, courseId)) {
+                        return ResponseEntity.status(HttpStatus.CONFLICT)
+                                        .body(Map.of("message", "Este usuario YA está matriculado en este curso."));
+                }
+
                 try {
-                        courseRepository.addEnrollment(courseId, userId);
+                        // ✅ FORMA CORRECTA: Crear objeto Enrollment
+                        Enrollment enrollment = new Enrollment();
+                        enrollment.setUser(user);
+                        enrollment.setCourse(course);
+                        enrollment.setAmountPaid(java.math.BigDecimal.ZERO); // Es admin, precio 0 o el del curso
+                        enrollment.setEnrolledAt(LocalDateTime.now());
+                        enrollment.setPaymentId("MANUAL_ADMIN"); // Marca para saber que fue manual
+
+                        enrollmentRepository.save(enrollment);
+
                         return ResponseEntity.ok(Map.of("message", "Usuario matriculado correctamente"));
+
                 } catch (Exception e) {
                         return ResponseEntity.badRequest()
-                                        .body(Map.of("message", "El usuario ya estaba matriculado o error interno"));
+                                        .body(Map.of("message", "Error interno: " + e.getMessage()));
                 }
         }
 
-        // ==========================================
-        // 4. DESMATRICULAR (UNENROLL)
-        // ==========================================
+        // =======================================================
+        // 4. DESMATRICULAR (CORREGIDO: Borrando Enrollment)
+        // =======================================================
         @PostMapping("/unenroll")
         public ResponseEntity<?> unenrollUser(@RequestParam UUID userId, @RequestParam UUID courseId) {
                 try {
-                        // Ejecutamos el borrado directo
-                        courseRepository.deleteEnrollment(userId, courseId);
-                        return ResponseEntity.ok().body("{\"message\": \"Matrícula cancelada correctamente\"}");
+                        // Buscamos la matrícula específica
+                        Enrollment enrollment = enrollmentRepository.findByUserId(userId).stream()
+                                        .filter(e -> e.getCourse().getId().equals(courseId))
+                                        .findFirst()
+                                        .orElseThrow(() -> new RuntimeException("Matrícula no encontrada"));
+
+                        enrollmentRepository.delete(enrollment);
+
+                        return ResponseEntity.ok(Map.of("message", "Matrícula cancelada correctamente"));
                 } catch (Exception e) {
                         return ResponseEntity.badRequest()
-                                        .body("{\"message\": \"Error al cancelar matrícula: " + e.getMessage() + "\"}");
+                                        .body(Map.of("message", "Error al cancelar: " + e.getMessage()));
                 }
         }
 
+        // =======================================================
+        // 5. OBTENER CURSOS DE UN USUARIO (CORREGIDO)
+        // =======================================================
+        // 👇 ESTE ES EL MÉTODO QUE TE FALLABA
         @GetMapping("/users/{userId}/courses")
         public ResponseEntity<List<CourseDropdownDTO>> getUserCourses(@PathVariable UUID userId) {
-                List<Course> courses = courseRepository.findByStudents_Id(userId);
 
-                // Convertimos a DTO
-                List<CourseDropdownDTO> userCourses = courses.stream()
-                                .map(c -> new CourseDropdownDTO(c.getId(), c.getTitle()))
+                // 1. Buscamos en la tabla ENROLLMENTS (Matrículas), no en Courses
+                List<Enrollment> enrollments = enrollmentRepository.findByUserId(userId);
+
+                // 2. Extraemos los cursos de esas matrículas
+                List<CourseDropdownDTO> userCourses = enrollments.stream()
+                                .map(enrollment -> {
+                                        Course c = enrollment.getCourse();
+                                        return new CourseDropdownDTO(c.getId(), c.getTitle());
+                                })
                                 .toList();
 
                 return ResponseEntity.ok(userCourses);
         }
 
-        // 6. CAMBIAR ROL DE USUARIO
+        // 6. CAMBIAR ROL
         @PutMapping("/users/{userId}/role")
         public ResponseEntity<?> changeUserRole(@PathVariable UUID userId, @RequestParam String newRole) {
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
                 try {
-                        // Convertimos el String (ej: "ADMIN") al Enum (Role.ADMIN)
-                        user.setRole(com.radioacademy.backend.enums.Role.valueOf(newRole));
+                        user.setRole(Role.valueOf(newRole));
                         userRepository.save(user);
-                        return ResponseEntity.ok().body("{\"message\": \"Rol actualizado correctamente\"}");
+                        return ResponseEntity.ok(Map.of("message", "Rol actualizado"));
                 } catch (IllegalArgumentException e) {
-                        return ResponseEntity.badRequest().body("{\"message\": \"Rol no válido\"}");
+                        return ResponseEntity.badRequest().body(Map.of("message", "Rol no válido"));
                 }
         }
 }

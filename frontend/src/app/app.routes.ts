@@ -17,6 +17,9 @@ import { ProfileComponent } from './pages/profile/profile'; // 👈 Importa esto
 import { adminGuard } from './guards/admin-guard';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password';
 import { ResetPasswordComponent } from './pages/reset-password/reset-password';
+import { TestPaymentComponent } from './pages/payment/test-payment/test-payment';
+import { PaymentSuccessComponent } from './pages/payment/payment-success/payment-success';
+import { PaymentCancel } from './pages/payment/payment-cancel/payment-cancel';
 
 export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
@@ -33,6 +36,11 @@ export const routes: Routes = [
   { path: 'profile', component: ProfileComponent, canActivate: [authGuard] },
   { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'reset-password', component: ResetPasswordComponent },
+
+  // Payment Routes
+  { path: 'payment/test', component: TestPaymentComponent }, // Para ver el botón de prueba
+  { path: 'payment/success', component: PaymentSuccessComponent }, // Retorno OK
+  { path: 'payment/cancel', component: PaymentCancel }, // Retorno Cancelado
   // Admin Routes
   { path: 'admin', component: AdminDashboard, canActivate: [adminGuard] }, // /admin
   { path: 'admin/users', component: AdminUsersComponent, canActivate: [adminGuard] },

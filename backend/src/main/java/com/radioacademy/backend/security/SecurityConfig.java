@@ -47,6 +47,10 @@ public class SecurityConfig {
                         // Catálogo público
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 
+                        // Pago
+                        .requestMatchers("/api/payment/**")
+                        .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
+
                         // 2. ZONA ADMIN
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 

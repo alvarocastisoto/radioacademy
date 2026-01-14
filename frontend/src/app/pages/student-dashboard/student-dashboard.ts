@@ -1,17 +1,8 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StudentService } from '../../services/student/student';
 import { Router, RouterModule } from '@angular/router';
-
-// 👇 1. INTERFAZ (Coincide con el Backend)
-export interface DashboardCourse {
-  id: string;
-  title: string;
-  description: string;
-  coverImage: string | null; // Ahora vendrá como "http://localhost:8080/..."
-  pdfUrl: string | null;
-  progress: number;
-}
+import { DashboardCourse } from '../../models/dashboard-course'; // 👈 Importa la interfaz
 
 @Component({
   selector: 'app-student-dashboard',
@@ -23,36 +14,32 @@ export interface DashboardCourse {
 export class StudentDashboardComponent implements OnInit {
   private studentService = inject(StudentService);
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
 
-  courses: DashboardCourse[] = [];
-  loading = true;
-
-  // ❌ HE BORRADO 'UPLOADS_URL'.
-  // Ya no hace falta porque el backend nos da la ruta absoluta.
-  // Si la dejas, corres el riesgo de concatenar doble.
+  // ✅ USAMOS SIGNALS (Más eficiente y reactivo)
+  courses = signal<DashboardCourse[]>([]);
+  loading = signal<boolean>(true);
 
   ngOnInit() {
     this.loadDashboard();
   }
 
   loadDashboard() {
-    this.loading = true;
+    this.loading.set(true); // Activamos carga
+
     this.studentService.getMyCourses().subscribe({
       next: (data) => {
         console.log('✅ Dashboard cargado:', data);
-        
-        // Asignamos directamente. 
-        // Las URLs de coverImage ya vienen listas para usar en el src=""
-        this.courses = data as DashboardCourse[];
-        
-        this.loading = false;
-        this.cdr.detectChanges(); 
+
+        // TypeScript confiará en que data cumple la interfaz si el servicio está tipado,
+        // si no, el cast es seguro aquí porque sabemos lo que envía el backend.
+        this.courses.set(data as DashboardCourse[]);
+
+        this.loading.set(false); // Desactivamos carga
       },
       error: (e) => {
         console.error('🔥 Error cargando dashboard:', e);
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.loading.set(false);
+        // Aquí podrías mostrar un toast o mensaje de error en la UI
       },
     });
   }

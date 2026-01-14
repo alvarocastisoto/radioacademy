@@ -2,6 +2,8 @@ package com.radioacademy.backend.entity;
 
 import com.radioacademy.backend.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -71,6 +73,10 @@ public class User implements UserDetails {
     @ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Course> enrolledCourses = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
+    @JsonIgnoreProperties("user") // 🛑 Evita el bucle infinito al convertir a JSON
+    private List<Enrollment> enrollments;
 
     // =================================================================
     // 👇 SOLUCIÓN AL BUCLE INFINITO DE MEMORIA 👇

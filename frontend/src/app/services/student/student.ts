@@ -2,29 +2,34 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+// Asegúrate de importar tus interfaces si las tienes
+import { DashboardCourse } from '../../models/dashboard-course';
 
 @Injectable({
   providedIn: 'root',
 })
 export class StudentService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/student`; // Asegúrate de tener esta URL base correcta
-  private readonly BASE_URL = 'http://localhost:8080/api';
-  // Obtener mis cursos
-  getMyCourses(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8080/api/student/dashboard');
+
+  // Usamos environment.apiUrl (ej: http://localhost:8080/api)
+  // Asegúrate de que en environment.ts apiUrl NO termina en barra '/'
+  private apiUrl = environment.apiUrl;
+
+  // Obtener mis cursos (Dashboard)
+  getMyCourses(): Observable<DashboardCourse[]> {
+    return this.http.get<DashboardCourse[]>(`${this.apiUrl}/student/dashboard`);
   }
 
-  // Obtener el contenido COMPLETO del curso (Módulos + Lecciones)
+  // Obtener el contenido COMPLETO del curso
   getCourseContent(courseId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/course/${courseId}/content`);
+    return this.http.get<any>(`${this.apiUrl}/student/course/${courseId}/content`);
   }
 
   getProfile(): Observable<any> {
-    return this.http.get(`${this.BASE_URL}/users/profile`);
+    return this.http.get(`${this.apiUrl}/users/profile`);
   }
 
   updateProfile(data: any): Observable<any> {
-    return this.http.put(`${this.BASE_URL}/users/profile`, data);
+    return this.http.put(`${this.apiUrl}/users/profile`, data);
   }
 }
