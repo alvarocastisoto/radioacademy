@@ -11,8 +11,6 @@ import { DashboardCourse } from '../../models/dashboard-course';
 export class StudentService {
   private http = inject(HttpClient);
 
-  // Usamos environment.apiUrl (ej: http://localhost:8080/api)
-  // Asegúrate de que en environment.ts apiUrl NO termina en barra '/'
   private apiUrl = environment.apiUrl;
 
   // Obtener mis cursos (Dashboard)

@@ -1,15 +1,15 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-
+import { environment } from '../../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
 export class CourseService {
   private http = inject(HttpClient);
-  
+
   // 1. Definimos la raíz de la API para evitar errores de escritura
-  private readonly API_BASE = 'http://localhost:8080/api';
+  private readonly API_BASE = environment.apiUrl;
 
   // --- CURSOS ---
   getCourses(): Observable<any[]> {
@@ -42,7 +42,7 @@ export class CourseService {
   }
 
   // --- LECCIONES ---
-  
+
   // CORREGIDO: Ahora apunta a /api/lessons, no a /api/courses/lessons
   createLesson(lessonData: FormData): Observable<any> {
     return this.http.post(`${this.API_BASE}/lessons`, lessonData);

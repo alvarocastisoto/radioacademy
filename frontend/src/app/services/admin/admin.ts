@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-// import { environment } from '../../../environments/environment'; // Descomenta si usas environment
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -9,8 +9,7 @@ import { Observable } from 'rxjs';
 export class AdminService {
   private http = inject(HttpClient);
 
-  // Idealmente usa environment.apiUrl, pero así también funciona:
-  private apiUrl = 'http://localhost:8080/api/admin';
+  private apiUrl = environment.apiUrl + '/admin';
 
   // Obtener todos los usuarios
   getUsers(): Observable<any[]> {

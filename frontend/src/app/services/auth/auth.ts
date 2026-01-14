@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
-
+import { environment } from '../../../environments/environment';
 // Definimos qué forma tiene un usuario
 export interface User {
   id: string;
@@ -23,7 +23,7 @@ interface LoginResponse {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = environment.apiUrl + '/auth';
 
   // 📡 SEÑAL PRINCIPAL: Guarda quién es el usuario actual (o null si no hay nadie)
   currentUser = signal<User | null>(null);
