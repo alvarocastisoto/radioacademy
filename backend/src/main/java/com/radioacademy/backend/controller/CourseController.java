@@ -1,7 +1,9 @@
 package com.radioacademy.backend.controller;
 
 import com.radioacademy.backend.dto.CourseDTO;
+import com.radioacademy.backend.dto.CourseDetailDTO;
 import com.radioacademy.backend.dto.CreateCourseRequest;
+import com.radioacademy.backend.dto.CourseDashboardDTO; // 👈 Usamos el DTO que creaste antes
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;
@@ -9,6 +11,7 @@ import com.radioacademy.backend.repository.CourseRepository;
 import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.service.StorageService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +25,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/courses")
-@CrossOrigin(origins = "http://localhost:4200")
 public class CourseController {
 
     @Autowired
@@ -37,71 +39,42 @@ public class CourseController {
     @Autowired
     private StorageService storageService;
 
-    // ==========================================
     // 1. OBTENER CURSOS (CATÁLOGO PÚBLICO)
-    // ==========================================
     @GetMapping
     public ResponseEntity<List<CourseDTO>> getAllCourses(Authentication authentication) {
-
-        // 1. Traemos todos los cursos
         List<Course> courses = courseRepository.findAll();
-
-        // 2. Preparamos el conjunto de IDs comprados
-        Set<UUID> purchasedCourseIds;
+        Set<UUID> purchasedCourseIds = new HashSet<>();
 
         if (authentication != null && authentication.isAuthenticated() &&
-                !authentication.getPrincipal().equals("anonymousUser")) {
+                !authentication.getName().equals("anonymousUser")) {
 
-            String email = authentication.getName();
-            User user = userRepository.findByEmail(email).orElse(null);
-
-            if (user != null) {
-                // ✅ CORRECCIÓN: Usamos el método del repositorio.
-                // Esto delega la búsqueda a SQL, evitando errores de comparación en Java.
-                List<Enrollment> userEnrollments = enrollmentRepository.findByUserId(user.getId());
-
-                purchasedCourseIds = userEnrollments.stream()
-                        .map(enrollment -> enrollment.getCourse().getId())
-                        .collect(Collectors.toSet());
-            } else {
-                purchasedCourseIds = Collections.emptySet();
-            }
-        } else {
-            purchasedCourseIds = Collections.emptySet();
+            userRepository.findByEmail(authentication.getName()).ifPresent(user -> {
+                enrollmentRepository.findByUserId(user.getId())
+                        .forEach(enrollment -> purchasedCourseIds.add(enrollment.getCourse().getId()));
+            });
         }
 
-        // 3. Convertimos a DTO (igual que antes)
-        List<CourseDTO> dtos = courses.stream().map(course -> {
-            // Al usar un Set y UUIDs, el .contains() funciona perfecto
-            boolean isPurchased = purchasedCourseIds.contains(course.getId());
-
-            return new CourseDTO(
-                    course.getId(),
-                    course.getTitle(),
-                    course.getDescription(),
-                    course.getCoverImage(),
-                    course.getPrice(),
-                    course.getHours(),
-                    isPurchased);
-        }).collect(Collectors.toList());
+        List<CourseDTO> dtos = courses.stream().map(course -> new CourseDTO(
+                course.getId(),
+                course.getTitle(),
+                course.getDescription(),
+                course.getCoverImage(),
+                course.getPrice(),
+                course.getHours(),
+                purchasedCourseIds.contains(course.getId()))).toList();
 
         return ResponseEntity.ok(dtos);
     }
 
-    // ==========================================
     // 2. CREAR CURSO (POST) - ADMIN
-    // ==========================================
     @PostMapping
-    public ResponseEntity<Course> createCourse(@RequestBody CreateCourseRequest request) {
-
-        System.out.println(">>> CREANDO CURSO: " + request.title());
+    public ResponseEntity<CourseDetailDTO> createCourse(@Valid @RequestBody CreateCourseRequest request) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User teacher = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Course newCourse = new Course();
-        // Aquí SÍ usamos setters porque 'Course' es una Entidad, no un Record.
         newCourse.setTitle(request.title());
         newCourse.setDescription(request.description());
         newCourse.setPrice(request.price());
@@ -111,22 +84,22 @@ public class CourseController {
         newCourse.setCoverImage(request.coverImage());
 
         Course savedCourse = courseRepository.save(newCourse);
-        return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
+
+        // 🔄 Devolvemos DTO
+        return new ResponseEntity<>(mapToDetailDTO(savedCourse), HttpStatus.CREATED);
     }
 
-    // ==========================================
     // 3. ACTUALIZAR CURSO (PUT) - ADMIN
-    // ==========================================
     @PutMapping("/{id}")
-    public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody CreateCourseRequest request) {
-        UUID uuid = UUID.fromString(id);
-        Course existingCourse = courseRepository.findById(uuid)
+    public ResponseEntity<CourseDetailDTO> updateCourse(@PathVariable UUID id,
+            @Valid @RequestBody CreateCourseRequest request) {
+
+        Course existingCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
-        String newImage = request.coverImage();
-        String oldImage = existingCourse.getCoverImage();
-
-        if (!Objects.equals(newImage, oldImage)) {
+        // Lógica de borrado de imagen antigua (Garbage Collection)
+        if (request.coverImage() != null && !request.coverImage().equals(existingCourse.getCoverImage())) {
+            String oldImage = existingCourse.getCoverImage();
             if (oldImage != null && !oldImage.isEmpty()) {
                 try {
                     String filename = oldImage.substring(oldImage.lastIndexOf("/") + 1);
@@ -135,7 +108,7 @@ public class CourseController {
                     System.err.println("⚠️ No se pudo borrar la imagen antigua: " + e.getMessage());
                 }
             }
-            existingCourse.setCoverImage(newImage);
+            existingCourse.setCoverImage(request.coverImage());
         }
 
         existingCourse.setTitle(request.title());
@@ -144,59 +117,71 @@ public class CourseController {
         existingCourse.setHours(request.hours());
 
         Course updatedCourse = courseRepository.save(existingCourse);
-        return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
+
+        // 🔄 Devolvemos DTO
+        return ResponseEntity.ok(mapToDetailDTO(updatedCourse));
     }
 
-    // ==========================================
     // 4. BORRAR CURSO (DELETE) - ADMIN
-    // ==========================================
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCourse(@PathVariable String id) {
-        UUID uuid = UUID.fromString(id);
+    public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
 
-        return courseRepository.findById(uuid).map(course -> {
-            String imageUrl = course.getCoverImage();
-            if (imageUrl != null && !imageUrl.isEmpty()) {
-                try {
-                    String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-                    storageService.delete(filename);
-                } catch (Exception e) {
-                    System.err.println("⚠️ Error borrando imagen: " + e.getMessage());
-                }
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
+
+        // Borrar imagen asociada
+        String imageUrl = course.getCoverImage();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+                storageService.delete(filename);
+            } catch (Exception e) {
+                System.err.println("⚠️ Error borrando imagen: " + e.getMessage());
             }
-            courseRepository.delete(course);
-            return new ResponseEntity<Void>(HttpStatus.NO_CONTENT);
-        }).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        }
+
+        courseRepository.delete(course);
+        return ResponseEntity.noContent().build();
     }
 
     // 5. OBTENER MIS CURSOS (DASHBOARD ALUMNO)
-    // ==========================================
+    // Usamos el DTO CourseDashboardDTO que ya tenías
     @GetMapping("/mine")
-    public ResponseEntity<List<Map<String, Object>>> getMyCourses(Authentication authentication) {
-        // 1. Obtener usuario
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
+    public ResponseEntity<List<CourseDashboardDTO>> getMyCourses(Authentication authentication) {
+
+        User user = userRepository.findByEmail(authentication.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        // 2. Buscar matrículas DIRECTAMENTE en el repositorio de enrollments
         List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
 
-        // 3. Mapear a lo que espera tu StudentDashboard (DashboardCourse)
-        List<Map<String, Object>> response = enrollments.stream().map(enrollment -> {
+        List<CourseDashboardDTO> response = enrollments.stream().map(enrollment -> {
             Course course = enrollment.getCourse();
 
-            // Construimos un mapa simple (o podrías crear un DTO DashboardCourseDTO)
-            Map<String, Object> map = new HashMap<>();
-            map.put("id", course.getId());
-            map.put("title", course.getTitle());
-            map.put("description", course.getDescription());
-            map.put("coverImage", course.getCoverImage());
-            map.put("pdfUrl", null); // O course.getPdfUrl() si lo tienes
-            map.put("progress", 0); // O enrollment.getProgress() si lo tienes implementado
+            // Aquí deberías calcular el progreso real si lo tienes implementado
+            // int progress = progressRepository.count... (como hicimos en el
+            // DashboardController)
+            int progress = 0;
 
-            return map;
-        }).collect(Collectors.toList());
+            return new CourseDashboardDTO(
+                    course.getId(),
+                    course.getTitle(),
+                    course.getDescription(),
+                    course.getCoverImage(),
+                    progress);
+        }).toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    // --- Helper para mapear ---
+    private CourseDetailDTO mapToDetailDTO(Course course) {
+        return new CourseDetailDTO(
+                course.getId(),
+                course.getTitle(),
+                course.getDescription(),
+                course.getCoverImage(),
+                course.getPrice(),
+                course.getHours(),
+                course.getActive());
     }
 }

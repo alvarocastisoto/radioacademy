@@ -127,30 +127,3 @@ ALTER TABLE ONLY public.courses
 ADD CONSTRAINT fkt4ba5fab1x56tmt4nsypv5lm5 FOREIGN KEY (teacher_id) REFERENCES public.users(id);
 ALTER TABLE ONLY public.lessons
 ADD CONSTRAINT fkt9yjhjbd9y3w6fxs66ny1wu02 FOREIGN KEY (module_id) REFERENCES public.modules(id);
--- 5. Insertar UN usuario Admin (Para que puedas entrar)
--- Password: 'password123' (encriptada)
-INSERT INTO public.users (
-        id,
-        dni,
-        email,
-        name,
-        surname,
-        password,
-        role,
-        region,
-        terms_accepted,
-        created_at
-    )
-VALUES (
-        gen_random_uuid(),
-        '12345678A',
-        'admin@radioacademy.com',
-        'Admin',
-        'Superuser',
-        -- 👇 Hash para la contraseña 'admin'
-        '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDNYApwmuZZn.SEw1z0y.2',
-        'ADMIN',
-        'Madrid',
-        true,
-        NOW()
-    );

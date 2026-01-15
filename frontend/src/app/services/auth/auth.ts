@@ -8,7 +8,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'USER' | 'ROLE_ADMIN' | 'ROLE_USER';
+  role: 'ADMIN' | 'STUDENT' | 'ROLE_ADMIN' | 'ROLE_STUDENT' | 'TEACHER' | 'ROLE_TEACHER';
 }
 
 // Definimos qué esperamos recibir del servidor al loguearnos
@@ -67,7 +67,7 @@ export class AuthService {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.currentUser.set(null); // Ponemos la señal en vacío
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/login']);
   }
 
   // Ayuda para saber si hay token crudo

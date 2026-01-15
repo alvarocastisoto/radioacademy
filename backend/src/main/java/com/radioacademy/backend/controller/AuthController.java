@@ -2,6 +2,7 @@ package com.radioacademy.backend.controller;
 
 import com.radioacademy.backend.dto.AuthResponse;
 import com.radioacademy.backend.dto.LoginRequest;
+import com.radioacademy.backend.dto.RegisterRequest;
 import com.radioacademy.backend.entity.PasswordResetToken;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.event.PasswordResetEvent;
@@ -9,6 +10,9 @@ import com.radioacademy.backend.event.UserRegistrationEvent;
 import com.radioacademy.backend.repository.PasswordResetTokenRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.security.JwtService;
+import com.radioacademy.backend.enums.Role;
+
+import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -56,40 +60,46 @@ public class AuthController {
     // Usamos ResponseEntity<?> (con interrogación) para poder devolver
     // AuthResponse si va bien, o un Map de error si va mal.
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody User user) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
 
-        // 1. 🛡️ VALIDACIÓN PREVIA
-        if (userRepository.existsByEmail(user.getEmail())) {
+        // 1. 🛡️ VALIDACIÓN DE DUPLICADOS
+        // (Las validaciones de formato ya las hizo @Valid antes de entrar aquí)
+        if (userRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "El email ya está registrado. Por favor, inicia sesión."));
         }
 
-        // 2. Ciframos la contraseña
-        System.out.println("📦 USUARIO RECIBIDO: " + user.getEmail());
-        if (isPasswordStrong(user.getPassword())) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        } else {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "La contraseña no es lo suficientemente fuerte. " +
-                            "Debe tener al menos 8 caracteres, incluyendo mayúsculas, minúsculas, " +
-                            "números y caracteres especiales."));
-        }
+        // 2. 🔄 MAPPING (DTO -> Entity)
+        // Creamos el usuario nosotros mismos para tener CONTROL TOTAL
+        User user = new User();
+        user.setName(request.getName());
+        user.setSurname(request.getSurname());
+        user.setEmail(request.getEmail());
+        user.setDni(request.getDni());
+        user.setPhone(request.getPhone());
+        user.setRegion(request.getRegion());
+        user.setTermsAccepted(request.isTermsAccepted());
+        user.setCreatedAt(LocalDateTime.now());
 
-        // 3. Ponemos fecha de creación
-        if (user.getCreatedAt() == null) {
-            user.setCreatedAt(LocalDateTime.now());
-        }
+        // 🔒 SEGURIDAD CRÍTICA: Asignamos el rol nosotros, ignorando lo que venga de
+        // fuera
+        user.setRole(Role.STUDENT);
 
-        // 4. Guardamos en BD
+        // 3. 🔐 CIFRADO DE CONTRASEÑA
+        // Ya sabemos que es fuerte gracias a la anotación @Pattern del DTO
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        // 4. 💾 GUARDAR EN BD
         User savedUser = userRepository.save(user);
 
-        // 6. Generamos token
+        // 5. 🎟️ GENERAR TOKEN Y EVENTOS
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
         String token = jwtService.generateToken(userDetails);
+
         eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
-        // 7. Devuelve Token + Usuario
+
+        // 6. 🚀 RESPUESTA
         return ResponseEntity.ok(new AuthResponse(token, savedUser));
     }
 

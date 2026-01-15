@@ -1,80 +1,92 @@
 package com.radioacademy.backend.controller;
 
+import com.radioacademy.backend.dto.CourseProgressResponse;
+import com.radioacademy.backend.dto.ToggleProgressResponse;
 import com.radioacademy.backend.entity.Lesson;
 import com.radioacademy.backend.entity.LessonProgress;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.LessonProgressRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor; // 👈 Lombok te ahorra los @Autowired
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException; // 
-import org.springframework.http.HttpStatus; // 
-import java.time.LocalDateTime;
-import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/progress")
+@RequiredArgsConstructor // Inyección por constructor automática
 public class ProgressController {
 
-    @Autowired
-    private LessonProgressRepository progressRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private LessonRepository lessonRepository;
+    private final LessonProgressRepository progressRepository;
+    private final UserRepository userRepository;
+    private final LessonRepository lessonRepository;
 
     // 1. MARCAR / DESMARCAR LECCIÓN
     @PostMapping("/{lessonId}/toggle")
-    public ResponseEntity<?> toggleProgress(@PathVariable UUID lessonId) {
-        // Obtenemos usuario del Token
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    public ResponseEntity<ToggleProgressResponse> toggleProgress(@Valid @PathVariable UUID lessonId) {
 
-        LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId);
+        // Obtener usuario (Extraído a método helper para no repetir código)
+        User user = getAuthenticatedUser();
+
+        // Buscamos si ya existe el registro de progreso
+        LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId)
+                .orElse(null);
+
+        boolean isCompletedNow;
 
         if (progress == null) {
-            // Si no existe, lo creamos (Marcar como visto)
+            // CREAR (Primera vez que la ve)
             Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no existe"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no encontrada"));
 
             progress = LessonProgress.builder()
                     .user(user)
                     .lesson(lesson)
-                    .isCompleted(true)
+                    .isCompleted(true) // Por defecto true al crear
                     .build();
+            isCompletedNow = true;
         } else {
-            // Si ya existe, invertimos el estado (Visto <-> No Visto)
-            progress.setCompleted(!progress.isCompleted());
-            progress.setCompletedAt(LocalDateTime.now());
+            // ACTUALIZAR (Toggle)
+            isCompletedNow = !progress.isCompleted(); // Invertimos
+            progress.setCompleted(isCompletedNow);
         }
 
         progressRepository.save(progress);
-        return ResponseEntity.ok(progress.isCompleted()); // Devolvemos true/false
+
+        // Devolvemos DTO limpio
+        String msg = isCompletedNow ? "Lección marcada como vista" : "Lección marcada como no vista";
+        return ResponseEntity.ok(new ToggleProgressResponse(lessonId, isCompletedNow, msg));
     }
 
-    // 2. OBTENER PROGRESO DE UN CURSO (Ids de lecciones vistas)
-    // Esto lo llamará Angular al entrar al curso para pintar los checks verdes
+    // 2. OBTENER PROGRESO DE UN CURSO
     @GetMapping("/course/{courseId}")
-    public ResponseEntity<List<UUID>> getCourseProgress(@PathVariable UUID courseId) {
+    public ResponseEntity<CourseProgressResponse> getCourseProgress(@Valid @PathVariable UUID courseId) {
+
+        User user = getAuthenticatedUser();
+
+        // Usamos la Query optimizada que devuelve solo los IDs (Set<UUID>)
+        // Esto es mucho más rápido que traerse las entidades enteras
+        Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(user.getId(), courseId);
+
+        return ResponseEntity.ok(new CourseProgressResponse(
+                courseId,
+                completedIds.size(),
+                completedIds));
+    }
+
+    // --- Helper Privado ---
+    private User getAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName())
+        return userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        List<LessonProgress> progressList = progressRepository.findByUserIdAndCourseId(user.getId(), courseId);
-
-        // Devolvemos solo una lista de IDs de las lecciones que están completadas
-        List<UUID> completedLessonIds = progressList.stream()
-                .filter(LessonProgress::isCompleted)
-                .map(p -> p.getLesson().getId())
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(completedLessonIds);
     }
 }

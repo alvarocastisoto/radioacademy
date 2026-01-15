@@ -105,16 +105,14 @@ public class AdminController {
         // =======================================================
         @PostMapping("/unenroll")
         public ResponseEntity<?> unenrollUser(@RequestParam UUID userId, @RequestParam UUID courseId) {
+
+                // Buscamos DIRECTAMENTE la matrícula específica (SQL hace el filtro)
+                Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "El usuario no está matriculado en este curso."));
+
                 try {
-                        // Buscamos la matrícula específica
-                        Enrollment enrollment = enrollmentRepository.findByUserId(userId).stream()
-                                        .filter(e -> e.getCourse().getId().equals(courseId))
-                                        .findFirst()
-                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                        "Matrícula no encontrada"));
-
                         enrollmentRepository.delete(enrollment);
-
                         return ResponseEntity.ok(Map.of("message", "Matrícula cancelada correctamente"));
                 } catch (Exception e) {
                         return ResponseEntity.badRequest()

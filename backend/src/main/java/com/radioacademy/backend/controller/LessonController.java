@@ -1,5 +1,6 @@
 package com.radioacademy.backend.controller;
 
+import com.radioacademy.backend.dto.LessonResponse;
 import com.radioacademy.backend.entity.Lesson;
 import com.radioacademy.backend.entity.Module;
 import com.radioacademy.backend.repository.LessonRepository;
@@ -33,27 +34,33 @@ public class LessonController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    // ✅ CAMBIO AQUÍ: Ahora guardamos en una subcarpeta específica
     private static final String UPLOAD_DIR = "uploads/pdfs";
 
-    // 1. GET: Lecciones por módulo
+    // 1. GET: Lecciones por módulo (Devuelve DTOs)
     @GetMapping("/module/{moduleId}")
-    public ResponseEntity<List<Lesson>> getLessonsByModule(@PathVariable UUID moduleId) {
+    public ResponseEntity<List<LessonResponse>> getLessonsByModule(@PathVariable UUID moduleId) {
         List<Lesson> lessons = lessonRepository.findByModuleIdOrderByOrderIndexAsc(moduleId);
-        return ResponseEntity.ok(lessons);
+
+        // 🔄 Convertimos a DTO
+        List<LessonResponse> response = lessons.stream()
+                .map(this::mapToDTO)
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
-    // 2. GET: Una lección
+    // 2. GET: Una lección (Devuelve DTO)
     @GetMapping("/{id}")
-    public ResponseEntity<Lesson> getLessonById(@PathVariable UUID id) {
+    public ResponseEntity<LessonResponse> getLessonById(@PathVariable UUID id) {
         return lessonRepository.findById(id)
+                .map(this::mapToDTO) // 🔄 Convertimos
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // 3. POST: Crear lección
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Lesson> createLesson(
+    public ResponseEntity<LessonResponse> createLesson(
             @RequestParam("title") String title,
             @RequestParam("videoUrl") String videoUrl,
             @RequestParam("moduleId") UUID moduleId,
@@ -75,16 +82,18 @@ public class LessonController {
         // GUARDADO DE ARCHIVO
         if (file != null && !file.isEmpty()) {
             String fileName = saveFile(file);
-            newLesson.setPdfUrl(fileName);
+            newLesson.setPdfUrl(fileName); // Guardamos solo el nombre del archivo
         }
 
         Lesson savedLesson = lessonRepository.save(newLesson);
-        return new ResponseEntity<>(savedLesson, HttpStatus.CREATED);
+
+        // 🔄 Devolvemos DTO
+        return new ResponseEntity<>(mapToDTO(savedLesson), HttpStatus.CREATED);
     }
 
     // 4. PUT: Actualizar lección
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Lesson> updateLesson(
+    public ResponseEntity<LessonResponse> updateLesson(
             @PathVariable UUID id,
             @RequestParam("title") String title,
             @RequestParam("videoUrl") String videoUrl,
@@ -103,10 +112,13 @@ public class LessonController {
             lesson.setPdfUrl(fileName);
         }
 
-        return ResponseEntity.ok(lessonRepository.save(lesson));
+        Lesson savedLesson = lessonRepository.save(lesson);
+
+        // 🔄 Devolvemos DTO
+        return ResponseEntity.ok(mapToDTO(savedLesson));
     }
 
-    // 5. DELETE: Borrar lección
+    // 5. DELETE
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable UUID id) {
         if (!lessonRepository.existsById(id)) {
@@ -120,6 +132,18 @@ public class LessonController {
     // 🛠️ MÉTODOS AUXILIARES
     // ==========================================
 
+    // 👇 ESTE ES EL MAPPER MÁGICO
+    private LessonResponse mapToDTO(Lesson lesson) {
+        return new LessonResponse(
+                lesson.getId(),
+                lesson.getTitle(),
+                lesson.getVideoUrl(),
+                lesson.getPdfUrl(),
+                lesson.getOrderIndex(),
+                lesson.getModule().getId() // Sacamos solo el ID
+        );
+    }
+
     private String saveFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty())
             return null;
@@ -131,7 +155,6 @@ public class LessonController {
         String projectRoot = System.getProperty("user.dir");
         Path uploadPath = Paths.get(projectRoot, UPLOAD_DIR);
 
-        // Esto crea "uploads" Y TAMBIÉN "uploads/pdfs" si no existen
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
@@ -140,31 +163,23 @@ public class LessonController {
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         System.out.println("✅ Archivo guardado en: " + filePath.toString());
-
         return uniqueFileName;
     }
 
     private String sanitizeFileName(String originalFilename) {
         if (originalFilename == null)
             return "archivo_sin_nombre";
-
         String extension = "";
         int i = originalFilename.lastIndexOf('.');
         String nameWithoutExtension = originalFilename;
-
         if (i > 0) {
             extension = originalFilename.substring(i);
             nameWithoutExtension = originalFilename.substring(0, i);
         }
-
         String normalized = Normalizer.normalize(nameWithoutExtension, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         String slug = pattern.matcher(normalized).replaceAll("");
-
-        slug = slug.toLowerCase()
-                .replaceAll("\\s+", "_")
-                .replaceAll("[^a-z0-9\\-_]", "");
-
+        slug = slug.toLowerCase().replaceAll("\\s+", "_").replaceAll("[^a-z0-9\\-_]", "");
         return slug + extension.toLowerCase();
     }
 }

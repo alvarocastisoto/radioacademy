@@ -5,24 +5,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/media")
-@CrossOrigin(origins = "http://localhost:4200")
 public class MediaController {
 
     @Autowired
     private StorageService storageService;
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    // 1. Quitamos @Valid (no sirve aquí).
+    // 2. @RequestParam ya obliga a que venga el parámetro "file"
+    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
 
-        // 1. El servicio ya nos devuelve la URL COMPLETA
-        // (http://localhost:8080/uploads/images/foto.jpg)
+        // Seguridad extra: ¿El archivo pesa 0 bytes?
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El archivo está vacío"));
+        }
+
         String fullUrl = storageService.store(file);
 
-        // 2. Devolvemos la URL tal cual (Texto plano).
-        // NADA de Maps, NADA de JSON, NADA de ServletUriComponentsBuilder aquí.
-        return ResponseEntity.ok(fullUrl);
+        // Devuelve JSON: { "url": "http://..." }
+        return ResponseEntity.ok(Map.of("url", fullUrl));
     }
 }

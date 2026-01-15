@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class StudentController {
         private CourseRepository courseRepository;
 
         @Autowired
-        private EnrollmentRepository enrollmentRepository; // 👈 INYECTAMOS ESTO
+        private EnrollmentRepository enrollmentRepository;
 
         @Autowired
         private LessonProgressRepository progressRepository;
@@ -50,6 +51,8 @@ public class StudentController {
         // ✅ DASHBOARD (MIS CURSOS) - CORREGIDO
         @GetMapping("/dashboard")
         public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard() {
+
+                // 1. Obtener Usuario
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 User user = userRepository.findByEmail(auth.getName())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
@@ -57,22 +60,30 @@ public class StudentController {
 
                 List<CourseDashboardDTO> response = new ArrayList<>();
 
-                // 🛑 CAMBIO CRÍTICO: Buscamos en las matrículas, no en la relación directa
+                // 2. Buscar Matrículas (Enrollments)
                 List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
 
+                // 3. Calcular progreso para cada curso
                 for (Enrollment enrollment : enrollments) {
-                        Course course = enrollment.getCourse(); // Obtenemos el curso desde la matrícula
+                        Course course = enrollment.getCourse();
 
+                        // A. Contamos lecciones totales del curso
                         long totalLessons = lessonRepository.countByCourseId(course.getId());
+
+                        // B. Contamos lecciones completadas por ESTE usuario en ESTE curso
                         long completedLessons = progressRepository.countCompletedLessons(user.getId(), course.getId());
 
+                        // C. Calculamos porcentaje (evitando división por cero)
                         int percentage = 0;
                         if (totalLessons > 0) {
                                 percentage = (int) ((completedLessons * 100) / totalLessons);
                         }
+
+                        // Pequeña seguridad por si los datos se desincronizan
                         if (percentage > 100)
                                 percentage = 100;
 
+                        // D. Añadir al DTO
                         response.add(new CourseDashboardDTO(
                                         course.getId(),
                                         course.getTitle(),
@@ -91,47 +102,83 @@ public class StudentController {
                         @PathVariable UUID courseId,
                         Authentication authentication) {
 
-                String email = authentication.getName();
-                User user = userRepository.findByEmail(email)
+                // 1. Obtener Usuario
+                User user = userRepository.findByEmail(authentication.getName())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Usuario no encontrado"));
 
-                // 🛑 CAMBIO CRÍTICO: Verificamos si existe la matrícula para dar acceso
+                // 2. Seguridad: ¿Está matriculado?
                 boolean isEnrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
-
                 if (!isEnrolled) {
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                        "No tienes permiso para ver este curso. Debes comprarlo primero.");
+                                        "No tienes acceso a este curso. Debes comprarlo primero.");
                 }
 
-                // Si tiene permiso, buscamos el curso normal
+                // 3. Obtener el curso
                 Course course = courseRepository.findById(courseId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Curso no encontrado"));
 
+                // 4. 🚀 OPTIMIZACIÓN: Traer todos los IDs de lecciones completadas por el
+                // usuario de golpe
+                // Esto evita hacer una consulta por cada lección (N+1 problem)
+                Set<UUID> completedLessonIds = progressRepository.findCompletedLessonIdsByUserId(user.getId());
+
+                // 5. Calcular Progreso Global del Curso
+                long totalLessons = lessonRepository.countByCourseId(courseId);
+                // Filtramos las lecciones completadas que PERTENECEN a este curso
+                long completedInThisCourse = progressRepository.countCompletedLessons(user.getId(), courseId);
+
+                int progressPercentage = 0;
+                if (totalLessons > 0) {
+                        progressPercentage = (int) ((completedInThisCourse * 100) / totalLessons);
+                        if (progressPercentage > 100)
+                                progressPercentage = 100;
+                }
+
+                // 6. Mapear Módulos y Lecciones (Inyectando el estado 'isCompleted')
                 List<ModuleDTO> sectionDTOs = course.getModules().stream()
+                                .sorted((m1, m2) -> Integer.compare(m1.getOrderIndex(), m2.getOrderIndex())) // Asegurar
+                                                                                                             // orden
                                 .map(module -> new ModuleDTO(
                                                 module.getId(),
                                                 module.getTitle(),
                                                 module.getOrderIndex(),
                                                 module.getLessons().stream()
-                                                                .map(lesson -> new LessonDTO(
-                                                                                lesson.getId(),
-                                                                                lesson.getTitle(),
-                                                                                lesson.getVideoUrl(),
-                                                                                lesson.getPdfUrl(),
-                                                                                0,
-                                                                                false))
+                                                                .sorted((l1, l2) -> Integer.compare(l1.getOrderIndex(),
+                                                                                l2.getOrderIndex())) // Asegurar orden
+                                                                                                     // lecciones
+                                                                .map(lesson -> {
+                                                                        // ⚡ Aquí comprobamos si está completada mirando
+                                                                        // el Set (es instantáneo)
+                                                                        boolean isCompleted = completedLessonIds
+                                                                                        .contains(lesson.getId());
+
+                                                                        return new LessonDTO(
+                                                                                        lesson.getId(),
+                                                                                        lesson.getTitle(),
+                                                                                        lesson.getVideoUrl(),
+                                                                                        lesson.getPdfUrl(),
+                                                                                        lesson.getDuration(), // Usamos
+                                                                                                              // la
+                                                                                                              // duración
+                                                                                                              // real de
+                                                                                                              // la BD
+                                                                                        isCompleted // ✅ Estado real
+                                                                        );
+                                                                })
                                                                 .toList()))
                                 .toList();
 
+                // 7. Construir respuesta final
                 CourseContentDTO content = new CourseContentDTO(
                                 course.getId(),
                                 course.getTitle(),
                                 course.getDescription(),
                                 sectionDTOs,
                                 course.getCoverImage(),
-                                0);
+                                progressPercentage // ✅ Progreso real
+                );
 
                 return ResponseEntity.ok(content);
         }

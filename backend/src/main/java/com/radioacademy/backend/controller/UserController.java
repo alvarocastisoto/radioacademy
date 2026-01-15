@@ -1,6 +1,12 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.service.StorageService; // 
+import com.radioacademy.backend.service.StorageService;
+
+import jakarta.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import com.radioacademy.backend.dto.UserProfileDTO;
 import com.radioacademy.backend.entity.User;
@@ -9,8 +15,7 @@ import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException; // 
-import org.springframework.http.HttpStatus; // 
+import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +26,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     private UserRepository userRepository;
@@ -49,84 +56,89 @@ public class UserController {
         }
     }
 
-    @PutMapping("profile")
-    public ResponseEntity<Map<String, String>> updateProfile(@RequestBody UserProfileDTO profileData) {
+    @PutMapping("/profile")
+    public ResponseEntity<Map<String, String>> updateProfile(@Valid @RequestBody UserProfileDTO profileData) {
 
-        System.out.println("🚩 1. INICIO CONTROLADOR");
+        // 1. OBTENER USUARIO AUTENTICADO
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
         User user = userRepository.findByEmail(auth.getName())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        // Preparar datos básicos
-        String newName = profileData.name() != null ? profileData.name() : user.getName();
-        String newSurname = profileData.surname() != null ? profileData.surname() : user.getSurname();
-        String newPhone = profileData.phone() != null ? profileData.phone() : user.getPhone();
-        String newEmail = user.getEmail();
-        String newPassword = user.getPassword();
+        boolean emailChanged = false;
 
-        // --- LÓGICA DE AVATAR Y GARBAGE COLLECTION ---
-        String newAvatar = user.getAvatar(); // Por defecto mantenemos el viejo
+        // 2. VALIDACIÓN Y CAMBIO DE CONTRASEÑA (Prioridad Alta)
+        if (profileData.newPassword() != null && !profileData.newPassword().isBlank()) {
 
-        // Si nos envían un avatar nuevo Y es diferente al que ya teníamos
-        if (profileData.avatar() != null && !profileData.avatar().isEmpty()
-                && !profileData.avatar().equals(user.getAvatar())) {
+            // Validar que envió la actual
+            if (profileData.currentPassword() == null || profileData.currentPassword().isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Debes introducir tu contraseña actual para cambiarla."));
+            }
 
-            // 1. Actualizamos la variable para la BD
-            newAvatar = profileData.avatar();
+            // Validar que la actual coincida
+            if (!passwordEncoder.matches(profileData.currentPassword(), user.getPassword())) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "La contraseña actual es incorrecta."));
+            }
 
-            // 2. Borramos el archivo físico antiguo (Si existe)
+            // Aplicar cambio
+            user.setPassword(passwordEncoder.encode(profileData.newPassword()));
+        }
+
+        // 3. VALIDACIÓN Y CAMBIO DE EMAIL
+        // Si el email cambia, marcamos la bandera para avisar al frontend
+        if (profileData.email() != null && !profileData.email().isBlank()
+                && !profileData.email().equals(user.getEmail())) {
+
+            if (userRepository.existsByEmail(profileData.email())) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body(Map.of("error", "Ese email ya está en uso por otro usuario."));
+            }
+            user.setEmail(profileData.email());
+            emailChanged = true;
+        }
+
+        // 4. ACTUALIZACIÓN DE DATOS BÁSICOS
+        if (profileData.name() != null)
+            user.setName(profileData.name());
+        if (profileData.surname() != null)
+            user.setSurname(profileData.surname());
+        if (profileData.phone() != null)
+            user.setPhone(profileData.phone());
+
+        // 5. GESTIÓN DE AVATAR (Garbage Collection)
+        if (profileData.avatar() != null && !profileData.avatar().equals(user.getAvatar())) {
+
             String oldAvatarUrl = user.getAvatar();
-            if (oldAvatarUrl != null && !oldAvatarUrl.isEmpty()) {
+
+            // Asignamos el nuevo
+            user.setAvatar(profileData.avatar());
+
+            // Borrado físico del antiguo
+            if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
                 try {
-                    // La URL es tipo ".../uploads/images/foto.jpg". Extraemos "foto.jpg"
                     String filename = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
                     storageService.delete(filename);
-                    System.out.println("🗑️ Imagen antigua borrada: " + filename);
+                    logger.info("🗑️ Avatar antiguo eliminado: {}", filename);
                 } catch (Exception e) {
-                    System.err.println("⚠️ No se pudo borrar la imagen antigua: " + e.getMessage());
+                    logger.warn("⚠️ No se pudo borrar el avatar antiguo: {}", e.getMessage());
                 }
             }
         }
-        // ---------------------------------------------
 
-        // Validaciones de Email
-        if (profileData.email() != null && !profileData.email().isEmpty()
-                && !profileData.email().equals(user.getEmail())) {
-            if (userRepository.existsByEmail(profileData.email())) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("error", "El email ya existe"));
-            }
-            newEmail = profileData.email();
+        // 6. GUARDADO FINAL
+        userRepository.save(user);
+        logger.info("✅ Perfil actualizado para usuario: {}", user.getEmail());
+
+        // 7. RESPUESTA CONDICIONAL
+        if (emailChanged) {
+            // Avisamos a Angular para que cierre sesión
+            return ResponseEntity.ok(Map.of(
+                    "message", "Perfil actualizado. Email cambiado, inicia sesión de nuevo.",
+                    "action", "LOGOUT_REQUIRED"));
         }
-
-        // Validaciones de Password
-        if (profileData.newPassword() != null && !profileData.newPassword().isEmpty()) {
-            if (profileData.currentPassword() == null || profileData.currentPassword().isEmpty()
-                    || !passwordEncoder.matches(profileData.currentPassword(), user.getPassword())) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("error", "La contraseña actual es incorrecta"));
-            }
-            newPassword = passwordEncoder.encode(profileData.newPassword());
-        }
-
-        System.out.println("🚩 2. LLAMANDO A BD...");
-
-        // Usamos el método personalizado que incluye el avatar
-        userRepository.updateProfileDirectly(
-                user.getId(), newName, newSurname, newPhone, newEmail, newPassword, newAvatar);
-
-        System.out.println("🚩 3. ÉXITO");
 
         return ResponseEntity.ok(Map.of("message", "Perfil actualizado correctamente"));
-    }
-
-    private void updateBasicFields(User user, UserProfileDTO dto) {
-        if (dto.name() != null)
-            user.setName(dto.name());
-        if (dto.surname() != null)
-            user.setSurname(dto.surname());
-        if (dto.phone() != null)
-            user.setPhone(dto.phone());
     }
 
     @GetMapping("profile")

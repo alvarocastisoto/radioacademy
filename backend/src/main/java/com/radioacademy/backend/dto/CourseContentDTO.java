@@ -2,13 +2,20 @@ package com.radioacademy.backend.dto;
 
 import java.util.UUID;
 import java.util.List;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record CourseContentDTO(
-        UUID id,
-        String title,
-        String description,
-        List<ModuleDTO> sections,
-        String coverImage, // 👈 Lista anidada de secciones
-        Integer progress // Progreso global
-) {
+                @NotNull(message = "El ID del curso es obligatorio") UUID id,
+
+                @NotBlank(message = "El título es obligatorio") String title,
+
+                @NotBlank(message = "La descripción es obligatoria") String description,
+
+                @NotNull(message = "Las secciones no pueden ser nulas") // 👈 @NotNull para Listas
+                List<ModuleDTO> sections,
+
+                @NotBlank(message = "La imagen de portada es obligatoria") String coverImage,
+
+                @NotNull(message = "El progreso es obligatorio") Integer progress) {
 }

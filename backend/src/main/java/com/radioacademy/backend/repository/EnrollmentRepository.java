@@ -15,4 +15,8 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
 
     // Opcional: Para evitar duplicados en el momento de la compra
     boolean existsByUserIdAndCourseId(UUID userId, UUID courseId);
+
+    // Devuelve un Optional directamente si existe la matrícula de X usuario en Y
+    // curso
+    Optional<Enrollment> findByUserIdAndCourseId(UUID userId, UUID courseId);
 }

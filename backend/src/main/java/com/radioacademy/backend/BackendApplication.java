@@ -14,14 +14,4 @@ public class BackendApplication {
 		SpringApplication.run(BackendApplication.class, args);
 	}
 
-	@Bean
-	public CommandLineRunner imprimirHash(
-			org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
-		return args -> {
-			System.out.println("------------------------------------------------");
-			System.out.println("🔑 TU HASH PARA 'admin' ES: " + passwordEncoder.encode("admin"));
-			System.out.println("------------------------------------------------");
-		};
-	}
-
 }
