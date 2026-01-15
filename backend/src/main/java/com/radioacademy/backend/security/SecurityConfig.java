@@ -17,7 +17,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.http.HttpMethod;
-
+import org.springframework.beans.factory.annotation.Value;
 import java.util.List;
 
 @Configuration
@@ -26,6 +26,9 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final CustomUserDetailsService customUserDetailsService;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public SecurityConfig(CustomUserDetailsService customUserDetailsService, JwtAuthenticationFilter jwtAuthFilter) {
         this.customUserDetailsService = customUserDetailsService;
@@ -74,13 +77,16 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ⚠️ CAMBIO IMPORTANTE: Permitimos TODO (*) para evitar problemas en desarrollo
-        // Usamos allowedOriginPatterns en lugar de allowedOrigins para que funcione con
-        // allowCredentials
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // 2. 🔒 SEGURIDAD: En lugar de "*", usamos SOLO tu frontend real
+        configuration.setAllowedOrigins(List.of(frontendUrl));
 
+        // Métodos permitidos
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(List.of("*"));
+
+        // Cabeceras permitidas
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+
+        // Credenciales (Cookies/Auth headers) permitidas SOLO para el origen de arriba
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -1,6 +1,6 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.service.StorageService; // 👈 Importante
+import com.radioacademy.backend.service.StorageService; // 
 import org.springframework.beans.factory.annotation.Autowired;
 import com.radioacademy.backend.dto.UserProfileDTO;
 import com.radioacademy.backend.entity.User;
@@ -9,7 +9,8 @@ import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException; // 
+import org.springframework.http.HttpStatus; // 
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +56,7 @@ public class UserController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         // Preparar datos básicos
         String newName = profileData.name() != null ? profileData.name() : user.getName();
@@ -132,7 +133,7 @@ public class UserController {
     public ResponseEntity<User> getMyProfile() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         user.setPassword(null);
         return ResponseEntity.ok(user);
     }

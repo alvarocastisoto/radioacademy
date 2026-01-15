@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -97,7 +98,7 @@ public class CourseController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User teacher = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         Course newCourse = new Course();
         // Aquí SÍ usamos setters porque 'Course' es una Entidad, no un Record.
@@ -120,7 +121,7 @@ public class CourseController {
     public ResponseEntity<Course> updateCourse(@PathVariable String id, @RequestBody CreateCourseRequest request) {
         UUID uuid = UUID.fromString(id);
         Course existingCourse = courseRepository.findById(uuid)
-                .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
         String newImage = request.coverImage();
         String oldImage = existingCourse.getCoverImage();
@@ -175,7 +176,7 @@ public class CourseController {
         // 1. Obtener usuario
         String email = authentication.getName();
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         // 2. Buscar matrículas DIRECTAMENTE en el repositorio de enrollments
         List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());

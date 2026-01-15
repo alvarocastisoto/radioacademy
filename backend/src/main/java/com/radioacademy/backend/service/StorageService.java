@@ -4,6 +4,8 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +33,7 @@ public class StorageService {
     public String store(MultipartFile file) {
         try {
             if (file.isEmpty()) {
-                throw new RuntimeException("Error: El archivo está vacío.");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error: El archivo está vacío.");
             }
 
             // Nombre único
@@ -56,7 +58,8 @@ public class StorageService {
                     .toUriString();
 
         } catch (IOException e) {
-            throw new RuntimeException("Error al guardar el archivo: " + e.getMessage());
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al guardar el archivo: " + e.getMessage());
         }
     }
 

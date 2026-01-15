@@ -20,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -101,7 +102,8 @@ public class AuthController {
 
         // 2. Recuperamos la Entidad Usuario (para enviarla al Frontend)
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado tras autenticación"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        "Usuario no encontrado tras autenticación"));
 
         // 3. Generamos el token
         // Usamos el UserDetailsService para obtener la versión "Segura" del usuario
@@ -146,7 +148,7 @@ public class AuthController {
 
         // 1. Buscar token
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token inválido"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Token inválido"));
 
         // 2. Verificar caducidad
         if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {

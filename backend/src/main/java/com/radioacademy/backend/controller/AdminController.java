@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -109,7 +110,8 @@ public class AdminController {
                         Enrollment enrollment = enrollmentRepository.findByUserId(userId).stream()
                                         .filter(e -> e.getCourse().getId().equals(courseId))
                                         .findFirst()
-                                        .orElseThrow(() -> new RuntimeException("Matrícula no encontrada"));
+                                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                        "Matrícula no encontrada"));
 
                         enrollmentRepository.delete(enrollment);
 
@@ -145,7 +147,8 @@ public class AdminController {
         @PutMapping("/users/{userId}/role")
         public ResponseEntity<?> changeUserRole(@PathVariable UUID userId, @RequestParam String newRole) {
                 User user = userRepository.findById(userId)
-                                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuario no encontrado"));
                 try {
                         user.setRole(Role.valueOf(newRole));
                         userRepository.save(user);

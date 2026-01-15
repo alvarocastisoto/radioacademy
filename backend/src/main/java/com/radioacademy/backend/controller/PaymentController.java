@@ -14,7 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.UUID;
@@ -47,10 +48,10 @@ public class PaymentController {
     // ... (Tu método getAuthenticatedUser sigue igual) ...
     private User getAuthenticatedUser(Authentication authentication) {
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new RuntimeException("Usuario no autenticado");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuario no autenticado");
         }
         return userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
     // 1. CHECKOUT (Igual que antes, protegemos el intento de pago)
@@ -61,7 +62,7 @@ public class PaymentController {
 
         UUID courseId = UUID.fromString(request.get("courseId"));
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
         // Bloqueo rápido antes de llamar a Stripe
         if (enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId)) {
@@ -112,7 +113,7 @@ public class PaymentController {
             if ("paid".equals(session.getPaymentStatus())) {
                 String courseIdStr = session.getMetadata().get("course_id");
                 Course course = courseRepository.findById(UUID.fromString(courseIdStr))
-                        .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
                 // 👈 AQUÍ LLAMAMOS AL SERVICIO NUEVO
                 // El servicio se encarga de verificar si existe y guardar si no.

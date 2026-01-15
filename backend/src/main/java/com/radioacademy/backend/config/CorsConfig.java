@@ -5,9 +5,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.beans.factory.annotation.Value; // 👈 Importante
 
 @Configuration
 public class CorsConfig {
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Bean
     public WebMvcConfigurer corsConfigurer() {
@@ -15,7 +18,7 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(@NonNull CorsRegistry registry) {
                 registry.addMapping("/**") // Permitir todas las rutas
-                        .allowedOrigins("http://localhost:4200") // Permitir solo a nuestro Angular
+                        .allowedOrigins(frontendUrl) // Permitir solo a nuestro Angular
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Verbos permitidos
                         .allowedHeaders("*")
                         .allowCredentials(true);

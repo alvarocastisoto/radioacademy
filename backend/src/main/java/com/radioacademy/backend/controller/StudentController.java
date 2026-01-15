@@ -5,14 +5,15 @@ import com.radioacademy.backend.dto.CourseDashboardDTO;
 import com.radioacademy.backend.dto.LessonDTO;
 import com.radioacademy.backend.dto.ModuleDTO;
 import com.radioacademy.backend.entity.Course;
-import com.radioacademy.backend.entity.Enrollment; // 👈 Importante
+import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.CourseRepository;
-import com.radioacademy.backend.repository.EnrollmentRepository; // 👈 Importante
+import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.LessonProgressRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,102 +32,107 @@ import java.util.UUID;
 @RequestMapping("/api/student")
 public class StudentController {
 
-    @Autowired
-    private UserRepository userRepository;
+        @Autowired
+        private UserRepository userRepository;
 
-    @Autowired
-    private CourseRepository courseRepository;
+        @Autowired
+        private CourseRepository courseRepository;
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository; // 👈 INYECTAMOS ESTO
+        @Autowired
+        private EnrollmentRepository enrollmentRepository; // 👈 INYECTAMOS ESTO
 
-    @Autowired
-    private LessonProgressRepository progressRepository;
+        @Autowired
+        private LessonProgressRepository progressRepository;
 
-    @Autowired
-    private LessonRepository lessonRepository;
+        @Autowired
+        private LessonRepository lessonRepository;
 
-    // ✅ DASHBOARD (MIS CURSOS) - CORREGIDO
-    @GetMapping("/dashboard")
-    public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // ✅ DASHBOARD (MIS CURSOS) - CORREGIDO
+        @GetMapping("/dashboard")
+        public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard() {
+                Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+                User user = userRepository.findByEmail(auth.getName())
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuario no encontrado"));
 
-        List<CourseDashboardDTO> response = new ArrayList<>();
+                List<CourseDashboardDTO> response = new ArrayList<>();
 
-        // 🛑 CAMBIO CRÍTICO: Buscamos en las matrículas, no en la relación directa
-        List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
+                // 🛑 CAMBIO CRÍTICO: Buscamos en las matrículas, no en la relación directa
+                List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
 
-        for (Enrollment enrollment : enrollments) {
-            Course course = enrollment.getCourse(); // Obtenemos el curso desde la matrícula
+                for (Enrollment enrollment : enrollments) {
+                        Course course = enrollment.getCourse(); // Obtenemos el curso desde la matrícula
 
-            long totalLessons = lessonRepository.countByCourseId(course.getId());
-            long completedLessons = progressRepository.countCompletedLessons(user.getId(), course.getId());
+                        long totalLessons = lessonRepository.countByCourseId(course.getId());
+                        long completedLessons = progressRepository.countCompletedLessons(user.getId(), course.getId());
 
-            int percentage = 0;
-            if (totalLessons > 0) {
-                percentage = (int) ((completedLessons * 100) / totalLessons);
-            }
-            if (percentage > 100) percentage = 100;
+                        int percentage = 0;
+                        if (totalLessons > 0) {
+                                percentage = (int) ((completedLessons * 100) / totalLessons);
+                        }
+                        if (percentage > 100)
+                                percentage = 100;
 
-            response.add(new CourseDashboardDTO(
-                    course.getId(),
-                    course.getTitle(),
-                    course.getDescription(),
-                    course.getCoverImage(),
-                    percentage));
+                        response.add(new CourseDashboardDTO(
+                                        course.getId(),
+                                        course.getTitle(),
+                                        course.getDescription(),
+                                        course.getCoverImage(),
+                                        percentage));
+                }
+
+                return ResponseEntity.ok(response);
         }
 
-        return ResponseEntity.ok(response);
-    }
+        // ✅ PLAYER (CONTENIDO DEL CURSO) - CORREGIDO
+        @GetMapping("/course/{courseId}/content")
+        @Transactional(readOnly = true)
+        public ResponseEntity<CourseContentDTO> getCourseContent(
+                        @PathVariable UUID courseId,
+                        Authentication authentication) {
 
-    // ✅ PLAYER (CONTENIDO DEL CURSO) - CORREGIDO
-    @GetMapping("/course/{courseId}/content")
-    @Transactional(readOnly = true)
-    public ResponseEntity<CourseContentDTO> getCourseContent(
-            @PathVariable UUID courseId,
-            Authentication authentication) {
+                String email = authentication.getName();
+                User user = userRepository.findByEmail(email)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuario no encontrado"));
 
-        String email = authentication.getName();
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                // 🛑 CAMBIO CRÍTICO: Verificamos si existe la matrícula para dar acceso
+                boolean isEnrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
 
-        // 🛑 CAMBIO CRÍTICO: Verificamos si existe la matrícula para dar acceso
-        boolean isEnrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
-        
-        if (!isEnrolled) {
-            throw new RuntimeException("⛔ No tienes permiso para ver este curso. Debes comprarlo primero.");
+                if (!isEnrolled) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                        "No tienes permiso para ver este curso. Debes comprarlo primero.");
+                }
+
+                // Si tiene permiso, buscamos el curso normal
+                Course course = courseRepository.findById(courseId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Curso no encontrado"));
+
+                List<ModuleDTO> sectionDTOs = course.getModules().stream()
+                                .map(module -> new ModuleDTO(
+                                                module.getId(),
+                                                module.getTitle(),
+                                                module.getOrderIndex(),
+                                                module.getLessons().stream()
+                                                                .map(lesson -> new LessonDTO(
+                                                                                lesson.getId(),
+                                                                                lesson.getTitle(),
+                                                                                lesson.getVideoUrl(),
+                                                                                lesson.getPdfUrl(),
+                                                                                0,
+                                                                                false))
+                                                                .toList()))
+                                .toList();
+
+                CourseContentDTO content = new CourseContentDTO(
+                                course.getId(),
+                                course.getTitle(),
+                                course.getDescription(),
+                                sectionDTOs,
+                                course.getCoverImage(),
+                                0);
+
+                return ResponseEntity.ok(content);
         }
-
-        // Si tiene permiso, buscamos el curso normal
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Curso no encontrado"));
-
-        List<ModuleDTO> sectionDTOs = course.getModules().stream()
-                .map(module -> new ModuleDTO(
-                        module.getId(),
-                        module.getTitle(),
-                        module.getOrderIndex(),
-                        module.getLessons().stream()
-                                .map(lesson -> new LessonDTO(
-                                        lesson.getId(),
-                                        lesson.getTitle(),
-                                        lesson.getVideoUrl(),
-                                        lesson.getPdfUrl(),
-                                        0,
-                                        false))
-                                .toList()))
-                .toList();
-
-        CourseContentDTO content = new CourseContentDTO(
-                course.getId(),
-                course.getTitle(),
-                course.getDescription(),
-                sectionDTOs,
-                course.getCoverImage(),
-                0);
-
-        return ResponseEntity.ok(content);
-    }
 }

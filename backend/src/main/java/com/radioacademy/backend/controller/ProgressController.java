@@ -11,7 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.server.ResponseStatusException; // 
+import org.springframework.http.HttpStatus; // 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -34,14 +35,14 @@ public class ProgressController {
         // Obtenemos usuario del Token
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId);
 
         if (progress == null) {
             // Si no existe, lo creamos (Marcar como visto)
             Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new RuntimeException("Lección no existe"));
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no existe"));
 
             progress = LessonProgress.builder()
                     .user(user)
@@ -64,7 +65,7 @@ public class ProgressController {
     public ResponseEntity<List<UUID>> getCourseProgress(@PathVariable UUID courseId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User user = userRepository.findByEmail(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         List<LessonProgress> progressList = progressRepository.findByUserIdAndCourseId(user.getId(), courseId);
 
