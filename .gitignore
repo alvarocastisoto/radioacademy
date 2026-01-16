@@ -7,17 +7,25 @@ ehthumbs.db
 Desktop.ini
 
 # =========================
+# Scripts Locales con Secretos (¡IMPORTANTE!)
+# =========================
+*.bat
+*.sh
+*.cmd
+backend/start_app.bat
+
+# =========================
 # IDEs / Editors
 # =========================
 .idea/
 *.iml
 *.ipr
 *.iws
+
+# VS Code: Ignoramos todo EXCEPTO extensiones recomendadas.
+# IMPORTANTE: launch.json se ignora porque puede tener claves.
 .vscode/*
-!.vscode/settings.json
 !.vscode/extensions.json
-!.vscode/launch.json
-!.vscode/tasks.json
 
 # =========================
 # Logs
@@ -139,11 +147,20 @@ docker-data/
 *.bak
 *.tmp
 *.orig
-# --- Spring config (ignore local properties with secrets) ---
-backend/src/main/resources/application.properties
-backend/src/main/resources/application-*.properties
 
-# --- Angular environments (ignore local env files) ---
-frontend/src/environments/environment.ts
-frontend/src/environments/environment.development.ts
-frontend/src/environments/environment.production.ts
+# =========================
+# CONFIGURACIÓN DE APP (ATENCIÓN AQUÍ)
+# =========================
+
+# Ignorar propiedades locales que uses para sobreescribir (si crearas alguno)
+backend/src/main/resources/application-local.properties
+
+# PERMITIMOS application.properties porque ahora está limpio (solo placeholders)
+# Si lo ignoras, la app fallará en Render.
+!backend/src/main/resources/application.properties
+
+# Angular: Permitimos environment.ts porque el build lo necesita.
+# Asegúrate de no poner claves SECRETAS (sk_) aquí, solo PÚBLICAS (pk_).
+!frontend/src/environments/environment.ts
+!frontend/src/environments/environment.development.ts
+!frontend/src/environments/environment.production.ts

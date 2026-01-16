@@ -1,4 +1,3 @@
-<!-- player.html -->
 <div class="player-page">
   <div class="player-layout">
     <!-- SIDEBAR -->
@@ -56,7 +55,7 @@
 
                 <span class="lesson-meta">
                   @if (currentLesson?.id === lesson.id) {
-                  <span class="playing"> <i class="bi bi-play-fill"></i> Reproduciendo </span>
+                  <span class="playing"><i class="bi bi-play-fill"></i> Reproduciendo</span>
                   }
                   {{ lesson.duration > 0 ? lesson.duration + ' min' : '' }}
                 </span>
@@ -130,26 +129,54 @@
               Tu navegador no soporta el tag de video.
             </video>
             } } @else {
+            <!-- PDF: si existe, mostramos iframe cuando esté cargado -->
+            @if (currentLesson.pdfUrl) { @if (pdfLoading) {
+            <div class="pdf-only">
+              <div class="spinner-border mb-3"></div>
+              <p class="mt-2 mb-0">Cargando PDF...</p>
+            </div>
+            } @else if (pdfError) {
             <div class="pdf-only">
               <i class="bi bi-file-earmark-pdf display-1"></i>
-              <p class="mt-2 mb-0">Esta lección es material de lectura (PDF)</p>
+              <p class="mt-2 mb-2">{{ pdfError }}</p>
             </div>
-            }
+            } @else if (safePdfUrl) {
+            <iframe [src]="safePdfUrl" width="100%" height="100%" style="border: 0"></iframe>
+            } @else {
+            <div class="pdf-only">
+              <i class="bi bi-file-earmark-pdf display-1"></i>
+              <p class="mt-2 mb-0">Material PDF disponible</p>
+            </div>
+            } } @else {
+            <div class="pdf-only">
+              <i class="bi bi-collection-play display-1"></i>
+              <p class="mt-2 mb-0">Sin video ni PDF</p>
+            </div>
+            } }
           </div>
 
           <div class="lesson-info">
             <h2 class="fw-bold mb-3 text-white">{{ currentLesson.title }}</h2>
 
             <div class="actions">
-              @if (safePdfUrl) {
-              <a
-                [href]="safePdfUrl"
-                target="_blank"
-                rel="noopener"
+              @if (currentLesson.pdfUrl) {
+              <button
+                type="button"
+                class="btn btn-outline-light d-flex align-items-center shadow-sm"
+                (click)="openPdfNewTab()"
+                [disabled]="pdfLoading"
+              >
+                <i class="bi bi-box-arrow-up-right me-2"></i> Abrir PDF
+              </button>
+
+              <button
+                type="button"
                 class="btn btn-danger d-flex align-items-center shadow-sm"
+                (click)="downloadPdf()"
+                [disabled]="pdfLoading"
               >
                 <i class="bi bi-file-earmark-pdf-fill me-2"></i> Descargar Material (PDF)
-              </a>
+              </button>
               }
 
               <button

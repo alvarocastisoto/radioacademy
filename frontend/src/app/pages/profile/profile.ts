@@ -19,12 +19,9 @@ export class ProfileComponent implements OnInit {
   private studentService = inject(StudentService);
   private authService = inject(AuthService);
   private cd = inject(ChangeDetectorRef);
-  private mediaService = inject(MediaService);
+  public mediaService = inject(MediaService); // 👈 Hacemos público para usar toPublicUrl en el HTML si hiciera falta
 
-  // Variable para recordar el email original
   currentEmail: string = '';
-
-  // 👇 NUEVO: Variable para controlar la imagen visualmente
   avatarUrl: string | null = null;
 
   profileForm: FormGroup;
@@ -64,28 +61,29 @@ export class ProfileComponent implements OnInit {
         next: (user) => {
           this.currentEmail = user.email;
 
-          // 👇 NUEVO: Guardamos la URL para mostrarla
-          this.avatarUrl = user.avatar;
+          // ✅ CORRECCIÓN 1: Convertimos el path relativo (uploads/...) a URL completa
+          // para que el navegador pueda mostrar la imagen.
+          this.avatarUrl = this.mediaService.toPublicUrl(user.avatar);
 
           this.profileForm.patchValue({
             name: user.name,
             surname: user.surname,
             email: user.email,
             phone: user.phone,
-            avatar: user.avatar,
+            avatar: user.avatar, // En el form guardamos el path relativo (para BD)
           });
         },
-        error: (err) => {
+        error: (err: any) => {
+          // 👈 Tipamos como any para evitar quejas
           console.error('Error cargando perfil', err);
           this.errorMessage = 'No se pudieron cargar tus datos.';
         },
       });
   }
 
-  // 👇 NUEVO: Si la imagen falla (404/403), cargamos una generada
   handleImageError() {
     const name = this.profileForm.get('name')?.value || 'U';
-    // Usamos ui-avatars para generar una imagen con la inicial
+    // Si falla la imagen, ponemos un avatar por defecto
     this.avatarUrl = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`;
   }
 
@@ -101,23 +99,25 @@ export class ProfileComponent implements OnInit {
     this.isUploading = true;
     this.errorMessage = '';
 
+    // ✅ CORRECCIÓN 2: El método se llama uploadFile, no uploadImage
     this.mediaService
-      .uploadImage(file)
-      .pipe
-      // No usamos finalize aquí para mantener el spinner hasta que guardemos en BD
-      ()
+      .uploadFile(file)
+      .pipe()
       .subscribe({
-        next: (url) => {
-          console.log('✅ Imagen subida a disco. URL:', url);
+        next: (relativePath) => {
+          // El backend devuelve "uploads/images/xxx.jpg"
+          console.log('✅ Imagen subida a disco. Path:', relativePath);
 
-          // 1. Actualizamos visualmente
-          this.avatarUrl = url;
-          this.profileForm.patchValue({ avatar: url });
+          // 1. Actualizamos visualmente (Convertimos a URL completa)
+          this.avatarUrl = this.mediaService.toPublicUrl(relativePath);
 
-          // 2. AUTO-GUARDADO: Llamamos al backend para vincular la foto al usuario
-          this.saveAvatarToDatabase(url);
+          // 2. Actualizamos el formulario con el path relativo
+          this.profileForm.patchValue({ avatar: relativePath });
+
+          // 3. Guardamos en BD (enviamos el path relativo, que es lo correcto)
+          this.saveAvatarToDatabase(relativePath);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('❌ Error subiendo fichero:', err);
           this.isUploading = false;
           this.errorMessage = 'Error al subir la imagen.';
@@ -126,18 +126,15 @@ export class ProfileComponent implements OnInit {
       });
   }
 
-  // 👇 NUEVO MÉTODO AUXILIAR PARA GUARDAR EN BD
-  saveAvatarToDatabase(url: string) {
+  saveAvatarToDatabase(relativePath: string) {
     const formValues = this.profileForm.value;
 
-    // Preparamos los datos (sin tocar passwords)
     const dto = {
       name: formValues.name,
       surname: formValues.surname,
       email: formValues.email,
       phone: formValues.phone,
-      avatar: url, // 👈 La clave: enviamos la nueva URL
-      // No enviamos passwords para no activar validaciones extrañas
+      avatar: relativePath, // 👈 Enviamos path relativo (uploads/...)
     };
 
     this.studentService
@@ -153,16 +150,14 @@ export class ProfileComponent implements OnInit {
           console.log('💾 Avatar guardado en base de datos');
           this.successMessage = '¡Foto de perfil actualizada!';
 
-          // Actualizamos la sesión para que el Navbar se entere también
           this.authService.updateUserFields({
             ...dto,
-            avatar: url,
+            avatar: relativePath,
           });
 
-          // Quitamos el mensaje de éxito a los 3 segundos para que quede limpio
           setTimeout(() => (this.successMessage = ''), 3000);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error('Error guardando perfil:', err);
           this.errorMessage = 'La imagen se subió, pero no se pudo guardar en tu perfil.';
         },
@@ -197,8 +192,6 @@ export class ProfileComponent implements OnInit {
       currentPassword: formValues.currentPassword,
       avatar: formValues.avatar,
     };
-
-    console.log('Enviando datos...', dto);
 
     this.studentService
       .updateProfile(dto)

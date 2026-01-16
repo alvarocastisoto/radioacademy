@@ -1,4 +1,4 @@
-<!-- course-syllabus.html -->
+<!-- course-details.html (tu course-syllabus.html) -->
 <div class="course-syllabus-page">
   <div class="container-fluid px-3 px-lg-5">
     <div class="course-syllabus-wrap">
@@ -53,14 +53,21 @@
                       ▶ Ver Vídeo
                     </a>
                     } @if (lesson.pdfUrl) {
-                    <a
-                      [href]="'http://localhost:8080/' + lesson.pdfUrl"
-                      target="_blank"
-                      rel="noopener"
-                      class="btn btn-sm btn-secondary"
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-secondary me-2"
+                      (click)="openLessonPdf(lesson.id)"
                     >
-                      📄 PDF
-                    </a>
+                      📄 Abrir PDF
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-outline-secondary"
+                      (click)="downloadLessonPdf(lesson.id, lesson.title)"
+                    >
+                      ⬇ Descargar
+                    </button>
                     }
                   </div>
                 </div>

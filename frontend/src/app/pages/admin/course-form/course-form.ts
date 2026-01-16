@@ -1,4 +1,4 @@
-import { Component, inject, ChangeDetectorRef } from '@angular/core'; // 👈 1. Importar ChangeDetectorRef
+import { Component, inject, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CourseService } from '../../../services/course/course';
@@ -15,9 +15,9 @@ import { CommonModule } from '@angular/common';
 export class CourseForm {
   private fb = inject(FormBuilder);
   private courseService = inject(CourseService);
-  private mediaService = inject(MediaService);
+  public mediaService = inject(MediaService); // 👈 Público por si lo usas en el HTML
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef); // 👈 2. Inyectar CDR
+  private cdr = inject(ChangeDetectorRef);
 
   // Variables para la vista previa
   isUploading = false;
@@ -32,29 +32,33 @@ export class CourseForm {
     coverImage: [''],
   });
 
-  // 👇 Lógica de subida CORREGIDA
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.isUploading = true;
-      this.cdr.detectChanges(); // 👈 Forzar actualización para mostrar el spinner YA
+      this.cdr.detectChanges();
 
       const file = input.files[0];
 
-      this.mediaService.uploadImage(file).subscribe({
-        next: (url) => {
-          this.courseForm.patchValue({ coverImage: url });
-          this.coverPreview = url;
+      // ✅ CORRECCIÓN 1: uploadFile (no uploadImage)
+      this.mediaService.uploadFile(file).subscribe({
+        next: (relativePath) => {
+          // 1. Guardamos el path relativo en el formulario (para la BD)
+          this.courseForm.patchValue({ coverImage: relativePath });
+
+          // 2. ✅ CORRECCIÓN 2: Generamos URL completa para la vista previa visual
+          this.coverPreview = this.mediaService.toPublicUrl(relativePath);
 
           this.isUploading = false;
-          this.cdr.detectChanges(); // 👈 IMPORTANTE: Avisar a Angular que ya terminó
+          this.cdr.detectChanges();
         },
-        error: (err) => {
+        error: (err: any) => {
+          // 👈 Tipado any para evitar quejas
           console.error(err);
           alert('Error al subir la imagen');
 
           this.isUploading = false;
-          this.cdr.detectChanges(); // 👈 IMPORTANTE: Quitar spinner aunque falle
+          this.cdr.detectChanges();
         },
       });
     }
@@ -67,7 +71,7 @@ export class CourseForm {
           alert('Curso creado con éxito');
           this.router.navigate(['/admin']);
         },
-        error: (err) => {
+        error: (err: any) => {
           console.error(err);
           alert('Error al crear el curso');
         },

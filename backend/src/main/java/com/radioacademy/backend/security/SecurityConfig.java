@@ -42,19 +42,31 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. RUTAS PÚBLICAS (Sin token)
-                        .requestMatchers("/api/auth/**").permitAll() // Cubre login, register y test-email
-                        .requestMatchers("/uploads/**").permitAll()
+                        // 1. RUTAS PÚBLICAS Y DE SISTEMA
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
+                        .requestMatchers("/error").permitAll() // 👈 IMPORTANTE: Para ver los mensajes de error reales
 
-                        // Catálogo público
+                        // 2. STATIC RESOURCES (Archivos)
+                        .requestMatchers(HttpMethod.GET, "/uploads/images/**").permitAll() // Imágenes públicas
+                        .requestMatchers("/uploads/pdfs/**").denyAll() // 🔒 PDFs físicos BLOQUEADOS (nadie entra por
+                                                                       // aquí)
+
+                        // 3. CATÁLOGO PÚBLICO
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 
-                        // Pago
+                        // 4. ACCESO A CONTENIDO PROTEGIDO (PDFs mediante Controlador)
+                        .requestMatchers("/api/student/lessons/**") // 👈 Tu nuevo controlador
+                        .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
+
+                        // 5. SUBIDA DE ARCHIVOS (MEDIA)
+                        .requestMatchers("/api/media/**").authenticated()
+
+                        // 6. PAGOS
                         .requestMatchers("/api/payment/**")
                         .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
 
-                        // 2. ZONA ADMIN
+                        // 7. ZONA ADMIN
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         // Gestión de cursos (Admin)
@@ -65,7 +77,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 3. TODO LO DEMÁS -> AUTENTICADO
+                        // 8. RESTO
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
@@ -77,16 +89,15 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 2. 🔒 SEGURIDAD: En lugar de "*", usamos SOLO tu frontend real
         configuration.setAllowedOrigins(List.of(frontendUrl));
-
-        // Métodos permitidos
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
-        // Cabeceras permitidas
-        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type"));
+        // ⚠️ CAMBIO RECOMENDADO PARA ARCHIVOS:
+        // A veces la subida de archivos (Multipart) envía cabeceras extra o boundaries.
+        // Poner "*" en headers es más seguro para evitar errores de CORS raros al subir
+        // fotos.
+        configuration.setAllowedHeaders(List.of("*"));
 
-        // Credenciales (Cookies/Auth headers) permitidas SOLO para el origen de arriba
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

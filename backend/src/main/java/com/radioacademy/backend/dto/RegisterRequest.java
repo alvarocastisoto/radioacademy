@@ -17,8 +17,9 @@ public class RegisterRequest {
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
-    // Esta RegEx cumple exactamente lo que pedías en tu método isPasswordStrong
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$", message = "La contraseña debe tener al menos 8 caracteres, mayúscula, minúscula, número y carácter especial")
+    // (?=.*[\W_]) significa: "Cualquier cosa que no sea una letra o número, o un
+    // guion bajo"
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])(?=\\S+$).{8,}$", message = "La contraseña debe tener min 8 caracteres, mayúscula, minúscula, número y carácter especial")
     private String password;
 
     @NotBlank(message = "El DNI es obligatorio")
