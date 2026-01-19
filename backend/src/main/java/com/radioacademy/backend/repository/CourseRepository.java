@@ -16,18 +16,5 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     List<Course> findByActiveTrue();
 
-    List<Course> findByStudents_Id(UUID userId);
-
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM course_students WHERE user_id = :userId AND course_id = :courseId", nativeQuery = true)
-    void deleteEnrollment(@Param("userId") UUID userId, @Param("courseId") UUID courseId);
-
-    Optional<Course> findByIdAndStudents_Id(UUID courseId, UUID userId);
-
-    // Añade esto
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO course_students (course_id, user_id) VALUES (:courseId, :userId)", nativeQuery = true)
-    void addEnrollment(UUID courseId, UUID userId);
+    ;
 }

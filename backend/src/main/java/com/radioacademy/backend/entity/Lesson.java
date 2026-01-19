@@ -5,9 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
 import java.util.Objects; // 👈 Importa esto
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.List;
 
 @Entity
 @Table(name = "lessons")
@@ -35,6 +38,9 @@ public class Lesson {
     @JoinColumn(name = "module_id", nullable = false)
     @JsonIgnore
     private Module module;
+
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LessonProgress> progressList = new ArrayList<>();
 
     // 👇 AÑADE ESTO
     @Override

@@ -57,10 +57,8 @@ public class Course {
     @JsonIgnore
     private List<Module> modules;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "course_students", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))
-    @JsonIgnore
-    private Set<User> students = new HashSet<>();
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Enrollment> enrollments = new HashSet<>();
 
     // ✅ Lombok ya genera getCoverImage y setCoverImage.
     // Borramos los manuales.

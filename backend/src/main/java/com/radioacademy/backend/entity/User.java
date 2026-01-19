@@ -70,10 +70,6 @@ public class User implements UserDetails {
     @Column(name = "terms_accepted", nullable = false)
     private boolean termsAccepted;
 
-    @ManyToMany(mappedBy = "students", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private Set<Course> enrolledCourses = new HashSet<>();
-
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     @JsonIgnoreProperties("user") // 🛑 Evita el bucle infinito al convertir a JSON
     private List<Enrollment> enrollments;

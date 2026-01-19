@@ -1,9 +1,11 @@
 package com.radioacademy.backend.repository;
 
-import com.radioacademy.backend.entity.Enrollment;
-import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.entity.Course;
+import com.radioacademy.backend.entity.Enrollment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import java.util.UUID;
 import java.util.Optional;
 
@@ -19,4 +21,10 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
     // Devuelve un Optional directamente si existe la matrícula de X usuario en Y
     // curso
     Optional<Enrollment> findByUserIdAndCourseId(UUID userId, UUID courseId);
+
+    void deleteByUser_IdAndCourse_Id(UUID userId, UUID courseId);
+
+    @Query("select e.course from Enrollment e where e.user.id = :userId")
+    List<Course> findCoursesByUserId(@Param("userId") UUID userId);
+
 }

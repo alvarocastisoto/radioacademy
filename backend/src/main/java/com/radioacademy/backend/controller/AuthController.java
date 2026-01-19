@@ -1,6 +1,7 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.AuthResponse;
+import com.radioacademy.backend.dto.AuthResponseDTO;
+import com.radioacademy.backend.dto.UserAuthDTO;
 import com.radioacademy.backend.dto.LoginRequest;
 import com.radioacademy.backend.dto.RegisterRequest;
 import com.radioacademy.backend.entity.PasswordResetToken;
@@ -61,16 +62,14 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
 
-        // 1. 🛡️ VALIDACIÓN DE DUPLICADOS
-        // (Las validaciones de formato ya las hizo @Valid antes de entrar aquí)
+        // 1) Validación duplicados
         if (userRepository.existsByEmail(request.getEmail())) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
                     .body(Map.of("error", "El email ya está registrado. Por favor, inicia sesión."));
         }
 
-        // 2. 🔄 MAPPING (DTO -> Entity)
-        // Creamos el usuario nosotros mismos para tener CONTROL TOTAL
+        // 2) Mapping DTO -> Entity
         User user = new User();
         user.setName(request.getName());
         user.setSurname(request.getSurname());
@@ -81,46 +80,59 @@ public class AuthController {
         user.setTermsAccepted(request.isTermsAccepted());
         user.setCreatedAt(LocalDateTime.now());
 
-        // 🔒 SEGURIDAD CRÍTICA: Asignamos el rol nosotros, ignorando lo que venga de
-        // fuera
+        // Rol controlado por backend
         user.setRole(Role.STUDENT);
 
-        // 3. 🔐 CIFRADO DE CONTRASEÑA
-        // Ya sabemos que es fuerte gracias a la anotación @Pattern del DTO
+        // 3) Password
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // 4. 💾 GUARDAR EN BD
+        // 4) Save
         User savedUser = userRepository.save(user);
 
-        // 5. 🎟️ GENERAR TOKEN Y EVENTOS
+        // 5) Token + eventos
         UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
         String token = jwtService.generateToken(userDetails);
 
         eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
 
-        // 6. 🚀 RESPUESTA
-        return ResponseEntity.ok(new AuthResponse(token, savedUser));
+        // 6) Respuesta DTO (NO entity)
+        var userDto = toUserAuthDTO(savedUser);
+        return ResponseEntity.ok(new AuthResponseDTO(token, userDto));
     }
 
-    // Endpoint de Login
+    // Endpoint Login
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        // 1. Spring Security autentica (lanza excepción si falla)
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequest request) {
+
+        // 1) Autenticación
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-        // 2. Recuperamos la Entidad Usuario (para enviarla al Frontend)
+        // 2) Cargar usuario (entity)
         User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
                         "Usuario no encontrado tras autenticación"));
 
-        // 3. Generamos el token
-        // Usamos el UserDetailsService para obtener la versión "Segura" del usuario
+        // 3) Token
         UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
         String token = jwtService.generateToken(userDetails);
 
-        // 4. Devolvemos Token + Usuario completo
-        return ResponseEntity.ok(new AuthResponse(token, user));
+        // 4) Respuesta DTO (NO entity)
+        return ResponseEntity.ok(new AuthResponseDTO(token, toUserAuthDTO(user)));
+    }
+
+    private UserAuthDTO toUserAuthDTO(User user) {
+        return new UserAuthDTO(
+                user.getId(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getRole(),
+                // Ajusta esto al campo real de tu User. Si no existe, pon null o elimina el
+                // campo del DTO.
+                user.getAvatar(),
+                user.getCreatedAt());
     }
 
     private boolean isPasswordStrong(String password) {

@@ -3,7 +3,7 @@ package com.radioacademy.backend.controller;
 import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
-import com.radioacademy.backend.repository.projection.LessonPdfInfo;
+import com.radioacademy.backend.dto.internal.LessonPdfInfo;
 import com.radioacademy.backend.service.StorageService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -50,13 +50,13 @@ public class StudentLessonPdfController {
         LessonPdfInfo info = lessonRepository.findPdfInfo(lessonId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no encontrada"));
 
-        String pdfPath = info.getPdfUrl();
+        String pdfPath = info.pdfUrl();
         if (pdfPath == null || pdfPath.isBlank()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Esta lección no tiene PDF");
         }
 
         // Matricula obligatoria
-        boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(userId, info.getCourseId());
+        boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(userId, info.courseId());
         if (!enrolled) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No matriculado en este curso");
         }
