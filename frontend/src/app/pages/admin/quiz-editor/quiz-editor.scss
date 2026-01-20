@@ -1,0 +1,105 @@
+// Variables locales (puedes ajustarlas a tu paleta)
+$border-dashed-color: #dee2e6;
+$success-light-bg: #d1e7dd;
+$success-border: #198754;
+
+.quiz-editor-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+}
+
+// Estilos de las Tarjetas (Preguntas)
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+  // Efecto sutil al pasar el ratón por encima de una pregunta
+  &:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.08) !important; // Bootstrap shadow-sm -> shadow
+  }
+
+  .card-header {
+    background-color: #fff;
+    
+    .badge {
+      font-size: 0.9rem;
+      padding: 0.5em 1em;
+      font-weight: 500;
+    }
+  }
+}
+
+// Estilos para los Inputs de Opciones
+.input-group {
+  .input-group-text {
+    background-color: #f8f9fa;
+    border-right: 0;
+    
+    .form-check-input {
+      width: 1.2em;
+      height: 1.2em;
+      cursor: pointer;
+      margin-top: 0; // Centrar verticalmente
+      
+      &:checked {
+        background-color: $success-border;
+        border-color: $success-border;
+      }
+    }
+  }
+
+  // Input de texto de la opción
+  .form-control {
+    border-left: 0;
+    transition: all 0.2s;
+
+    &:focus {
+      box-shadow: none;
+      border-color: #ced4da; // Evita el glow azul por defecto si quieres mantenerlo limpio
+      border-bottom: 2px solid var(--bs-primary); // Solo borde inferior al escribir
+    }
+
+    // 🟢 ESTADO DE RESPUESTA CORRECTA
+    // Esto coincide con el [class.text-success] que pusimos en el HTML
+    &.text-success {
+      background-color: rgba($success-light-bg, 0.3); // Fondo verde muy suave
+      border-color: rgba($success-border, 0.3);
+      color: darken($success-border, 10%) !important;
+      
+      &::placeholder {
+        color: rgba($success-border, 0.6);
+      }
+    }
+  }
+}
+
+// Zona de "Añadir Nueva Pregunta" (Caja discontinua)
+// El HTML tenía estilos inline, pero mejor controlarlos aquí para el hover
+.border-dashed {
+  border-style: dashed !important;
+  border-width: 2px !important;
+  border-color: $border-dashed-color;
+  background-color: #fff;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  button {
+    pointer-events: none; // Para que el click en el div dispare el botón visualmente
+  }
+
+  &:hover {
+    background-color: #e9ecef; // Gris muy suave al pasar el ratón
+    border-color: #adb5bd;
+    transform: translateY(-2px); // Pequeño salto hacia arriba
+  }
+}
+
+// Ajustes Responsive
+@media (max-width: 768px) {
+  .card-body {
+    padding: 1.5rem !important;
+  }
+  
+  .input-group {
+    flex-wrap: nowrap; // Evita que el botón de borrar salte de línea en móviles
+  }
+}

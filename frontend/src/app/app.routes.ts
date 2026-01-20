@@ -20,6 +20,8 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password';
 import { TestPaymentComponent } from './pages/payment/test-payment/test-payment';
 import { PaymentSuccessComponent } from './pages/payment/payment-success/payment-success';
 import { PaymentCancel } from './pages/payment/payment-cancel/payment-cancel';
+import { QuizEditorComponent } from './pages/admin/quiz-editor/quiz-editor';
+
 
 export const routes: Routes = [
   { path: '', component: Home }, // Ruta raíz (Home)
@@ -51,6 +53,7 @@ export const routes: Routes = [
   { path: 'admin/lessons/:id/edit', component: LessonForm, canActivate: [adminGuard] },
   { path: 'admin/modules/:moduleId/new-lesson', component: LessonForm, canActivate: [adminGuard] },
   { path: 'admin/courses/:courseId/new-module', component: ModuleForm, canActivate: [adminGuard] },
+  { path: 'admin/lessons/:lessonId/quiz',component: QuizEditorComponent, canActivate: [adminGuard] }, // Ruta para el editor de exámenes
 
   { path: '**', redirectTo: '' }, // Si escriben algo raro -> volver a Home
 ];

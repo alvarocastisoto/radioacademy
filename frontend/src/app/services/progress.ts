@@ -20,4 +20,8 @@ export class ProgressService {
   getCourseProgress(courseId: string): Observable<string[]> {
     return this.http.get<string[]>(`${this.apiUrl}/course/${courseId}`);
   }
+
+
+  
+
 }

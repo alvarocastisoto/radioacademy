@@ -51,14 +51,21 @@
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="fw-bold text-dark text-truncate">🎥 {{ lesson.title }}</span>
 
-                    <button
-                      class="btn btn-sm btn-outline-danger"
-                      title="Borrar lección"
-                      aria-label="Borrar lección"
-                      (click)="$event.stopPropagation(); deleteLesson(lesson.id)"
-                    >
-                      🗑️
-                    </button>
+<a
+        [routerLink]="['/admin/lessons', lesson.id, 'quiz']"
+        class="btn btn-sm btn-outline-warning text-dark"
+        title="Gestionar Examen"
+      >
+        📝 Test
+      </a>
+      <button
+        class="btn btn-sm btn-outline-danger"
+        title="Borrar lección"
+        aria-label="Borrar lección"
+        (click)="$event.stopPropagation(); deleteLesson(lesson.id)"
+      >
+        🗑️
+      </button>
                   </div>
 
                   @if (lesson.videoUrl) {

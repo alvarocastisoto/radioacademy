@@ -1,11 +1,14 @@
 package com.radioacademy.backend.dto.exams;
 
 import java.util.List;
+import java.util.UUID;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record QuestionDTO(
-        @NotBlank String question,
-        @NotNull List<OptionDTO> options,
-        @NotNull Integer points) {
+                UUID id,
+                @NotBlank String question,
+                @NotNull List<OptionDTO> options,
+                @NotNull Integer points) {
 }

@@ -7,9 +7,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record QuizDTO(
-
-        @NotBlank String title,
-        @NotNull UUID lessonId,
-        @NotNull List<QuestionDTO> questions) {
+                UUID id,
+                @NotBlank String title,
+                @NotNull UUID lessonId,
+                @NotNull List<QuestionDTO> questions) {
 
 }

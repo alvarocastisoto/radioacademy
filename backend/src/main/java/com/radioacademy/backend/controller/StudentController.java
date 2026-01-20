@@ -4,6 +4,9 @@ import com.radioacademy.backend.dto.CourseContentDTO;
 import com.radioacademy.backend.dto.CourseDashboardDTO;
 import com.radioacademy.backend.dto.LessonDTO;
 import com.radioacademy.backend.dto.ModuleDTO;
+import com.radioacademy.backend.dto.exams.QuizDTO;
+import com.radioacademy.backend.dto.student.QuizResultDTO;
+import com.radioacademy.backend.dto.student.QuizSubmissionDTO;
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;
@@ -12,22 +15,22 @@ import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.LessonProgressRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.service.student.StudentService; // Asegúrate de tener este servicio creado
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Set;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/student")
@@ -35,55 +38,40 @@ public class StudentController {
 
         @Autowired
         private UserRepository userRepository;
-
         @Autowired
         private CourseRepository courseRepository;
-
         @Autowired
         private EnrollmentRepository enrollmentRepository;
-
         @Autowired
         private LessonProgressRepository progressRepository;
-
         @Autowired
         private LessonRepository lessonRepository;
+        @Autowired
+        private StudentService studentService; // 👈 Inyección del servicio de lógica de estudiante
 
-        // ✅ DASHBOARD (MIS CURSOS) - CORREGIDO
+        // ✅ 1. DASHBOARD
         @GetMapping("/dashboard")
         public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard() {
-
-                // 1. Obtener Usuario
                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                 User user = userRepository.findByEmail(auth.getName())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Usuario no encontrado"));
 
                 List<CourseDashboardDTO> response = new ArrayList<>();
-
-                // 2. Buscar Matrículas (Enrollments)
                 List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
 
-                // 3. Calcular progreso para cada curso
                 for (Enrollment enrollment : enrollments) {
                         Course course = enrollment.getCourse();
-
-                        // A. Contamos lecciones totales del curso
                         long totalLessons = lessonRepository.countByCourseId(course.getId());
-
-                        // B. Contamos lecciones completadas por ESTE usuario en ESTE curso
                         long completedLessons = progressRepository.countCompletedLessons(user.getId(), course.getId());
 
-                        // C. Calculamos porcentaje (evitando división por cero)
                         int percentage = 0;
                         if (totalLessons > 0) {
                                 percentage = (int) ((completedLessons * 100) / totalLessons);
                         }
-
-                        // Pequeña seguridad por si los datos se desincronizan
                         if (percentage > 100)
                                 percentage = 100;
 
-                        // D. Añadir al DTO
                         response.add(new CourseDashboardDTO(
                                         course.getId(),
                                         course.getTitle(),
@@ -91,42 +79,31 @@ public class StudentController {
                                         course.getCoverImage(),
                                         percentage));
                 }
-
                 return ResponseEntity.ok(response);
         }
 
-        // ✅ PLAYER (CONTENIDO DEL CURSO) - CORREGIDO
+        // ✅ 2. COURSE PLAYER CONTENT
         @GetMapping("/course/{courseId}/content")
         @Transactional(readOnly = true)
         public ResponseEntity<CourseContentDTO> getCourseContent(
                         @PathVariable UUID courseId,
                         Authentication authentication) {
 
-                // 1. Obtener Usuario
                 User user = userRepository.findByEmail(authentication.getName())
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Usuario no encontrado"));
 
-                // 2. Seguridad: ¿Está matriculado?
                 boolean isEnrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
                 if (!isEnrolled) {
-                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                                        "No tienes acceso a este curso. Debes comprarlo primero.");
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes acceso a este curso.");
                 }
 
-                // 3. Obtener el curso
                 Course course = courseRepository.findById(courseId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Curso no encontrado"));
 
-                // 4. 🚀 OPTIMIZACIÓN: Traer todos los IDs de lecciones completadas por el
-                // usuario de golpe
-                // Esto evita hacer una consulta por cada lección (N+1 problem)
                 Set<UUID> completedLessonIds = progressRepository.findCompletedLessonIdsByUserId(user.getId());
-
-                // 5. Calcular Progreso Global del Curso
                 long totalLessons = lessonRepository.countByCourseId(courseId);
-                // Filtramos las lecciones completadas que PERTENECEN a este curso
                 long completedInThisCourse = progressRepository.countCompletedLessons(user.getId(), courseId);
 
                 int progressPercentage = 0;
@@ -136,50 +113,58 @@ public class StudentController {
                                 progressPercentage = 100;
                 }
 
-                // 6. Mapear Módulos y Lecciones (Inyectando el estado 'isCompleted')
                 List<ModuleDTO> sectionDTOs = course.getModules().stream()
-                                .sorted((m1, m2) -> Integer.compare(m1.getOrderIndex(), m2.getOrderIndex())) // Asegurar
-                                                                                                             // orden
+                                .sorted((m1, m2) -> Integer.compare(m1.getOrderIndex(), m2.getOrderIndex()))
                                 .map(module -> new ModuleDTO(
                                                 module.getId(),
                                                 module.getTitle(),
                                                 module.getOrderIndex(),
                                                 module.getLessons().stream()
+                                                                .distinct()
                                                                 .sorted((l1, l2) -> Integer.compare(l1.getOrderIndex(),
-                                                                                l2.getOrderIndex())) // Asegurar orden
-                                                                                                     // lecciones
+                                                                                l2.getOrderIndex()))
                                                                 .map(lesson -> {
-                                                                        // ⚡ Aquí comprobamos si está completada mirando
-                                                                        // el Set (es instantáneo)
                                                                         boolean isCompleted = completedLessonIds
                                                                                         .contains(lesson.getId());
+
+                                                                        // Mapeo seguro del Quiz ID
+                                                                        UUID quizId = (lesson.getQuiz() != null)
+                                                                                        ? lesson.getQuiz().getId()
+                                                                                        : null;
 
                                                                         return new LessonDTO(
                                                                                         lesson.getId(),
                                                                                         lesson.getTitle(),
                                                                                         lesson.getVideoUrl(),
                                                                                         lesson.getPdfUrl(),
-                                                                                        lesson.getDuration(), // Usamos
-                                                                                                              // la
-                                                                                                              // duración
-                                                                                                              // real de
-                                                                                                              // la BD
-                                                                                        isCompleted // ✅ Estado real
+                                                                                        lesson.getDuration(),
+                                                                                        isCompleted,
+                                                                                        quizId // ✅
                                                                         );
                                                                 })
-                                                                .toList()))
-                                .toList();
+                                                                .collect(Collectors.toList())))
+                                .collect(Collectors.toList());
 
-                // 7. Construir respuesta final
                 CourseContentDTO content = new CourseContentDTO(
                                 course.getId(),
                                 course.getTitle(),
                                 course.getDescription(),
                                 sectionDTOs,
                                 course.getCoverImage(),
-                                progressPercentage // ✅ Progreso real
-                );
+                                progressPercentage);
 
                 return ResponseEntity.ok(content);
+        }
+
+        // ✅ 3. OBTENER EXAMEN (PARA ALUMNO)
+        @GetMapping("/quiz/{quizId}")
+        public ResponseEntity<QuizDTO> getQuizForStudent(@PathVariable UUID quizId) {
+                return ResponseEntity.ok(studentService.getQuizForStudent(quizId));
+        }
+
+        // ✅ 4. ENVIAR RESPUESTAS
+        @PostMapping("/quiz/submit")
+        public ResponseEntity<QuizResultDTO> submitQuiz(@RequestBody QuizSubmissionDTO submission) {
+                return ResponseEntity.ok(studentService.submitQuiz(submission));
         }
 }

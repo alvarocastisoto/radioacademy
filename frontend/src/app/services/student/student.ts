@@ -11,16 +11,15 @@ import { DashboardCourse } from '../../models/dashboard-course';
 export class StudentService {
   private http = inject(HttpClient);
 
-  private apiUrl = environment.apiUrl;
-
+private apiUrl = `${environment.apiUrl}/student`;
   // Obtener mis cursos (Dashboard)
   getMyCourses(): Observable<DashboardCourse[]> {
-    return this.http.get<DashboardCourse[]>(`${this.apiUrl}/student/dashboard`);
+    return this.http.get<DashboardCourse[]>(`${this.apiUrl}/dashboard`);
   }
 
   // Obtener el contenido COMPLETO del curso
   getCourseContent(courseId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/student/course/${courseId}/content`);
+    return this.http.get<any>(`${this.apiUrl}/course/${courseId}/content`);
   }
 
   getProfile(): Observable<any> {
@@ -30,4 +29,19 @@ export class StudentService {
   updateProfile(data: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/users/profile`, data);
   }
+
+    // Obtener examen para hacer (SIN respuestas correctas)
+getQuizForStudent(quizId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/quiz/${quizId}`);
+  }
+
+  // 2. Enviar respuestas para corrección (POST)
+  // payload debe coincidir con QuizSubmissionDTO: { quizId: string, answers: Map/Object }
+  submitQuiz(payload: { quizId: string; answers: any }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/quiz/submit`, payload);
+  }
+  
+
+  
+
 }

@@ -76,6 +76,8 @@ public class SecurityConfig {
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                        .requestMatchers("/api/quizzes/**")
+                        .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
                         // 8. RESTO
                         .anyRequest().authenticated())

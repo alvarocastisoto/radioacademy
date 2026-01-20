@@ -57,4 +57,8 @@ public class Lesson {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Quiz quiz;
 }
