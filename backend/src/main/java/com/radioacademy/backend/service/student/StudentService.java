@@ -3,11 +3,14 @@ package com.radioacademy.backend.service.student;
 import com.radioacademy.backend.dto.course.CourseContentDTO;
 import com.radioacademy.backend.dto.course.CourseDashboardDTO;
 import com.radioacademy.backend.dto.exams.*;
+import com.radioacademy.backend.dto.internal.LessonPdfInfo;
 import com.radioacademy.backend.dto.lesson.LessonDTO;
 import com.radioacademy.backend.dto.module.ModuleDTO;
 import com.radioacademy.backend.entity.*;
 import com.radioacademy.backend.repository.*;
 import com.radioacademy.backend.repository.exams.*;
+import com.radioacademy.backend.service.StorageService;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.core.io.Resource;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,6 +34,7 @@ public class StudentService {
     private final LessonRepository lessonRepository;
     private final LessonProgressRepository progressRepository;
     private final QuizRepository quizRepository;
+    private final StorageService storageService;
 
     // ✅ 1. DASHBOARD
     @Transactional(readOnly = true)
@@ -172,5 +177,37 @@ public class StudentService {
             return 0;
         int percentage = (int) ((completed * 100) / total);
         return Math.min(percentage, 100);
+    }
+
+    // ✅ 5. DESCARGAR PDF DE LECCIÓN (SECURE)
+    @Transactional(readOnly = true)
+    public Resource getLessonPdf(UUID lessonId, String userEmail) {
+        User user = getUser(userEmail);
+
+        // 1. Buscamos info del PDF y Curso (Optimizado con DTO/Proyección)
+        // Asumo que tienes el método findPdfInfo en LessonRepository
+        LessonPdfInfo info = lessonRepository.findPdfInfo(lessonId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no encontrada"));
+
+        // 2. Validar que existe archivo
+        if (info.pdfUrl() == null || info.pdfUrl().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Esta lección no tiene PDF asociado");
+        }
+
+        // 3. Validar Matrícula (El núcleo de la seguridad)
+        if (!enrollmentRepository.existsByUserIdAndCourseId(user.getId(), info.courseId())) {
+            log.warn("⛔ Acceso denegado al PDF: Usuario {} intentó acceder a lección {} sin pagar.", userEmail,
+                    lessonId);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás matriculado en este curso.");
+        }
+
+        // 4. Cargar recurso físico
+        Resource resource = storageService.loadAsResource(info.pdfUrl());
+
+        if (resource == null || !resource.exists()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El archivo físico no existe en el servidor");
+        }
+
+        return resource;
     }
 }
