@@ -1,9 +1,9 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.CourseDTO;
-import com.radioacademy.backend.dto.CourseDetailDTO;
-import com.radioacademy.backend.dto.CreateCourseRequest;
-import com.radioacademy.backend.dto.CourseDashboardDTO; // 👈 Usamos el DTO que creaste antes
+import com.radioacademy.backend.dto.course.CourseDTO;
+import com.radioacademy.backend.dto.course.CourseDashboardDTO;
+import com.radioacademy.backend.dto.course.CourseDetailDTO;
+import com.radioacademy.backend.dto.course.CreateCourseRequest;
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;

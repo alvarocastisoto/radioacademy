@@ -1,12 +1,12 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.CourseContentDTO;
-import com.radioacademy.backend.dto.CourseDashboardDTO;
-import com.radioacademy.backend.dto.LessonDTO;
-import com.radioacademy.backend.dto.ModuleDTO;
+import com.radioacademy.backend.dto.course.CourseContentDTO;
+import com.radioacademy.backend.dto.course.CourseDashboardDTO;
 import com.radioacademy.backend.dto.exams.QuizDTO;
-import com.radioacademy.backend.dto.student.QuizResultDTO;
-import com.radioacademy.backend.dto.student.QuizSubmissionDTO;
+import com.radioacademy.backend.dto.exams.QuizResultDTO;
+import com.radioacademy.backend.dto.exams.QuizSubmissionDTO;
+import com.radioacademy.backend.dto.lesson.LessonDTO;
+import com.radioacademy.backend.dto.module.ModuleDTO;
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;

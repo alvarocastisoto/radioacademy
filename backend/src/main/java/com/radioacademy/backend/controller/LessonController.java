@@ -1,6 +1,6 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.LessonResponse;
+import com.radioacademy.backend.dto.lesson.LessonResponse;
 import com.radioacademy.backend.entity.Lesson;
 import com.radioacademy.backend.entity.Module;
 import com.radioacademy.backend.repository.LessonRepository;

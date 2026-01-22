@@ -1,7 +1,7 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.CreateModuleRequest;
-import com.radioacademy.backend.dto.ModuleRequest;
+import com.radioacademy.backend.dto.module.CreateModuleRequest;
+import com.radioacademy.backend.dto.module.ModuleRequest;
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Module;
 import com.radioacademy.backend.repository.CourseRepository;

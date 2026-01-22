@@ -1,7 +1,7 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.CourseProgressResponse;
-import com.radioacademy.backend.dto.ToggleProgressResponse;
+import com.radioacademy.backend.dto.course.CourseProgressResponse;
+import com.radioacademy.backend.dto.lesson.ToggleProgressResponse;
 import com.radioacademy.backend.entity.Lesson;
 import com.radioacademy.backend.entity.LessonProgress;
 import com.radioacademy.backend.entity.User;

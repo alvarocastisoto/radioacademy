@@ -1,9 +1,9 @@
 package com.radioacademy.backend.controller;
 
-import com.radioacademy.backend.dto.AuthResponseDTO;
-import com.radioacademy.backend.dto.UserAuthDTO;
-import com.radioacademy.backend.dto.LoginRequest;
-import com.radioacademy.backend.dto.RegisterRequest;
+import com.radioacademy.backend.dto.auth.AuthResponseDTO;
+import com.radioacademy.backend.dto.auth.LoginRequest;
+import com.radioacademy.backend.dto.auth.RegisterRequest;
+import com.radioacademy.backend.dto.auth.UserAuthDTO;
 import com.radioacademy.backend.entity.PasswordResetToken;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.event.PasswordResetEvent;

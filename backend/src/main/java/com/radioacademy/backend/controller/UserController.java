@@ -8,7 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import com.radioacademy.backend.dto.UserProfileDTO;
+
+import com.radioacademy.backend.dto.student.UserProfileDTO;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.UserRepository;
 

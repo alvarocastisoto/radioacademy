@@ -1,4 +1,4 @@
-package com.radioacademy.backend.dto;
+package com.radioacademy.backend.dto.auth;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
