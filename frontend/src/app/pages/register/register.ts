@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../../services/auth/auth';
-import { CommonModule } from '@angular/common'; // Recomendado importar CommonModule
+import { AuthService } from '../../services/auth/auth'; // Asegúrate de que la ruta es correcta
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-register',
@@ -16,15 +16,15 @@ export class Register {
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // 👇 El mismo Regex que en Java (permitiendo . _ * -)
+  // 👇 Regex sincronizado con tu backend (AuthService.java)
+  // "Al menos 1 num, 1 minus, 1 mayus, 1 especial, sin espacios, min 8 chars"
   private readonly passwordPattern =
-    /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!._*-])(?=\S+$).{8,}$/;
+    /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_])(?=\S+$).{8,}$/;
 
   registerForm: FormGroup = this.fb.group({
     name: ['', [Validators.required, Validators.minLength(2)]],
     surname: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
-    // 👇 Validación fuerte sincronizada con Backend
     password: [
       '',
       [Validators.required, Validators.minLength(8), Validators.pattern(this.passwordPattern)],
@@ -32,38 +32,44 @@ export class Register {
     dni: ['', Validators.required],
     phone: [''],
     region: ['GALICIA'],
-    role: ['STUDENT'],
+    // role: ['STUDENT'], // 💡 NOTA: Tu backend fuerza el rol STUDENT, así que no hace falta enviarlo desde aquí.
     termsAccepted: [false, Validators.requiredTrue],
   });
 
-  // Helper para el HTML (Punto 5: Validación consistente touched/dirty)
+  // Helper para validación visual
   isFieldInvalid(fieldName: string): boolean {
     const field = this.registerForm.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
-  // Getter para usar fácil en el HTML (ej: @if (password.hasError('pattern')))
+
   get password() {
     return this.registerForm.get('password');
   }
 
   onSubmit() {
     if (this.registerForm.invalid) {
-      this.registerForm.markAllAsTouched(); // Marca todo en rojo para que el usuario vea qué falta
+      this.registerForm.markAllAsTouched();
       return;
     }
 
-    console.log('Enviando datos:', this.registerForm.value);
+    console.log('Enviando registro...', this.registerForm.value);
 
+    // 👇 AQUÍ ESTÁ LA MAGIA DEL AUTO-LOGIN
     this.authService.register(this.registerForm.value).subscribe({
-      next: (response) => {
-        console.log('Registro exitoso:', response);
-        alert('¡Cuenta creada con éxito! Ahora inicia sesión.');
-        this.router.navigate(['/login']);
+      next: () => {
+        // El AuthService ya guardó el token y el user en localStorage por ti.
+        console.log('Registro y Auto-Login exitosos');
+        
+        // Redirigimos DIRECTAMENTE al Dashboard (o a /courses)
+        this.router.navigate(['/dashboard']); 
       },
       error: (err) => {
         console.error('Error al registrar:', err);
-        // 👇 Leemos el mensaje exacto que envía tu Backend (Map.of("error", "..."))
-        const backendMsg = err.error?.error || 'Ocurrió un error al conectar con el servidor.';
+        // Tu backend devuelve: { "error": "El email ya está registrado..." }
+        // Con status 409 Conflict o 400 Bad Request
+        const backendMsg = err.error?.error || 'Error de conexión con el servidor.';
+        
+        // En una app real, usaríamos un Toast/SnackBar, pero alert vale por ahora
         alert('Error: ' + backendMsg);
       },
     });

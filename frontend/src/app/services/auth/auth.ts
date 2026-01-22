@@ -3,18 +3,27 @@ import { Injectable, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
-// Definimos qué forma tiene un usuario
+
+// 1. INTERFACES (Sincronizadas con tu backend DTO)
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'ADMIN' | 'STUDENT' | 'ROLE_ADMIN' | 'ROLE_STUDENT' | 'TEACHER' | 'ROLE_TEACHER';
+  surname: string;
+  role: 'ADMIN' | 'STUDENT' | 'TEACHER' | 'ROLE_ADMIN' | 'ROLE_STUDENT';
+  avatar?: string;
+
+  // 👇👇 Tienes que añadir estos campos explícitamente 👇👇
+  phone?: string;
+  dni?: string;
+  region?: string;
+  createdAt?: string;
 }
 
-// Definimos qué esperamos recibir del servidor al loguearnos
-interface LoginResponse {
+// Renombramos LoginResponse a AuthResponse porque sirve para Login y Register
+export interface AuthResponse {
   token: string;
-  user: User; // <--- IMPORTANTE: Esperamos que el backend nos devuelva esto
+  user: User;
 }
 
 @Injectable({
@@ -25,68 +34,76 @@ export class AuthService {
   private router = inject(Router);
   private apiUrl = environment.apiUrl + '/auth';
 
-  // 📡 SEÑAL PRINCIPAL: Guarda quién es el usuario actual (o null si no hay nadie)
+  // 📡 SEÑAL PRINCIPAL
   currentUser = signal<User | null>(null);
 
   constructor() {
-    // AL INICIAR: Recuperamos la sesión si existe
+    this.checkLocalStorage();
+  }
+
+  // ✅ RECUPERAR SESIÓN AL RECARGAR
+  private checkLocalStorage() {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
+    const token = localStorage.getItem('token');
+
+    if (storedUser && token) {
       try {
         this.currentUser.set(JSON.parse(storedUser));
       } catch (e) {
-        console.error('Datos corruptos en localStorage');
+        console.error('Datos corruptos en localStorage, cerrando sesión...');
         this.logout();
       }
     }
   }
 
-  // REGISTRO
-  register(userData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/register`, userData);
+  // ✅ REGISTRO (Ahora con Auto-Login) 🚀
+  // Fíjate que ahora devuelve Observable<AuthResponse> y hace el tap()
+  register(userData: any): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/register`, userData)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
   }
 
-  // LOGIN
-  login(credentials: any): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((response) => {
-        // 1. Guardamos Token
-        localStorage.setItem('token', response.token);
-
-        // 2. Guardamos Usuario (para que no se borre al refrescar)
-        localStorage.setItem('user', JSON.stringify(response.user));
-
-        // 3. Actualizamos la señal (Angular se entera automáticamente)
-        this.currentUser.set(response.user);
-      })
-    );
+  // ✅ LOGIN
+  login(credentials: any): Observable<AuthResponse> {
+    return this.http
+      .post<AuthResponse>(`${this.apiUrl}/login`, credentials)
+      .pipe(tap((response) => this.handleAuthSuccess(response)));
   }
 
-  // LOGOUT
+  // ✅ LOGOUT
   logout() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    this.currentUser.set(null); // Ponemos la señal en vacío
+    this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
-  // Ayuda para saber si hay token crudo
-  isLoggedIn(): boolean {
-    return !!localStorage.getItem('token');
+  // 🛠️ HELPER PRIVADO: Centraliza el guardado de sesión
+  private handleAuthSuccess(response: AuthResponse) {
+    // 1. Guardar Token
+    localStorage.setItem('token', response.token);
+
+    // 2. Guardar Usuario
+    localStorage.setItem('user', JSON.stringify(response.user));
+
+    // 3. Actualizar Señal
+    this.currentUser.set(response.user);
   }
 
-  // Método para actualizar los datos del usuario manualmente
-  updateUserFields(newData: any) {
-    const current = this.currentUser(); // Obtenemos valor actual
+  // Helpers de Utilidad
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token'); // Simple check de existencia
+  }
+
+  // Actualizar datos locales (ej: tras editar perfil)
+  updateUserFields(newData: Partial<User>) {
+    // Usamos Partial<User> para más seguridad
+    const current = this.currentUser();
     if (current) {
-      // Fusionamos lo viejo con lo nuevo
       const updatedUser = { ...current, ...newData };
-
-      // 1. Actualizamos la Señal (Signal)
       this.currentUser.set(updatedUser);
-
-      // 2. Actualizamos el LocalStorage para que persista al recargar
-      localStorage.setItem('user', JSON.stringify(updatedUser)); // OJO: Revisa si tu clave es 'user_session' o 'user_data'
+      localStorage.setItem('user', JSON.stringify(updatedUser));
     }
   }
 
