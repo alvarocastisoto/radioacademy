@@ -4,7 +4,8 @@ import com.radioacademy.backend.dto.course.CourseDTO;
 import com.radioacademy.backend.dto.course.CourseDashboardDTO;
 import com.radioacademy.backend.dto.course.CourseDetailDTO;
 import com.radioacademy.backend.dto.course.CreateCourseRequest;
-import com.radioacademy.backend.service.course.CourseService;
+import com.radioacademy.backend.service.content.CourseService;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package com.radioacademy.backend.service.course;
+package com.radioacademy.backend.service.content;
 
 import com.radioacademy.backend.dto.course.CourseDTO;
 import com.radioacademy.backend.dto.course.CourseDashboardDTO;
