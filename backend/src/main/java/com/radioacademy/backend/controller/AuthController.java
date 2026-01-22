@@ -3,192 +3,44 @@ package com.radioacademy.backend.controller;
 import com.radioacademy.backend.dto.auth.AuthResponseDTO;
 import com.radioacademy.backend.dto.auth.LoginRequest;
 import com.radioacademy.backend.dto.auth.RegisterRequest;
-import com.radioacademy.backend.dto.auth.UserAuthDTO;
-import com.radioacademy.backend.entity.PasswordResetToken;
-import com.radioacademy.backend.entity.User;
-import com.radioacademy.backend.event.PasswordResetEvent;
-import com.radioacademy.backend.event.UserRegistrationEvent;
-import com.radioacademy.backend.repository.PasswordResetTokenRepository;
-import com.radioacademy.backend.repository.UserRepository;
-import com.radioacademy.backend.security.JwtService;
-import com.radioacademy.backend.enums.Role;
-
+import com.radioacademy.backend.service.auth.AuthService;
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor // Inyección por constructor automática
 public class AuthController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthService authService;
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private ApplicationEventPublisher eventPublisher;
-
-    @Autowired
-    private PasswordResetTokenRepository tokenRepository;
-
-    // Endpoint de Registro
-    // Usamos ResponseEntity<?> (con interrogación) para poder devolver
-    // AuthResponse si va bien, o un Map de error si va mal.
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
-
-        // 1) Validación duplicados
-        if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity
-                    .status(HttpStatus.CONFLICT)
-                    .body(Map.of("error", "El email ya está registrado. Por favor, inicia sesión."));
-        }
-
-        // 2) Mapping DTO -> Entity
-        User user = new User();
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
-        user.setEmail(request.getEmail());
-        user.setDni(request.getDni());
-        user.setPhone(request.getPhone());
-        user.setRegion(request.getRegion());
-        user.setTermsAccepted(request.isTermsAccepted());
-        user.setCreatedAt(LocalDateTime.now());
-
-        // Rol controlado por backend
-        user.setRole(Role.STUDENT);
-
-        // 3) Password
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-        // 4) Save
-        User savedUser = userRepository.save(user);
-
-        // 5) Token + eventos
-        UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
-        String token = jwtService.generateToken(userDetails);
-
-        eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
-
-        // 6) Respuesta DTO (NO entity)
-        var userDto = toUserAuthDTO(savedUser);
-        return ResponseEntity.ok(new AuthResponseDTO(token, userDto));
+    public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequest request) {
+        // El servicio lanzará ResponseStatusException si algo falla (ej: 409 Conflict)
+        // Spring captura esa excepción y devuelve el código HTTP correcto
+        // automáticamente.
+        return ResponseEntity.ok(authService.register(request));
     }
 
-    // Endpoint Login
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody LoginRequest request) {
-
-        // 1) Autenticación
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-
-        // 2) Cargar usuario (entity)
-        User user = userRepository.findByEmail(request.email())
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Usuario no encontrado tras autenticación"));
-
-        // 3) Token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
-        String token = jwtService.generateToken(userDetails);
-
-        // 4) Respuesta DTO (NO entity)
-        return ResponseEntity.ok(new AuthResponseDTO(token, toUserAuthDTO(user)));
-    }
-
-    private UserAuthDTO toUserAuthDTO(User user) {
-        return new UserAuthDTO(
-                user.getId(),
-                user.getName(),
-                user.getSurname(),
-                user.getEmail(),
-                user.getRole(),
-                // Ajusta esto al campo real de tu User. Si no existe, pon null o elimina el
-                // campo del DTO.
-                user.getAvatar(),
-                user.getCreatedAt());
-    }
-
-    private boolean isPasswordStrong(String password) {
-        String regex = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])(?=\\S+$).{8,}$";
-        return password.matches(regex);
+        return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
-        String email = request.get("email");
-
-        // Buscamos usuario. Si no existe, NO decimos "no existe" por seguridad,
-        // devolvemos OK igual para que los hackers no sepan qué emails tenemos.
-        userRepository.findByEmail(email).ifPresent(user -> {
-            // 1. Generar token aleatorio
-            String token = UUID.randomUUID().toString();
-
-            // 2. Guardarlo en BD (Borramos anteriores si hubiera)
-            // Nota: En una app real, haz esto transaccional, pero para el prototipo vale.
-            PasswordResetToken myToken = new PasswordResetToken(token, user);
-            tokenRepository.save(myToken);
-
-            // 3. Lanzar evento
-            eventPublisher.publishEvent(new PasswordResetEvent(this, user, token));
-        });
-
+        authService.forgotPassword(request.get("email"));
+        // Siempre devolvemos OK por seguridad
         return ResponseEntity.ok(Map.of("message", "Si el email existe, recibirás un correo."));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
-        String token = request.get("token");
-        String newPassword = request.get("password");
-
-        // 1. Buscar token
-        PasswordResetToken resetToken = tokenRepository.findByToken(token)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Token inválido"));
-
-        // 2. Verificar caducidad
-        if (resetToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "El token ha caducado"));
-        }
-
-        // 3. Cambiar contraseña
-        User user = resetToken.getUser();
-        if (isPasswordStrong(newPassword)) {
-            user.setPassword(passwordEncoder.encode(newPassword));
-            userRepository.save(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Contraseña débil"));
-        }
-
-        // 4. Borrar el token usado (Para que no se pueda reusar)
-        tokenRepository.delete(resetToken);
-
+        authService.resetPassword(request.get("token"), request.get("password"));
         return ResponseEntity.ok(Map.of("message", "Contraseña restablecida con éxito"));
     }
-
 }
