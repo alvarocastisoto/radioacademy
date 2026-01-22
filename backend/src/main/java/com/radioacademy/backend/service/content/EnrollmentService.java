@@ -1,25 +1,26 @@
-package com.radioacademy.backend.service;
+package com.radioacademy.backend.service.content;
 
 import com.radioacademy.backend.entity.Course;
 import com.radioacademy.backend.entity.Enrollment;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.EnrollmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j; // 👈 Para logs profesionales
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
 @Service
+@RequiredArgsConstructor // 👈 Inyección por constructor (Standard Pro)
+@Slf4j // 👈 Inyecta automáticamente una variable 'log'
 public class EnrollmentService {
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     /**
      * Matricula un usuario en un curso tras un pago exitoso.
-     * Es IDEMPOTENTE: Si ya existe, no duplica ni lanza error, simplemente retorna
-     * la existente.
+     * Es IDEMPOTENTE: Si ya existe, no duplica ni lanza error.
      */
     @Transactional
     public void enrollUser(User user, Course course, String paymentId) {
@@ -28,8 +29,10 @@ public class EnrollmentService {
         boolean exists = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), course.getId());
 
         if (exists) {
-            System.out.println("⚠️ El usuario " + user.getEmail() + " ya tenía el curso " + course.getTitle());
-            return; // Salimos sin hacer nada
+            // Usamos log.warn para advertencias (no es un error crítico, pero es raro)
+            log.warn("⚠️ Intento de re-matrícula: Usuario {} ya tenía el curso '{}'", user.getEmail(),
+                    course.getTitle());
+            return;
         }
 
         // 2. Crear la matrícula
@@ -38,10 +41,12 @@ public class EnrollmentService {
         enrollment.setCourse(course);
         enrollment.setAmountPaid(course.getPrice());
         enrollment.setPaymentId(paymentId);
-        enrollment.setEnrolledAt(LocalDateTime.now()); // Asegúrate de tener este campo o quítalo si no existe
+        enrollment.setEnrolledAt(LocalDateTime.now());
 
         // 3. Guardar
         enrollmentRepository.save(enrollment);
-        System.out.println("✅ Nueva matrícula creada: " + user.getEmail() + " -> " + course.getTitle());
+
+        // Usamos log.info para confirmar éxito
+        log.info("✅ Nueva matrícula creada: {} -> {} (Pago: {})", user.getEmail(), course.getTitle(), paymentId);
     }
 }
