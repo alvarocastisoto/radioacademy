@@ -19,7 +19,7 @@ export class StudentService {
 
   // Obtener el contenido COMPLETO del curso
   getCourseContent(courseId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/course/${courseId}/content`);
+    return this.http.get<any>(`${this.apiUrl}/student/course/${courseId}/content`);
   }
 
   getProfile(): Observable<any> {

@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
-// --- Interfaces (DTOs) que coinciden con el Backend Java ---
+// --- Interfaces (DTOs) ---
 export interface OptionDTO {
   id?: string;
   text: string;
@@ -12,7 +12,7 @@ export interface OptionDTO {
 
 export interface QuestionDTO {
   id?: string;
-  question: string; // Coincide con backend: question.setContent(dto.question())
+  question: string;
   points: number;
   options: OptionDTO[];
 }
@@ -24,22 +24,44 @@ export interface QuizDTO {
   questions: QuestionDTO[];
 }
 
+// Interface para el resultado de la corrección
+export interface QuizResultDTO {
+  score: number;
+  passed: boolean;
+}
+
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class QuizService {
   private http = inject(HttpClient);
-  // Ajusta la URL base según tu environment (ej: http://localhost:8080/api)
-  private apiUrl = `${environment.apiUrl}/quizzes`; 
 
-  // 1. Crear o Editar (Upsert)
+  // Base URL: http://localhost:8080/api/quizzes
+  private apiUrl = `${environment.apiUrl}/quizzes`;
+
+  // 1. Crear o Editar (ADMIN)
   createQuiz(quiz: QuizDTO): Observable<any> {
     return this.http.post<any>(this.apiUrl, quiz);
   }
 
-  // 2. Obtener por Lección (Este era el que faltaba)
+  // 2. Obtener por Lección (ADMIN - Para editar)
   getQuizByLesson(lessonId: string): Observable<QuizDTO> {
-    // Llama al endpoint Java: @GetMapping("/lesson/{lessonId}")
+    // GET /api/quizzes/lesson/{lessonId}
     return this.http.get<QuizDTO>(`${this.apiUrl}/lesson/${lessonId}`);
+  }
+
+  // 3. Obtener por ID (ESTUDIANTE - Para realizar el examen)
+  getQuizById(quizId: string): Observable<QuizDTO> {
+    // GET /api/quizzes/{quizId}
+    return this.http.get<QuizDTO>(`${this.apiUrl}/${quizId}`);
+  }
+
+  // 4. Enviar respuestas (ESTUDIANTE - Para corregir) 🚀 NUEVO
+  submitQuiz(submission: {
+    quizId: string;
+    answers: Record<string, string>;
+  }): Observable<QuizResultDTO> {
+    // POST /api/quizzes/submit
+    return this.http.post<QuizResultDTO>(`${this.apiUrl}/submit`, submission);
   }
 }

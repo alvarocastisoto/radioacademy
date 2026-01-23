@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.radioacademy.backend.dto.exams.OptionDTO;
 import com.radioacademy.backend.dto.exams.QuestionDTO;
 import com.radioacademy.backend.dto.exams.QuizDTO;
+import com.radioacademy.backend.dto.exams.QuizResultDTO;
+import com.radioacademy.backend.dto.exams.QuizSubmissionDTO;
 import com.radioacademy.backend.entity.Quiz;
 import com.radioacademy.backend.repository.exams.QuizRepository;
 import com.radioacademy.backend.service.exams.QuizService;
@@ -41,4 +43,13 @@ public class QuizController {
                 .orElse(ResponseEntity.noContent().build()); // 204 No Content si no hay test
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<QuizDTO> getQuizById(@PathVariable UUID id) {
+        return ResponseEntity.ok(quizService.getQuizById(id));
+    }
+
+    @PostMapping("/submit")
+    public ResponseEntity<QuizResultDTO> submitQuiz(@RequestBody QuizSubmissionDTO submission) {
+        return ResponseEntity.ok(quizService.submitQuiz(submission));
+    }
 }

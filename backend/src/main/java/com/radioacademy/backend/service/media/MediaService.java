@@ -56,7 +56,10 @@ public class MediaService {
             // Si intentan acceder a /etc/passwd o salir de uploads, cortamos
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a esta ruta");
         }
-
+        if (normalized.startsWith("uploads/pdfs/")) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "PDFs solo vía endpoint /api/student/lessons/{id}/pdf");
+        }
         // 2. Cargar recurso físico
         Resource resource = storageService.loadAsResource(normalized);
 

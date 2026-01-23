@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef, NgZone } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { StudentService } from '../../services/student/student';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -6,6 +6,7 @@ import { ProgressService } from '../../services/progress';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; // 👈 IMPORTANTE
 import { MediaService } from '../../services/media/media';
+import { QuizService } from '../../services/quiz/quiz';
 @Component({
   selector: 'app-course-player',
   standalone: true,
@@ -21,13 +22,15 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   private mediaService = inject(MediaService);
   private sanitizer = inject(DomSanitizer);
   private cdr = inject(ChangeDetectorRef);
+  private quizService = inject(QuizService);
+  private ngZone = inject(NgZone);
 
   course: any = null;
   currentLesson: any = null;
 
   // Estados de media
   safeVideoUrl: SafeResourceUrl | null = null;
-  
+
   // ✅ PDF via Blob
   safePdfUrl: SafeResourceUrl | null = null;
   private pdfObjectUrl: string | null = null;
@@ -203,8 +206,10 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
 
   loadQuiz(quizId: string) {
     this.quizLoading = true;
-    // Asegúrate de tener este método en StudentService
-    this.studentService.getQuizForStudent(quizId).subscribe({
+
+    // 3. USA quizService EN LUGAR DE studentService
+    // Y recuerda que el método lo llamamos 'getQuizById' en el servicio anterior
+    this.quizService.getQuizById(quizId).subscribe({
       next: (quiz) => {
         this.activeQuiz = quiz;
         this.quizLoading = false;
@@ -213,7 +218,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
       error: (err) => {
         console.error('Error cargando quiz', err);
         this.quizLoading = false;
-      }
+      },
     });
   }
 
@@ -224,38 +229,51 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
 
   submitQuiz() {
     if (!this.activeQuiz) return;
-    
-    // Confirmación simple
-    if (!confirm('¿Seguro que quieres enviar tus respuestas?')) return;
 
+    // 1. Mostrar spinner
     this.quizLoading = true;
+    this.cdr.detectChanges(); // Forzamos vista de carga
 
-    // Preparamos el payload
     const payload = {
       quizId: this.activeQuiz.id,
-      answers: this.userAnswers // { questionId: optionId }
+      answers: this.userAnswers,
     };
 
-    // Asegúrate de tener este método en StudentService
-    this.studentService.submitQuiz(payload).subscribe({
+    this.quizService.submitQuiz(payload).subscribe({
       next: (result: any) => {
-        // El backend debe devolver: { score: 80, passed: true, correctAnswers: {...} }
-        this.quizScore = result.score;
-        this.quizPassed = result.passed;
-        this.quizSubmitted = true;
-        this.quizLoading = false;
+        console.log('✅ RESPUESTA RECIBIDA:', result);
 
-        // Si aprobó, marcamos lección como completada automáticamente
-        if (this.quizPassed && !this.isCompleted(this.currentLesson.id)) {
-            this.toggleLessonCompletion(this.currentLesson.id);
-        }
-        this.cdr.detectChanges();
+        // 2. EJECUTAR DENTRO DE NGZONE (Seguridad Anti-Fallos de Angular)
+        this.ngZone.run(() => {
+          // A. PRIMERO: Actualizamos los datos visuales (Lo más importante)
+          this.quizScore = result.score;
+          this.quizPassed = result.passed;
+          this.quizSubmitted = true; // Esto activa la pantalla de resultados
+          this.quizLoading = false; // Esto quita el spinner
+
+          // B. SEGUNDO: Intentamos marcar como completada (Lógica secundaria)
+          // Usamos un try-catch para que si esto falla, NO rompa la pantalla de la nota
+          try {
+            if (this.quizPassed && this.currentLesson && !this.isCompleted(this.currentLesson.id)) {
+              console.log('🎉 Aprobado -> Marcando lección como completada...');
+              this.toggleLessonCompletion(this.currentLesson.id);
+            }
+          } catch (e) {
+            console.warn('⚠️ Error menor actualizando progreso (pero el examen está bien):', e);
+          }
+
+          // C. TERCERO: Forzamos el repintado final
+          this.cdr.detectChanges();
+        });
       },
       error: (err) => {
-        console.error('Error enviando quiz', err);
-        this.quizLoading = false;
-        alert('Error al enviar el examen. Inténtalo de nuevo.');
-      }
+        console.error('❌ ERROR:', err);
+        this.ngZone.run(() => {
+          this.quizLoading = false;
+          this.cdr.detectChanges();
+        });
+        alert('Hubo un error al enviar el examen.');
+      },
     });
   }
   // 👆👆👆 FIN LÓGICA DE QUIZ 👆👆👆
