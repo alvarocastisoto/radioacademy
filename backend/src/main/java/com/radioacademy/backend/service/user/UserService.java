@@ -1,6 +1,7 @@
 package com.radioacademy.backend.service.user;
 
 import com.radioacademy.backend.dto.student.UserProfileDTO;
+import com.radioacademy.backend.dto.student.UserProfileResponseDTO;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.service.StorageService;
@@ -24,26 +25,35 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final StorageService storageService;
 
-    // 1. OBTENER TODOS (ADMIN)
+    private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
+
+    // // 1. OBTENER TODOS (ADMIN)
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // 2. CREAR USUARIO (ADMIN/REGISTRO MANUAL)
-    @Transactional
-    public User createUser(User user) {
-        // Encriptamos pass si viene en plano
-        if (user.getPassword() != null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-        return userRepository.save(user);
-    }
+    // // 2. CREAR USUARIO (ADMIN/REGISTRO MANUAL)
+    // @Transactional
+    // public User createUser(User user) {
+    // // Encriptamos pass si viene en plano
+    // if (user.getPassword() != null) {
+    // user.setPassword(passwordEncoder.encode(user.getPassword()));
+    // }
+    // return userRepository.save(user);
+    // }
 
     // 3. OBTENER MI PERFIL
-    public User getMyProfile(String email) {
+    public UserProfileResponseDTO getMyProfile(String email) {
         User user = getUser(email);
-        user.setPassword(null); // Seguridad: nunca devolver el hash
-        return user;
+
+        return new UserProfileResponseDTO(
+                user.getId(),
+                user.getName(),
+                user.getSurname(),
+                user.getEmail(),
+                user.getPhone(),
+                user.getAvatar(),
+                user.getRole() != null ? user.getRole().name() : null);
     }
 
     // 4. ACTUALIZAR PERFIL (Lógica Compleja)
@@ -54,13 +64,25 @@ public class UserService {
 
         // A. CAMBIO DE CONTRASEÑA
         if (profileData.newPassword() != null && !profileData.newPassword().isBlank()) {
-            // Validar pass actual
-            if (profileData.currentPassword() == null || profileData.currentPassword().isBlank()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes introducir tu contraseña actual.");
+
+            // 1. VALIDACIÓN MANUAL DE FORTALEZA (Lo que antes hacía el DTO)
+            if (!profileData.newPassword().matches(PASSWORD_PATTERN)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "La nueva contraseña debe ser fuerte: Min 8 caracteres, Mayúscula, Minúscula, Número y Especial.");
             }
+
+            // 2. Validar que envió la pass actual
+            if (profileData.currentPassword() == null || profileData.currentPassword().isBlank()) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Debes introducir tu contraseña actual para confirmar el cambio.");
+            }
+
+            // 3. Validar coincidencia
             if (!passwordEncoder.matches(profileData.currentPassword(), user.getPassword())) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La contraseña actual es incorrecta.");
             }
+
+            // 4. Aplicar cambio
             user.setPassword(passwordEncoder.encode(profileData.newPassword()));
         }
 
@@ -112,16 +134,12 @@ public class UserService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
     }
 
-    private void deleteOldAvatar(String oldAvatarUrl) {
-        if (oldAvatarUrl != null && !oldAvatarUrl.isBlank()) {
-            try {
-                // Extraer filename de la URL (asumiendo formato standard)
-                String filename = oldAvatarUrl.substring(oldAvatarUrl.lastIndexOf("/") + 1);
-                storageService.delete(filename);
-                log.info("🗑️ Avatar antiguo eliminado: {}", filename);
-            } catch (Exception e) {
-                log.warn("⚠️ No se pudo borrar el avatar antiguo: {}", e.getMessage());
-            }
-        }
+    private void deleteOldAvatar(String oldAvatarPathOrUrl) {
+        if (oldAvatarPathOrUrl == null || oldAvatarPathOrUrl.isBlank())
+            return;
+
+        storageService.delete(oldAvatarPathOrUrl);
+        log.info("🗑️ Avatar antiguo eliminado (si existía): {}", oldAvatarPathOrUrl);
     }
+
 }

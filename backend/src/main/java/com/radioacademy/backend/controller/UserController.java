@@ -1,6 +1,7 @@
 package com.radioacademy.backend.controller;
 
 import com.radioacademy.backend.dto.student.UserProfileDTO;
+import com.radioacademy.backend.dto.student.UserProfileResponseDTO;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.service.user.UserService;
 import jakarta.validation.Valid;
@@ -21,20 +22,22 @@ public class UserController {
     private final UserService userService;
 
     // Obtener todos (GET /api/users)
+
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // Crear usuario (POST /api/users)
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return new ResponseEntity<>(userService.createUser(user), HttpStatus.CREATED);
-    }
+    // // Crear usuario (POST /api/users)
+    // @PostMapping
+    // public ResponseEntity<User> createUser(@RequestBody User user) {
+    // return new ResponseEntity<>(userService.createUser(user),
+    // HttpStatus.CREATED);
+    // }
 
     // Obtener mi perfil
     @GetMapping("/profile")
-    public ResponseEntity<User> getMyProfile(Authentication auth) {
+    public ResponseEntity<UserProfileResponseDTO> getMyProfile(Authentication auth) {
         return ResponseEntity.ok(userService.getMyProfile(auth.getName()));
     }
 

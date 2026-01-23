@@ -89,6 +89,7 @@ public class PaymentService {
     }
 
     // 2. CONFIRMAR PAGO
+    // 2. CONFIRMAR PAGO
     @Transactional
     public void confirmPayment(String userEmail, String sessionId) {
         User user = userRepository.findByEmail(userEmail)
@@ -97,6 +98,18 @@ public class PaymentService {
         try {
             Session session = Session.retrieve(sessionId);
 
+            // 🛑 1. VERIFICACIÓN DE PROPIEDAD (SEGURIDAD CRÍTICA)
+            // Comprobamos que el usuario que inició el pago es el mismo que lo confirma
+            String clientRef = session.getClientReferenceId();
+
+            if (clientRef == null || !clientRef.equals(user.getId().toString())) {
+                // Logueamos esto como advertencia de seguridad
+                System.err.println(
+                        "🚨 SEGURIDAD: Usuario " + user.getId() + " intentó apropiarse de la sesión " + sessionId);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Esta sesión de pago no te pertenece.");
+            }
+
+            // 🛑 2. VERIFICACIÓN DE ESTADO
             if ("paid".equals(session.getPaymentStatus())) {
                 String courseIdStr = session.getMetadata().get("course_id");
 
@@ -104,13 +117,16 @@ public class PaymentService {
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                 "Curso no encontrado (Metadata corrupta)"));
 
-                // Delegamos la matrícula al servicio correspondiente
+                // Delegamos la matrícula
                 enrollmentService.enrollUser(user, course, session.getPaymentIntent());
 
             } else {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago no se ha completado.");
+                // Puede ser 'unpaid' o 'no_payment_required'
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago no se ha completado o ha fallado.");
             }
 
+        } catch (ResponseStatusException e) {
+            throw e; // Relanzamos nuestras propias excepciones
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error verificando pago: " + e.getMessage());

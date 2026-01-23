@@ -2,7 +2,6 @@ package com.radioacademy.backend.entity;
 
 import com.radioacademy.backend.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,10 +16,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -70,8 +67,8 @@ public class User implements UserDetails {
     @Column(name = "terms_accepted", nullable = false)
     private boolean termsAccepted;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    @JsonIgnoreProperties("user") // 🛑 Evita el bucle infinito al convertir a JSON
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Enrollment> enrollments;
 
     // =================================================================

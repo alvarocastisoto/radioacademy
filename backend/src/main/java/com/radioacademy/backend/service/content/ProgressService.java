@@ -5,6 +5,7 @@ import com.radioacademy.backend.dto.lesson.ToggleProgressResponse;
 import com.radioacademy.backend.entity.Lesson;
 import com.radioacademy.backend.entity.LessonProgress;
 import com.radioacademy.backend.entity.User;
+import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.LessonProgressRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
@@ -21,60 +22,70 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProgressService {
 
-    private final LessonProgressRepository progressRepository;
-    private final UserRepository userRepository;
-    private final LessonRepository lessonRepository;
+        private final LessonProgressRepository progressRepository;
+        private final UserRepository userRepository;
+        private final LessonRepository lessonRepository;
+        private final EnrollmentRepository enrollmentRepository;
 
-    // 1. MARCAR / DESMARCAR (TOGGLE)
-    @Transactional
-    public ToggleProgressResponse toggleProgress(UUID lessonId, String userEmail) {
-        // Obtenemos usuario
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+        // 1. MARCAR / DESMARCAR (TOGGLE)
+        @Transactional
+        public ToggleProgressResponse toggleProgress(UUID lessonId, String userEmail) {
 
-        // Buscamos si ya existe progreso
-        LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId)
-                .orElse(null);
+                // 1. Obtener Usuario
+                User user = userRepository.findByEmail(userEmail)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuario no encontrado"));
 
-        boolean isCompletedNow;
+                // 2. Obtener Lección (Necesario para saber el curso)
+                Lesson lesson = lessonRepository.findById(lessonId)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Lección no encontrada"));
 
-        if (progress == null) {
-            // CREAR: Primera vez
-            Lesson lesson = lessonRepository.findById(lessonId)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no encontrada"));
+                // 3. SEGURIDAD: Validar matrícula
+                // Navegamos Lesson -> Module -> Course -> ID
+                UUID courseId = lesson.getModule().getCourse().getId();
 
-            // Usamos Builder si tienes @Builder en la entidad, si no usa new
-            // LessonProgress()
-            progress = LessonProgress.builder()
-                    .user(user)
-                    .lesson(lesson)
-                    .isCompleted(true)
-                    .build();
-            isCompletedNow = true;
-        } else {
-            // ACTUALIZAR: Invertir estado
-            isCompletedNow = !progress.isCompleted();
-            progress.setCompleted(isCompletedNow);
+                boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
+                if (!enrolled) {
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                                        "No tienes acceso a este curso (no matriculado).");
+                }
+
+                // 4. Lógica Toggle (Estilo limpio con orElseGet)
+                LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId)
+                                .orElseGet(() -> {
+                                        // Si no existe, creamos uno nuevo inicializado en false (para invertirlo luego)
+                                        LessonProgress newP = new LessonProgress();
+                                        newP.setUser(user);
+                                        newP.setLesson(lesson);
+                                        newP.setCompleted(false);
+                                        return newP;
+                                });
+
+                // 5. Invertir estado y Guardar
+                boolean newState = !progress.isCompleted();
+                progress.setCompleted(newState);
+
+                progressRepository.save(progress);
+
+                // 6. Respuesta
+                String msg = newState ? "Lección completada" : "Lección pendiente";
+                return new ToggleProgressResponse(lessonId, newState, msg);
         }
 
-        progressRepository.save(progress);
+        // 2. OBTENER PROGRESO CURSO
+        @Transactional(readOnly = true)
+        public CourseProgressResponse getCourseProgress(UUID courseId, String userEmail) {
+                User user = userRepository.findByEmail(userEmail)
+                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                                                "Usuario no encontrado"));
 
-        String msg = isCompletedNow ? "Lección completada" : "Lección pendiente";
-        return new ToggleProgressResponse(lessonId, isCompletedNow, msg);
-    }
+                // Query optimizada que devuelve solo IDs
+                Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(user.getId(), courseId);
 
-    // 2. OBTENER PROGRESO CURSO
-    @Transactional(readOnly = true)
-    public CourseProgressResponse getCourseProgress(UUID courseId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        // Query optimizada que devuelve solo IDs
-        Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(user.getId(), courseId);
-
-        return new CourseProgressResponse(
-                courseId,
-                completedIds.size(),
-                completedIds);
-    }
+                return new CourseProgressResponse(
+                                courseId,
+                                completedIds.size(),
+                                completedIds);
+        }
 }

@@ -146,16 +146,10 @@ public class CourseService {
                 course.getActive());
     }
 
-    private void deleteImageFile(String imageUrl) {
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            try {
-                // Extraer filename de la URL (suponiendo /api/media/images/foto.jpg)
-                String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
-                storageService.delete(filename);
-            } catch (Exception e) {
-                // Logueamos pero no detenemos el proceso, no es crítico para la BD
-                System.err.println("⚠️ No se pudo borrar la imagen física: " + e.getMessage());
-            }
-        }
+    private void deleteImageFile(String imagePathOrUrl) {
+        if (imagePathOrUrl == null || imagePathOrUrl.isBlank())
+            return;
+        storageService.delete(imagePathOrUrl);
     }
+
 }

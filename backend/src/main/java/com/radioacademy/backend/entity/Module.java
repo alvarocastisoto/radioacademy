@@ -6,10 +6,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.List;
-import java.util.Objects; // 👈 Importa esto
+import java.util.Objects;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.hibernate.annotations.BatchSize;
 
 @Entity
 @Table(name = "modules")
@@ -33,8 +33,9 @@ public class Module {
     @JsonIgnore
     private Course course;
 
-    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonManagedReference // Asegúrate de tener esto para evitar bucles infinitos
+    @BatchSize(size = 20)
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Lesson> lessons;
 
     // 👇 AÑADE ESTO (Obligatorio al quitar @Data)

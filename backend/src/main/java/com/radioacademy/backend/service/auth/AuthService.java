@@ -91,17 +91,23 @@ public class AuthService {
         return new AuthResponseDTO(token, toUserAuthDTO(user));
     }
 
-    // ✅ FORGOT PASSWORD
     @Transactional
     public void forgotPassword(String email) {
         userRepository.findByEmail(email).ifPresent(user -> {
             String token = UUID.randomUUID().toString();
-            PasswordResetToken myToken = new PasswordResetToken(token, user);
-            tokenRepository.save(myToken);
+
+            // 1 token activo por usuario: si existe, lo actualizamos; si no, lo creamos
+            PasswordResetToken reset = tokenRepository.findByUser_Id(user.getId())
+                    .orElseGet(() -> new PasswordResetToken());
+
+            reset.setUser(user);
+            reset.setToken(token);
+            reset.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+
+            tokenRepository.save(reset);
+
             eventPublisher.publishEvent(new PasswordResetEvent(this, user, token));
         });
-        // Si no existe, no hacemos nada (silencioso por seguridad), el controller
-        // devuelve OK.
     }
 
     // ✅ RESET PASSWORD

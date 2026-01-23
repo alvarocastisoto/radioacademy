@@ -104,13 +104,16 @@ public class StorageService {
             if (filenameOrUrl == null || filenameOrUrl.isBlank())
                 return;
 
-            // Si llega URL completa, extrae desde /uploads/...
-            String path = filenameOrUrl;
-            int idx = filenameOrUrl.indexOf("/uploads/");
-            if (idx >= 0) {
-                path = filenameOrUrl.substring(idx + 1); // quita el primer "/"
-            }
+            String s = filenameOrUrl.replace("\\", "/");
 
+            // 1) Extrae desde la primera aparición de "uploads/"
+            int idx = s.indexOf("uploads/");
+            if (idx < 0)
+                return;
+
+            String path = s.substring(idx); // "uploads/images/.."
+
+            // 2) Normaliza y valida
             String normalized = Paths.get(path).normalize().toString().replace("\\", "/");
             if (!normalized.startsWith("uploads/"))
                 return;
@@ -118,6 +121,7 @@ public class StorageService {
             String withoutPrefix = normalized.substring("uploads/".length());
             Path file = uploadsRoot.resolve(withoutPrefix).normalize().toAbsolutePath();
 
+            // 3) Anti path traversal
             if (!file.startsWith(uploadsRoot.toAbsolutePath()))
                 return;
 

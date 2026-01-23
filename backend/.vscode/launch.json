@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot - RadioAcademy",
+            "request": "launch",
+            "mainClass": "com.radioacademy.backend.RadioAcademyApplication",
+            "projectName": "backend",
+            "env": {
+                "DATABASE_URL": "jdbc:postgresql://localhost:5432/radio_db",
+                "DB_USER": "admin",
+                "DB_PASSWORD": "password123",
+                "JWT_SECRET": "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970",
+                "RESEND_API_KEY": "re_Rrb2VX9A_4JZaS6w6CqKxXeW4roYb828D",
+                "STRIPE_SECRET_KEY": "sk_test_51SpDjSRuOaIRKrgJIhfWr0TdWHpJWUaQ579YjGXjmKFPQ6wintpICxnZcPDKdh60Oqn4c3HCSGYYlDJzChTb8Lur009TeN1pbG",
+                "FRONTEND_URL": "http://localhost:4200",
+                "ADMIN_EMAIL": "admin@local.dev",
+                "ADMIN_PASSWORD": "admin"
+            }
+        }
+    ]
+}
