@@ -1,85 +1,122 @@
 # =========================
-# OS / Editor junk
+# Global / OS
 # =========================
 .DS_Store
 Thumbs.db
+ehthumbs.db
 Desktop.ini
-*.swp
-*.swo
 
 # =========================
-# IDEs
+# Scripts Locales con Secretos (¡IMPORTANTE!)
+# =========================
+*.bat
+*.sh
+*.cmd
+backend/start_app.bat
+
+# =========================
+# IDEs / Editors
 # =========================
 .idea/
 *.iml
 *.ipr
 *.iws
-.classpath
-.project
-.settings/
-.nbproject/
+
+# VS Code: Ignoramos todo EXCEPTO extensiones recomendadas.
+# IMPORTANTE: launch.json se ignora porque puede tener claves.
 .vscode/*
 !.vscode/extensions.json
 
 # =========================
-# Secrets / env (concretos)
-# =========================
-.env
-.env.*
-!.env.example
-
-# Certificados / keystores
-*.pem
-*.key
-*.p12
-*.pfx
-*.jks
-
-# Carpeta típica de secretos (si la usas)
-secrets/
-**/secrets/
-
-# =========================
-# Logs / runtime
+# Logs
 # =========================
 logs/
 *.log
 
 # =========================
-# Java / Maven / Gradle
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+secrets/
+**/secrets/
+**/*secret*
+**/*apikey*
+**/*api_key*
+**/*token*
+**/*jwt*
+**/*credentials*
+
+# =========================
+# Node / Angular
+# =========================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+out/
+coverage/
+.tmp/
+.temp/
+
+# Angular specific
+.angular/
+.sass-cache/
+.cache/
+
+# =========================
+# Java / Spring / Maven / Gradle
 # =========================
 target/
 *.class
 *.jar
 *.war
 *.ear
+*.nar
 *.hprof
+
+# Gradle
 .gradle/
 **/build/
 !**/src/**/build/
+
+# Maven wrapper (keep wrapper, ignore binaries if any)
 .mvn/wrapper/maven-wrapper.jar
 
 # =========================
-# Node / Angular
+# IntelliJ / Eclipse / NetBeans
 # =========================
-node_modules/
-dist/
-build/
-out/
-coverage/
-.angular/
-.cache/
-.tmp/
-.temp/
-npm-debug.log*
-yarn-debug.log*
-pnpm-debug.log*
-.pnpm-store/
-.npm/
-.yarn/
+.classpath
+.project
+.settings/
+.nb-gradle/
+.nbproject/
+.factorypath
 
 # =========================
-# Uploads / storage (runtime)
+# Test / Reports
+# =========================
+surefire-reports/
+failsafe-reports/
+test-results/
+reports/
+
+# =========================
+# Runtime uploads / generated content
 # =========================
 uploads/
 **/uploads/
@@ -89,25 +126,41 @@ tmp/
 **/tmp/
 
 # =========================
-# Local DB files
+# Database local files
 # =========================
 *.db
 *.sqlite
 *.sqlite3
 
 # =========================
-# Docker / local data
+# Docker / Compose
 # =========================
 docker-data/
 **/docker-data/
 *.pid
 
 # =========================
-# App config (tu caso)
+# Misc
 # =========================
+*.swp
+*.swo
+*.bak
+*.tmp
+*.orig
+
+# =========================
+# CONFIGURACIÓN DE APP (ATENCIÓN AQUÍ)
+# =========================
+
+# Ignorar propiedades locales que uses para sobreescribir (si crearas alguno)
 backend/src/main/resources/application-local.properties
+
+# PERMITIMOS application.properties porque ahora está limpio (solo placeholders)
+# Si lo ignoras, la app fallará en Render.
 !backend/src/main/resources/application.properties
 
+# Angular: Permitimos environment.ts porque el build lo necesita.
+# Asegúrate de no poner claves SECRETAS (sk_) aquí, solo PÚBLICAS (pk_).
 !frontend/src/environments/environment.ts
 !frontend/src/environments/environment.development.ts
 !frontend/src/environments/environment.production.ts
