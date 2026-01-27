@@ -1,115 +1,117 @@
-<div class="my-courses-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="my-courses-wrap">
-      <header class="page-head">
-        <h2 class="page-title">👋 Mis Cursos</h2>
-        <p class="page-subtitle">Continúa donde lo dejaste y sigue aprendiendo.</p>
-      </header>
+<div class="my-courses-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head mb-5 text-center text-lg-start">
+        <h2 class="fw-bold display-6 mb-1 text-main">👋 Mis Cursos</h2>
+        <p class="text-muted lead mb-0">Continúa donde lo dejaste y sigue aprendiendo.</p>
+      </div>
 
       @if (loading()) {
-      <div class="state state-loading text-center">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando...</span>
+        <div class="state state-loading glass-card text-center p-5">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <p class="text-muted">Calculando tu progreso...</p>
         </div>
-        <p class="mt-2 text-muted">Calculando tu progreso...</p>
-      </div>
-      } @if (!loading() && courses().length === 0) {
-      <div class="state state-empty text-center">
-        <i class="bi bi-journal-x display-1 text-muted opacity-25"></i>
-        <h4 class="mt-3 fw-bold text-muted">Aún no tienes cursos</h4>
-        <p class="text-muted mb-0">Parece que no estás matriculado en ningún curso todavía.</p>
-        <button class="btn btn-primary mt-3" routerLink="/courses">Ver catálogo</button>
-      </div>
-      } @if (!loading() && courses().length > 0) {
-      <div class="row g-4">
-        @for (course of courses(); track course.id) {
-        <div class="col-12 col-md-6 col-xl-4">
-          <div class="card course-card h-100">
-            <div
-              class="course-cover position-relative bg-light"
-              style="height: 200px; overflow: hidden"
-            >
-              @if (course.coverImage) {
-              <img
-                [src]="course.coverImage"
-                [alt]="course.title"
-                class="course-img w-100 h-100 object-fit-cover"
-                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none'); this.nextElementSibling.classList.add('d-flex');"
-              />
 
-              <div
-                class="fallback-icon d-none w-100 h-100 align-items-center justify-content-center text-muted"
-              >
-                <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
-              </div>
-              } @else {
-              <div
-                class="fallback-icon d-flex w-100 h-100 align-items-center justify-content-center text-muted"
-              >
-                <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
-              </div>
-              }
-            </div>
+      } @else if (courses().length === 0) {
+        <div class="state state-empty glass-card text-center p-5">
+          <div class="mb-3 fs-1 opacity-50">🎓</div>
+          <h4 class="fw-bold text-main">Aún no tienes cursos</h4>
+          <p class="text-muted mb-4">Parece que no estás matriculado en ningún curso todavía.</p>
+          <button class="btn btn-primary btn-glow" routerLink="/courses">
+            Explorar Catálogo <i class="bi bi-arrow-right ms-2"></i>
+          </button>
+        </div>
 
-            <div class="card-body course-body d-flex flex-column">
-              <h5 class="course-title text-truncate fw-bold mb-2" [title]="course.title">
-                {{ course.title }}
-              </h5>
-
-              <p
-                class="course-desc text-muted small mb-3 flex-grow-1"
-                style="
-                  display: -webkit-box;
-                  -webkit-line-clamp: 3;
-                  -webkit-box-orient: vertical;
-                  overflow: hidden;
-                "
-              >
-                {{ course.description || 'Sin descripción disponible.' }}
-              </p>
-
-              <div class="progress-block mb-3">
-                <div class="d-flex justify-content-between text-muted small mb-1">
-                  <span>Progreso</span>
-                  <span class="fw-bold">{{ course.progress }}%</span>
-                </div>
-
-                <div class="progress progress-rail" style="height: 6px">
-                  <div
-                    class="progress-bar bg-success rounded-pill"
-                    role="progressbar"
-                    [style.width.%]="course.progress"
-                    [attr.aria-valuenow]="course.progress"
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                  ></div>
-                </div>
-              </div>
-
-              <div class="actions d-flex gap-2">
-                <button class="btn btn-primary flex-grow-1" (click)="enterCourse(course.id)">
-                  @if(course.progress > 0) { Continuar <i class="bi bi-play-fill ms-1"></i> } @else
-                  { Empezar <i class="bi bi-arrow-right ms-1"></i>
+      } @else {
+        <div class="row g-4">
+          @for (course of courses(); track course.id) {
+            <div class="col-12 col-md-6 col-xl-4">
+              <div class="card course-card h-100">
+                <div class="course-cover">
+                  @if (course.coverImage) {
+                    <img
+                      [src]="course.coverImage"
+                      [alt]="course.title"
+                      class="course-img"
+                      loading="lazy"
+                      onerror="
+                        this.style.display = 'none';
+                        this.nextElementSibling.classList.remove('d-none');
+                        this.nextElementSibling.classList.add('d-flex');
+                      "
+                    />
+                    <div class="fallback-icon d-none">
+                      <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
+                    </div>
+                  } @else {
+                    <div class="fallback-icon d-flex">
+                      <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
+                    </div>
                   }
-                </button>
 
-                @if (course.pdfUrl) {
-                <a
-                  [href]="course.pdfUrl"
-                  target="_blank"
-                  rel="noopener"
-                  class="btn btn-outline-secondary"
-                  title="Descargar PDF del curso"
-                >
-                  <i class="bi bi-file-earmark-pdf-fill"></i>
-                </a>
-                }
+                  <div class="course-badge">
+                    <span class="badge-pill">
+                      {{ course.progress === 100 ? 'Completado' : 'En curso' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="card-body d-flex flex-column p-4">
+                  <h5 class="course-title text-truncate-2 mb-2" [title]="course.title">
+                    {{ course.title }}
+                  </h5>
+
+                  <p class="course-desc text-muted small text-truncate-3 mb-4 flex-grow-1">
+                    {{ course.description || 'Sin descripción disponible.' }}
+                  </p>
+
+                  <div class="progress-block mb-4">
+                    <div class="d-flex justify-content-between text-muted small mb-2 fw-bold">
+                      <span>Tu avance</span>
+                      <span class="text-primary">{{ course.progress }}%</span>
+                    </div>
+                    <div class="progress progress-thin">
+                      <div
+                        class="progress-bar bg-primary rounded-pill"
+                        role="progressbar"
+                        [style.width.%]="course.progress"
+                        [class.bg-success]="course.progress === 100"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div class="d-flex gap-2 mt-auto">
+                    <button class="btn btn-glow flex-grow-1" (click)="enterCourse(course.id)">
+                      @if (course.progress > 0) {
+                        Continuar <i class="bi bi-play-fill ms-1"></i>
+                      } @else {
+                        Empezar <i class="bi bi-arrow-right ms-1"></i>
+                      }
+                    </button>
+
+                    @if (course.pdfUrl) {
+                      <a
+                        [href]="course.pdfUrl"
+                        target="_blank"
+                        class="btn btn-glass px-3"
+                        title="Descargar PDF"
+                      >
+                        <i class="bi bi-file-earmark-pdf text-danger"></i>
+                      </a>
+                    }
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          }
         </div>
-        }
-      </div>
       }
     </div>
   </div>

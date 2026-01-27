@@ -1,287 +1,570 @@
-/* player.scss */
+/* course-player.component.scss — “premium light” (blanco + vidrio suave) */
 
-$primary-color: #4f46e5;
+/* ====== TOKENS ====== */
+$canvas: #f4f7fb;
+$surface: rgba(255, 255, 255, 0.86);
+$surface-solid: #ffffff;
+
+$text: #0f172a;
+$text-muted: #64748b;
+
+$border: rgba(15, 23, 42, 0.1);
+$border-strong: rgba(15, 23, 42, 0.14);
+
+$primary: #4f46e5;
+$primary-2: #7c3aed; /* acento secundario */
+$success: #059669;
+
+$radius-lg: 16px;
+$radius-xl: 20px;
+
+$shadow-1:
+  0 1px 0 rgba(15, 23, 42, 0.04),
+  0 12px 30px rgba(15, 23, 42, 0.06);
+$shadow-2:
+  0 1px 0 rgba(15, 23, 42, 0.05),
+  0 18px 50px rgba(15, 23, 42, 0.1);
+$shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+@mixin focus-ring($c) {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba($c, 0.18);
+}
 
 :host {
   display: block;
-  // 👇 CLAVE: "Clavamos" el componente a la pantalla
-  position: fixed; 
-  top: 70px;      // Altura de tu Navbar (ajústalo si es más/menos)
+  position: fixed;
+  top: 70px; /* navbar */
   left: 0;
   right: 0;
-  bottom: 0;      // Llega hasta el final de la pantalla
-  z-index: 100;   // Aseguramos que esté por encima de cosas básicas
-  overflow: hidden; // Evitamos scroll en el body principal
+  bottom: 0;
+  z-index: 100;
+
+  /* Fondo “premium”: suave, blanco y limpio */
+  background:
+    radial-gradient(1200px 800px at 15% 10%, rgba($primary, 0.12), transparent 55%),
+    radial-gradient(900px 700px at 90% 20%, rgba($primary-2, 0.1), transparent 55%),
+    linear-gradient(180deg, #ffffff 0%, $canvas 60%, $canvas 100%);
 }
 
-/* Page */
-.player-page {
-  width: 100%;
-  height: 100%; 
-  // Ya no necesitamos min-height aquí porque el host manda la altura exacta
+/* ====== LAYOUT ====== */
+.player-page,
+.player-layout {
+  height: 100%;
 }
 
-/* Layout */
 .player-layout {
   display: flex;
-  height: 100%;     // clave (NO min-height)
-  min-height: 0;    // clave
-  overflow: hidden; // clave: evita que la lista “estire” la página
+  width: 100%;
+  overflow: hidden;
 }
 
-/* Sidebar */
+/* ====== SIDEBAR ====== */
 .player-sidebar {
-  width: 350px;
-  min-width: 350px;
+  width: 360px;
+  min-width: 360px;
   height: 100%;
-  min-height: 0;        // clave
   display: flex;
   flex-direction: column;
-  
+
+  background: $surface;
+  border-right: 1px solid $border;
+  box-shadow: 12px 0 40px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .sidebar-header {
-  padding: 1rem 1rem;
-  border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-  background: #f9fafb;
+  height: 68px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
+  border-bottom: 1px solid $border;
+  box-shadow: $shadow-inset;
+}
+
+.btn-back {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid $border;
+  background: rgba(255, 255, 255, 0.9);
+  color: $text;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+    border-color: $border-strong;
+    background: $surface-solid;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:focus-visible {
+    @include focus-ring($primary);
+  }
+}
+
+.course-title {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: $text;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
 }
 
 .sidebar-body {
   flex: 1;
-  min-height: 0;        // clave
-  overflow-y: auto;     // scroll aquí
-  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 10px 10px 14px;
 }
 
-.sidebar-footer {
-  padding: 1rem;
-  border-top: 1px solid rgba(17, 24, 39, 0.08);
-  background: #f9fafb;
-}
-
-/* Modules */
 .module-block {
-  border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+  margin: 10px 0;
 }
 
 .module-toggle {
   width: 100%;
-  border: 0;
-  background: #f9fafb;
-  padding: 0.9rem 1rem;
+  border: 1px solid $border;
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: left;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  cursor: pointer;
+  gap: 12px;
+
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+
+  .module-text {
+    font-size: 0.78rem;
+    font-weight: 900;
+    color: rgba($text, 0.68);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .toggle-icon {
+    transition:
+      transform 180ms ease,
+      color 180ms ease;
+    color: rgba($text, 0.55);
+  }
 
   &:hover {
-    background: rgba(79, 70, 229, 0.05);
+    transform: translateY(-1px);
+    border-color: $border-strong;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+  }
+
+  &:focus-visible {
+    @include focus-ring($primary);
+  }
+
+  &.is-open {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba($primary, 0.06));
+    border-color: rgba($primary, 0.22);
+
+    .module-text {
+      color: rgba($text, 0.9);
+    }
+
+    .toggle-icon {
+      transform: rotate(180deg);
+      color: rgba($primary, 0.75);
+    }
   }
 }
 
-.module-title {
-  font-weight: 800;
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #6b7280;
-  min-width: 0;
-}
-
-/* Lessons list */
 .module-lessons {
-  background: #fff;
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(15, 23, 42, 0.07);
 }
 
 .lesson-item {
   width: 100%;
-  border: 0;
-  background: #fff;
-  padding: 0.85rem 1rem;
-  border-top: 1px solid rgba(17, 24, 39, 0.06);
-  display: grid;
-  grid-template-columns: 36px 1fr 22px;
-  gap: 10px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 14px;
+
+  padding: 12px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
   text-align: left;
   cursor: pointer;
 
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+
+  & + & {
+    margin-top: 10px;
+  }
+
   &:hover {
-    background: rgba(79, 70, 229, 0.04);
-  }
-}
-
-.active-lesson {
-  background: rgba(79, 70, 229, 0.08) !important;
-}
-
-.lesson-check {
-  display: inline-grid;
-  place-items: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-}
-
-.lesson-main {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.lesson-name {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #111827;
-  line-height: 1.2;
-}
-
-.lesson-meta {
-  font-size: 0.75rem;
-  color: #6b7280;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.playing {
-  color: #a5b4fc;
-  font-weight: 700;
-}
-
-.lesson-type {
-  color: #9ca3af;
-  display: inline-grid;
-  place-items: center;
-}
-
-/* Loading */
-.sidebar-loading {
-  padding: 1.5rem;
-  text-align: center;
-  color: #6b7280;
-}
-
-/* Content */
-.player-content {
-  flex: 1;
-  background: #0b1220; /* oscuro elegante */
-  color: #fff;
-  overflow: auto;
-  padding: 1rem;
-}
-
-.content-wrap {
-  max-width: 1000px;
-  max-width: 1600px;
-  margin: 0 auto;
-}
-
-.lesson-player {
-  background: #000;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-  margin-bottom: 1.25rem;
-  
-  // Esto mantiene el video siempre visible sin tener que bajar scroll
-  max-height: 80vh; 
-}
-
-/* Progress */
-.progress-block {
-  margin-bottom: 1.25rem;
-}
-
-.progress-rail {
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-/* Player */
-.lesson-player {
-  background: #000;
-  border-radius: 16px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-  margin-bottom: 1.25rem;
-}
-
-.pdf-only {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  padding: 1rem;
-}
-
-/* Actions */
-.lesson-info {
-  padding-bottom: 1rem;
-}
-
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.btn {
-  border-radius: 12px;
-  font-weight: 700;
-}
-
-/* Empty */
-.empty-lesson {
-  margin-top: 5rem;
-  text-align: center;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .player-content {
-    padding: 1rem;
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
+    border-color: rgba($primary, 0.16);
+    background: rgba(255, 255, 255, 0.98);
   }
 
-  .content-wrap {
-    max-width: 100%;
+  &:focus-visible {
+    @include focus-ring($primary);
   }
 
-/* --- CUSTOM SCROLLBAR (Para .sidebar-body) --- */
-.custom-scrollbar {
-  // Firefox
-  scrollbar-width: thin; 
-  scrollbar-color: #cbd5e1 transparent;
+  &.active-lesson {
+    border-color: rgba($primary, 0.28);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba($primary, 0.06));
+    box-shadow: 0 18px 44px rgba(79, 70, 229, 0.16);
 
-  // Chrome / Edge / Safari
-  &::-webkit-scrollbar {
-    width: 6px; // Muy fina
-  }
+    .lesson-name {
+      color: $text !important; /* pisa .text-primary si hace falta */
+      font-weight: 800;
+    }
 
-  &::-webkit-scrollbar-track {
-    background: transparent; 
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: #cbd5e1; // Gris suave
-    border-radius: 20px;       // Redondeada
-    border: 2px solid transparent; // Truco para darle margen
-    background-clip: content-box;
-    
-    &:hover {
-      background-color: #94a3b8; // Un poco más oscuro al pasar el ratón
+    .lesson-type-icon {
+      color: rgba($primary, 0.8);
     }
   }
 }
+
+.lesson-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(15, 23, 42, 0.18);
+  background: rgba(255, 255, 255, 0.95);
+  color: rgba(15, 23, 42, 0.28);
+
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease,
+    color 140ms ease;
+
+  i {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &:hover {
+    transform: scale(1.06);
+    border-color: rgba($primary, 0.35);
+    color: rgba($primary, 0.65);
+  }
+
+  &.completed {
+    border-color: rgba($success, 0.45);
+    background: rgba($success, 2);
+    color: rgba($success, 0.95);
+  }
 }
 
+.lesson-info-box {
+  min-width: 0;
+  flex: 1;
+}
 
+.lesson-name {
+  display: block;
+  font-size: 0.92rem;
+  color: rgba($text, 0.92);
+  line-height: 1.25;
+}
+
+.lesson-meta {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: $text-muted;
+
+  .playing {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    color: rgba($primary, 0.85);
+    font-weight: 700;
+  }
+}
+
+.lesson-type-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+
+  display: grid;
+  place-items: center;
+
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: rgba(255, 255, 255, 0.75);
+  color: rgba(15, 23, 42, 0.55);
+
+  i {
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+}
+
+/* Footer + progreso */
+.sidebar-footer {
+  padding: 14px 16px 18px;
+  border-top: 1px solid $border;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.9));
+
+  .progress-thin {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    border-radius: 999px;
+    background: linear-gradient(90deg, $success, rgba($success, 0.65));
+  }
+}
+
+/* ====== CONTENT ====== */
+.player-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 26px 26px 34px;
+}
+
+.content-wrap {
+  width: 100%;
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-bottom: 48px;
+}
+
+/* Header de lección (tu HTML mete text-white; lo pisamos aquí) */
+.lesson-header {
+  margin-bottom: 18px;
+
+  .badge {
+    background: rgba($primary, 0.1) !important;
+    color: rgba($primary, 0.95) !important;
+    border: 1px solid rgba($primary, 0.16);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    padding: 8px 12px;
+  }
+
+  h1,
+  .h3 {
+    color: $text !important;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Player video / pdf en tarjeta blanca “premium” */
+.lesson-view {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: $radius-xl;
+  box-shadow: $shadow-2;
+  padding: 16px;
+}
+
+.lesson-player {
+  border-radius: $radius-xl;
+  overflow: hidden;
+  background: #0b1220;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+}
+
+.pdf-container {
+  border-radius: $radius-xl;
+  overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  box-shadow: $shadow-1;
+}
+
+.pdf-placeholder {
+  background: rgba(255, 255, 255, 0.92);
+  border: 2px dashed rgba(15, 23, 42, 0.16);
+  border-radius: $radius-xl;
+  color: $text-muted !important;
+}
+
+/* Acciones */
+.lesson-actions {
+  margin-top: 14px !important;
+  background: rgba(255, 255, 255, 0.82) !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  border-radius: $radius-xl !important;
+  box-shadow: $shadow-1;
+  padding: 14px !important;
+}
+
+/* Botones (scopeado al componente) */
+:host .btn {
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+:host .btn:focus-visible {
+  @include focus-ring($primary);
+}
+
+:host .btn-primary {
+  border: 0;
+  background: linear-gradient(90deg, $primary, $primary-2);
+  box-shadow: 0 16px 40px rgba(79, 70, 229, 0.22);
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 20px 54px rgba(79, 70, 229, 0.28);
+  }
+}
+
+:host .btn-outline-light {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  color: $text;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: rgba(15, 23, 42, 0.18);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+  }
+}
+
+/* ====== QUIZ ====== */
+.quiz-player-container {
+  border-radius: $radius-xl !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  box-shadow: $shadow-2 !important;
+  background: rgba(255, 255, 255, 0.86) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.quiz-header {
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+/* cards del quiz */
+.quiz-questions .card {
+  border-radius: $radius-xl !important;
+  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+}
+
+/* opción seleccionada con borde “premium” */
+.quiz-questions label.btn {
+  border-radius: 14px !important;
+  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+
+  &:hover {
+    border-color: rgba($primary, 0.22) !important;
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+    transform: translateY(-1px);
+  }
+}
+
+.quiz-questions label.btn.btn-outline-primary {
+  border-color: rgba($primary, 0.3) !important;
+  box-shadow: 0 16px 44px rgba(79, 70, 229, 0.14);
+}
+
+/* ====== EMPTY STATE (pisar text-white-50) ====== */
+.empty-state {
+  color: rgba($text, 0.55) !important;
+
+  h3 {
+    color: rgba($text, 0.82) !important;
+    font-weight: 900;
+  }
+
+  p {
+    color: rgba($text, 0.55) !important;
+  }
+}
+
+/* ====== SCROLLBAR ====== */
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(15, 23, 42, 0.18);
+    border-radius: 999px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(15, 23, 42, 0.28);
+  }
+}
+
+/* ====== MOBILE ====== */
+@media (max-width: 991px) {
+  .player-content {
+    padding: 16px;
+  }
+
+  .lesson-actions {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+
+  :host .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ====== REDUCE MOTION ====== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

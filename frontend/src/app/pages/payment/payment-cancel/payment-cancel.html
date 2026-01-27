@@ -1,10 +1,36 @@
-<div class="container text-center mt-5">
-  <div class="card p-5 shadow-sm border-danger">
-    <div class="card-body">
-      <h1 class="text-danger display-1"><i class="bi bi-x-circle-fill"></i></h1>
-      <h2 class="mt-3">Pago Cancelado</h2>
-      <p class="lead">No se ha realizado ningún cargo en tu tarjeta.</p>
-      <a routerLink="/" class="btn btn-outline-dark mt-3">Volver al Inicio</a>
+<div class="status-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="status-container">
+    <div class="card glass-card">
+      <div class="card-body text-center p-5">
+        
+        <div class="icon-wrapper mb-4">
+          <i class="bi bi-x-circle-fill text-danger display-1"></i>
+        </div>
+
+        <h1 class="fw-bold mb-3 text-main">Pago Cancelado</h1>
+        
+        <p class="text-muted lead mb-4">
+          No se ha realizado ningún cargo en tu tarjeta.<br>
+          El proceso de compra se ha detenido.
+        </p>
+
+        <div class="d-flex justify-content-center gap-3">
+          <a routerLink="/" class="btn btn-glass">
+            <i class="bi bi-house me-2"></i> Inicio
+          </a>
+          <a routerLink="/courses" class="btn btn-glow">
+            <i class="bi bi-arrow-repeat me-2"></i> Intentar de nuevo
+          </a>
+        </div>
+
+      </div>
     </div>
   </div>
 </div>

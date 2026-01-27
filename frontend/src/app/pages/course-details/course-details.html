@@ -1,88 +1,112 @@
-<!-- course-details.html (tu course-syllabus.html) -->
-<div class="course-syllabus-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="course-syllabus-wrap">
-      <div class="d-flex justify-content-between align-items-center mb-4 page-header">
-        <button routerLink="/courses" class="btn btn-outline-secondary header-btn">
-          ⬅ Volver a Cursos
+<div class="syllabus-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <button routerLink="/courses" class="btn btn-glass">
+          <i class="bi bi-arrow-left"></i> Volver
         </button>
 
-        <h2 class="fw-bold m-0 text-center flex-grow-1">Temario del Curso</h2>
+        <div class="text-center flex-grow-1">
+          <h2 class="fw-bold display-6 mb-0 text-main">Temario del Curso</h2>
+          <p class="text-muted lead mb-0">Estructura completa de módulos y lecciones</p>
+        </div>
 
-        <div class="header-spacer"></div>
+        <div class="spacer d-none d-lg-block" style="width: 100px"></div>
       </div>
 
-      <div class="accordion syllabus-accordion shadow-sm" id="temarioAccordion">
+      <div class="accordion syllabus-accordion shadow-lg" id="temarioAccordion">
         @for (modulo of modules(); track modulo.id; let i = $index) {
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <button
-              class="accordion-button collapsed"
-              type="button"
-              data-bs-toggle="collapse"
-              [attr.data-bs-target]="'#collapse' + i"
+          <div class="accordion-item mb-3">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                [attr.data-bs-target]="'#collapse' + i"
+              >
+                <div class="d-flex align-items-center w-100">
+                  <span class="badge badge-module me-3">Módulo {{ i + 1 }}</span>
+                  <span class="fw-bold text-main fs-5 text-truncate">{{ modulo.title }}</span>
+                </div>
+              </button>
+            </h2>
+
+            <div
+              [id]="'collapse' + i"
+              class="accordion-collapse collapse"
+              data-bs-parent="#temarioAccordion"
             >
-              <span class="badge bg-primary me-3">Módulo {{ modulo.orderIndex }}</span>
-              <span class="fw-bold text-truncate">{{ modulo.title }}</span>
-            </button>
-          </h2>
+              <div class="accordion-body">
+                @if (modulo.lessons && modulo.lessons.length > 0) {
+                  <div class="list-group list-group-flush">
+                    @for (lesson of modulo.lessons; track lesson.id; let j = $index) {
+                      <div class="list-group-item lesson-row">
+                        <div class="lesson-left">
+                          <span class="lesson-number">{{ j + 1 }}</span>
+                          <div class="lesson-info">
+                            <span class="lesson-title">{{ lesson.title }}</span>
 
-          <div
-            [id]="'collapse' + i"
-            class="accordion-collapse collapse"
-            data-bs-parent="#temarioAccordion"
-          >
-            <div class="accordion-body">
-              @if (modulo.lessons && modulo.lessons.length > 0) {
-              <div class="list-group list-group-flush">
-                @for (lesson of modulo.lessons; track lesson.id) {
-                <div class="list-group-item lesson-row">
-                  <div class="lesson-left">
-                    <span class="text-muted small me-2">{{ lesson.orderIndex }}.</span>
-                    <span class="lesson-title">{{ lesson.title }}</span>
-                  </div>
+                            <div class="lesson-badges">
+                              @if (lesson.videoUrl) {
+                                <i class="bi bi-play-circle text-primary" title="Tiene Video"></i>
+                              }
+                              @if (lesson.pdfUrl) {
+                                <i class="bi bi-file-earmark-pdf text-danger" title="Tiene PDF"></i>
+                              }
+                            </div>
+                          </div>
+                        </div>
 
-                  <div class="lesson-actions">
-                    @if (lesson.videoUrl) {
-                    <a
-                      [href]="lesson.videoUrl"
-                      target="_blank"
-                      rel="noopener"
-                      class="btn btn-sm btn-danger me-2"
-                    >
-                      ▶ Ver Vídeo
-                    </a>
-                    } @if (lesson.pdfUrl) {
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-secondary me-2"
-                      (click)="openLessonPdf(lesson.id)"
-                    >
-                      📄 Abrir PDF
-                    </button>
+                        <div class="lesson-actions">
+                          @if (lesson.videoUrl) {
+                            <a [href]="lesson.videoUrl" target="_blank" class="btn btn-glass">
+                              <i class="bi bi-play-fill text-primary"></i> Ver Video
+                            </a>
+                          }
 
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary"
-                      (click)="downloadLessonPdf(lesson.id, lesson.title)"
-                    >
-                      ⬇ Descargar
-                    </button>
+                          @if (lesson.pdfUrl) {
+                            <button
+                              type="button"
+                              class="btn btn-glass"
+                              (click)="openLessonPdf(lesson.id)"
+                            >
+                              <i class="bi bi-eye"></i> Ver
+                            </button>
+
+                            <button
+                              type="button"
+                              class="btn btn-glow"
+                              (click)="downloadLessonPdf(lesson.id, lesson.title)"
+                            >
+                              <i class="bi bi-download"></i> Descargar
+                            </button>
+                          }
+                        </div>
+                      </div>
                     }
                   </div>
-                </div>
+                } @else {
+                  <div class="text-center py-4 text-muted">
+                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
+                    Aún no hay lecciones publicadas en este módulo.
+                  </div>
                 }
               </div>
-              } @else {
-              <p class="text-muted text-center m-0">Aún no hay lecciones en este módulo.</p>
-              }
             </div>
           </div>
-        </div>
         } @empty {
-        <div class="alert alert-warning text-center mb-0">
-          No se han encontrado módulos para este curso.
-        </div>
+          <div class="empty-state text-center py-5">
+            <div class="mb-3 fs-1 opacity-50">📂</div>
+            <h3 class="text-main fw-bold">No hay contenido disponible</h3>
+            <p class="text-muted">El temario de este curso aún no ha sido publicado.</p>
+          </div>
         }
       </div>
     </div>

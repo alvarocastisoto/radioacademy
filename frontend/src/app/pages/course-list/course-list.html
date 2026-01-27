@@ -1,94 +1,98 @@
-<div class="courses-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="courses-wrap">
-      <div class="page-head">
-        <h2 class="m-0">📚 Catálogo de Formación</h2>
-        <p class="text-muted mb-0">Explora los cursos disponibles.</p>
+<div class="courses-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head mb-5 text-center text-lg-start">
+        <h2 class="fw-bold display-6">📚 Catálogo de Formación</h2>
+        <p class="text-muted lead mb-0">Explora los cursos disponibles para tu preparación.</p>
       </div>
 
       <div class="row g-4">
         @for (course of courses(); track course.id) {
-        <div class="col-12 col-md-6 col-xl-4">
-          <div class="card course-card h-100">
-            <div class="course-media position-relative bg-light" style="height: 220px">
-              @if (course.coverImage) {
-              <img
-                [src]="course.coverImage"
-                alt="{{ course.title }}"
-                class="w-100 h-100 object-fit-cover"
-                onerror="this.onerror=null; this.src='https://placehold.co/1200x800/e9ecef/6c757d?text=Sin+Imagen';"
-              />
-              } @else {
-              <img
-                src="https://placehold.co/1200x800/20c997/ffffff?text=Radio"
-                alt="Placeholder"
-                class="w-100 h-100 object-fit-cover"
-              />
-              }
-            </div>
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card course-card h-100">
+              <div class="course-media">
+                @if (course.coverImage) {
+                  <img
+                    [src]="course.coverImage"
+                    alt="{{ course.title }}"
+                    loading="lazy"
+                    onerror="
+                      this.onerror = null;
+                      this.src = 'https://placehold.co/1200x800/f1f5f9/94a3b8?text=Sin+Imagen';
+                    "
+                  />
+                } @else {
+                  <div class="placeholder-img">
+                    <span class="fs-1">☢️</span>
+                  </div>
+                }
 
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="badge bg-primary">{{ course.hours }} Horas</span>
-
-                @if (course.isPurchased) {
-                <div class="price fw-bold text-success">
-                  <i class="bi bi-check-circle-fill"></i> Adquirido
+                <div class="course-badge">
+                  <span class="badge-pill">
+                    <i class="bi bi-clock me-1"></i> {{ course.hours }}h
+                  </span>
                 </div>
-                } @else {
-                <div class="price fw-bold text-dark">{{ course.price | currency : 'EUR' }}</div>
-                }
               </div>
 
-              <h5 class="card-title fw-bold mb-2 text-truncate" title="{{ course.title }}">
-                {{ course.title }}
-              </h5>
-              <p
-                class="card-text text-muted small mb-0"
-                style="
-                  display: -webkit-box;
-                  -webkit-line-clamp: 2;
-                  -webkit-box-orient: vertical;
-                  overflow: hidden;
-                "
-              >
-                {{ course.description || 'Sin descripción disponible.' }}
-              </p>
-            </div>
+              <div class="card-body d-flex flex-column">
+                <div class="mb-2 d-flex justify-content-between align-items-center">
+                  @if (course.isPurchased) {
+                    <span class="status-text text-success">
+                      <i class="bi bi-check-circle-fill me-1"></i> Adquirido
+                    </span>
+                  } @else {
+                    <span class="price-tag">{{ course.price | currency: 'EUR' }}</span>
+                  }
+                </div>
 
-            <div class="card-footer course-footer bg-transparent border-top-0 pt-0 pb-3">
-              <div class="d-grid">
-                @if (course.isPurchased) {
-                <a [routerLink]="['/courses', course.id]" class="btn btn-success btn-lg fw-bold">
-                  <i class="bi bi-play-circle-fill me-2"></i> Ir al Curso
-                </a>
-                } @else {
-                <button
-                  class="btn btn-primary btn-lg fw-bold"
-                  (click)="buyCourse(course)"
-                  [disabled]="isLoading()"
-                >
-                  @if (isLoading()) {
-                  <span
-                    class="spinner-border spinner-border-sm me-2"
-                    role="status"
-                    aria-hidden="true"
-                  ></span>
-                  Procesando... } @else {
-                  <i class="bi bi-cart-fill me-2"></i> Comprar ahora }
-                </button>
-                }
+                <h5 class="card-title text-truncate-2" title="{{ course.title }}">
+                  {{ course.title }}
+                </h5>
+
+                <p class="card-text text-muted small text-truncate-3 flex-grow-1">
+                  {{ course.description || 'Sin descripción disponible para este curso.' }}
+                </p>
+              </div>
+
+              <div class="card-footer p-4 pt-0 bg-transparent border-0">
+                <div class="d-grid">
+                  @if (course.isPurchased) {
+                    <a [routerLink]="['/courses', course.id]" class="btn btn-glass">
+                      <i class="bi bi-play-circle-fill me-2"></i> Ir al Curso
+                    </a>
+                  } @else {
+                    <button
+                      class="btn btn-glow"
+                      (click)="buyCourse(course)"
+                      [disabled]="isLoading()"
+                    >
+                      @if (isLoading()) {
+                        <span class="spinner-border spinner-border-sm me-2"></span>
+                        Procesando...
+                      } @else {
+                        <i class="bi bi-cart-fill me-2"></i> Comprar ahora
+                      }
+                    </button>
+                  }
+                </div>
               </div>
             </div>
           </div>
-        </div>
         } @empty {
-        <div class="col-12">
-          <div class="empty-state text-center py-5">
-            <h3 class="text-muted mb-2">No hay cursos disponibles todavía 😢</h3>
-            <p class="text-muted mb-0">Vuelve más tarde o contacta con administración.</p>
+          <div class="col-12">
+            <div class="empty-state glass-card text-center py-5">
+              <div class="mb-3 fs-1 opacity-50">📂</div>
+              <h3 class="text-main fw-bold">No hay cursos disponibles</h3>
+              <p class="text-muted">Estamos actualizando el catálogo. Vuelve pronto.</p>
+            </div>
           </div>
-        </div>
         }
       </div>
     </div>

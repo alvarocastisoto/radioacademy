@@ -1,85 +1,71 @@
-<div class="course-new-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="course-new-wrap">
-      <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8 col-xl-7">
-          <div class="card form-card">
-            <div class="card-header form-header">
-              <h2 class="fw-bold m-0">Nuevo Curso</h2>
-            </div>
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-            <div class="card-body p-4">
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head text-center mb-5">
+        <h2 class="fw-bold display-6 mb-2 text-main">🚀 Nuevo Curso</h2>
+        <p class="text-muted lead mb-0">Crea un nuevo programa formativo desde cero.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+          <div class="card glass-card">
+            <div class="card-body p-4 p-md-5">
               <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
                 <div class="mb-4">
-                  <label class="form-label mb-2">Portada del Curso</label>
-
-                  <div
-                    class="cover-upload-area position-relative rounded-3 overflow-hidden border"
-                    [class.border-primary]="isUploading"
-                    style="height: 220px; background: #f3f4f6"
-                  >
-                    @if (coverPreview) {
-                    <img [src]="coverPreview" class="w-100 h-100 object-fit-cover" />
-                    } @else {
-                    <div
-                      class="d-flex flex-column align-items-center justify-content-center h-100 text-muted"
-                    >
-                      <i class="bi bi-image display-4 mb-2 opacity-25"></i>
-                      <span class="small fw-bold">Subir Portada</span>
-                    </div>
-                    } @if (isUploading) {
-                    <div
-                      class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center"
-                    >
-                      <div class="spinner-border text-primary" role="status"></div>
-                    </div>
-                    }
-
-                    <input
-                      type="file"
-                      class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
-                      accept="image/*"
-                      (change)="onFileSelected($event)"
-                    />
-                  </div>
-                  <div class="form-text text-end mt-1">Recomendado: 1280x720px (JPG/PNG)</div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label" for="title">Título del Curso</label>
+                  <label class="form-label">Título del Curso</label>
                   <input
-                    id="title"
                     type="text"
-                    class="form-control"
+                    class="form-control form-control-lg"
                     formControlName="title"
                     placeholder="Ej: OPE Enfermería 2025"
                   />
                 </div>
 
-                <div class="mb-3">
-                  <label class="form-label" for="description">Descripción Corta</label>
+                <div class="mb-4">
+                  <label class="form-label">Descripción</label>
                   <textarea
-                    id="description"
                     class="form-control"
-                    rows="3"
                     formControlName="description"
-                    placeholder="Resumen del contenido..."
+                    rows="4"
+                    placeholder="Resumen del contenido y objetivos..."
                   ></textarea>
                 </div>
 
-                <div class="row g-3">
-                  <div class="col-12 col-md-4">
-                    <label class="form-label" for="price">Precio (€)</label>
-                    <input id="price" type="number" class="form-control" formControlName="price" />
+                <div class="row g-3 mb-4">
+                  <div class="col-md-4">
+                    <label class="form-label">Precio (€)</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-transparent border-end-0 text-muted">€</span>
+                      <input
+                        type="number"
+                        class="form-control border-start-0 ps-0"
+                        formControlName="price"
+                      />
+                    </div>
                   </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label" for="hours">Horas Lectivas</label>
-                    <input id="hours" type="number" class="form-control" formControlName="hours" />
+                  <div class="col-md-4">
+                    <label class="form-label">Horas</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-transparent border-end-0 text-muted"
+                        ><i class="bi bi-clock"></i
+                      ></span>
+                      <input
+                        type="number"
+                        class="form-control border-start-0 ps-0"
+                        formControlName="hours"
+                      />
+                    </div>
                   </div>
-
-                  <div class="col-12 col-md-4">
-                    <label class="form-label" for="level">Nivel</label>
-                    <select id="level" class="form-select" formControlName="level">
+                  <div class="col-md-4">
+                    <label class="form-label">Nivel</label>
+                    <select class="form-select" formControlName="level">
                       <option value="BEGINNER">Principiante</option>
                       <option value="INTERMEDIATE">Intermedio</option>
                       <option value="ADVANCED">Avanzado</option>
@@ -87,15 +73,68 @@
                   </div>
                 </div>
 
-                <div class="d-flex justify-content-end gap-2 mt-4">
-                  <a routerLink="/admin" class="btn btn-outline-secondary">Cancelar</a>
+                <div class="mb-5">
+                  <label class="form-label mb-3">Portada del Curso</label>
+
+                  <div
+                    class="upload-area p-4 text-center rounded-4 border-dashed mb-3 position-relative"
+                    [class.has-image]="coverPreview"
+                  >
+                    @if (coverPreview) {
+                      <div class="position-relative d-inline-block">
+                        <img
+                          [src]="coverPreview"
+                          alt="Preview"
+                          class="preview-img shadow-sm rounded-3"
+                        />
+                        <div
+                          class="overlay-hover rounded-3 d-flex align-items-center justify-content-center"
+                        >
+                          <span class="text-white fw-bold small">Cambiar imagen</span>
+                        </div>
+                      </div>
+                    } @else {
+                      <div class="py-4 text-muted opacity-50">
+                        <i class="bi bi-cloud-arrow-up display-4 mb-2 d-block"></i>
+                        <small class="fw-bold">Subir Portada</small>
+                      </div>
+                    }
+
+                    @if (isUploading) {
+                      <div
+                        class="position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center rounded-4"
+                      >
+                        <div class="spinner-border text-primary" role="status"></div>
+                      </div>
+                    }
+
+                    <input
+                      type="file"
+                      class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer"
+                      (change)="onFileSelected($event)"
+                      accept="image/*"
+                    />
+                  </div>
+
+                  <div class="form-text text-muted text-center small">
+                    Recomendado: 1280x720px (JPG/PNG). Máx 2MB.
+                  </div>
+                </div>
+
+                <div class="d-grid gap-3">
                   <button
                     type="submit"
-                    class="btn btn-primary px-4"
+                    class="btn btn-glow btn-lg"
                     [disabled]="courseForm.invalid || isUploading"
                   >
-                    Guardar Curso
+                    @if (isUploading) {
+                      <span class="spinner-border spinner-border-sm me-2"></span> Subiendo...
+                    } @else {
+                      Crear Curso
+                    }
                   </button>
+
+                  <a routerLink="/admin" class="btn btn-glass text-center"> Cancelar </a>
                 </div>
               </form>
             </div>

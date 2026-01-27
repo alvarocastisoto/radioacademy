@@ -1,255 +1,201 @@
-<!-- students-admin.html -->
-<div class="students-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="students-wrap">
-      <div class="d-flex justify-content-between align-items-center mb-4 page-header">
-        <div>
-          <h2 class="fw-bold text-dark mb-1">Estudiantes</h2>
-          <p class="text-muted mb-0">Gestiona accesos, roles y matrículas.</p>
-        </div>
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-        <div class="stats-pill">
-          <span class="fw-bold text-primary">{{ users.length }}</span>
-          <span class="text-muted small">Usuarios registrados</span>
+  <div class="content-relative">
+    <div class="ra-container">
+      
+      <div class="page-head mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <div>
+          <h2 class="fw-bold display-6 mb-1 text-main">Estudiantes</h2>
+          <p class="text-muted lead mb-0">Gestión de accesos, roles y matrículas.</p>
+        </div>
+        <div class="stats-card glass-card px-4 py-2 d-flex align-items-center gap-3">
+          <div class="icon-sq bg-primary-subtle text-primary">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div>
+            <span class="d-block fw-bold fs-4 text-main lh-1">{{ users.length }}</span>
+            <small class="text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">Usuarios</small>
+          </div>
         </div>
       </div>
 
       <div class="row g-4">
-        <!-- LISTA -->
+        
         <div class="col-lg-8">
-          <div class="position-relative mb-3">
+          
+          <div class="search-bar mb-4 glass-card p-2 d-flex align-items-center">
+            <i class="bi bi-search text-muted ms-3"></i>
             <input
               type="text"
-              class="form-control form-control-lg search-input"
+              class="form-control border-0 bg-transparent shadow-none"
               placeholder="Buscar por nombre, email o DNI..."
               [(ngModel)]="searchTerm"
               (input)="filterUsers()"
             />
-            <i class="bi bi-search search-icon"></i>
           </div>
 
-          <div class="card table-card">
-            <div class="card-body p-0">
-              <div class="table-responsive">
-                <table class="table align-middle mb-0 table-hover users-table">
-                  <thead>
-                    <tr class="text-uppercase small text-muted">
-                      <th class="ps-4 py-3" style="min-width: 260px">Usuario</th>
-                      <th class="py-3">Rol</th>
-                      <th class="py-3">Estado</th>
-                      <th class="text-end pe-4 py-3">Acción</th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    @for (user of filteredUsers; track user.id) {
-                    <tr
-                      class="user-row"
+          <div class="card glass-card overflow-hidden">
+            <div class="table-responsive">
+              <table class="table align-middle mb-0 table-hover custom-table">
+                <thead>
+                  <tr>
+                    <th class="ps-4 py-3">Usuario</th>
+                    <th class="py-3">Rol</th>
+                    <th class="py-3">Estado</th>
+                    <th class="text-end pe-4 py-3">Acción</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (user of filteredUsers; track user.id) {
+                    <tr 
+                      class="user-row cursor-pointer" 
                       [class.table-active]="selectedUser?.id === user.id"
                       (click)="selectUser(user)"
                     >
                       <td class="ps-4 py-3">
                         <div class="d-flex align-items-center">
-                          <div
-                            class="avatar-circle me-3 shadow-sm"
-                            [ngClass]="getAvatarColor(user.id)"
-                          >
+                          <div class="avatar-circle me-3 shadow-sm" [ngClass]="getAvatarColor(user.id)">
                             {{ getInitials(user.fullName) }}
                           </div>
                           <div>
-                            <div class="fw-bold text-dark">{{ user.fullName }}</div>
+                            <div class="fw-bold text-main">{{ user.fullName }}</div>
                             <div class="text-muted small">{{ user.email }}</div>
                           </div>
                         </div>
                       </td>
-
                       <td>
                         @if (user.role === 'ADMIN') {
-                        <span class="badge role-badge role-admin">
-                          <i class="bi bi-shield-lock-fill me-1"></i> Admin
-                        </span>
+                          <span class="badge badge-role bg-warning-subtle text-warning-emphasis">
+                            <i class="bi bi-shield-lock-fill me-1"></i> Admin
+                          </span>
                         } @else if (user.role === 'TEACHER') {
-                        <span class="badge role-badge role-teacher">
-                          <i class="bi bi-person-video3 me-1"></i> Profesor
-                        </span>
+                          <span class="badge badge-role bg-info-subtle text-info-emphasis">
+                            <i class="bi bi-person-video3 me-1"></i> Profe
+                          </span>
                         } @else {
-                        <span class="badge role-badge role-student">
-                          <i class="bi bi-person-fill me-1"></i> Alumno
-                        </span>
+                          <span class="badge badge-role bg-light text-dark border">
+                            <i class="bi bi-person me-1"></i> Alumno
+                          </span>
                         }
                       </td>
-
                       <td>
                         @if (user.active) {
-                        <div class="d-flex align-items-center">
-                          <span class="indicator bg-success me-2"></span>
-                          <span class="text-success fw-medium small">Activo</span>
-                        </div>
+                          <span class="status-dot bg-success" title="Activo"></span>
                         } @else {
-                        <div class="d-flex align-items-center">
-                          <span class="indicator bg-danger me-2"></span>
-                          <span class="text-danger fw-medium small">Bloqueado</span>
-                        </div>
+                          <span class="status-dot bg-danger" title="Bloqueado"></span>
                         }
                       </td>
-
                       <td class="text-end pe-4">
-                        <button
-                          class="btn btn-action-arrow"
-                          type="button"
-                          aria-label="Ver detalles"
-                        >
+                        <button class="btn btn-sm btn-icon-only text-muted">
                           <i class="bi bi-chevron-right"></i>
                         </button>
                       </td>
                     </tr>
-                    } @empty {
+                  } @empty {
                     <tr>
-                      <td colspan="4" class="text-center py-5">
-                        <div class="text-muted opacity-50">
-                          <i class="bi bi-search display-6 mb-2 d-block"></i>
-                          No se encontraron usuarios.
-                        </div>
+                      <td colspan="4" class="text-center py-5 text-muted">
+                        <i class="bi bi-search fs-1 d-block mb-2 opacity-25"></i>
+                        No se encontraron resultados.
                       </td>
                     </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+                  }
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        <!-- DETALLE -->
         <div class="col-lg-4">
           @if (selectedUser) {
-          <div class="sticky-top details-sticky">
-            <div class="card details-card">
-              <div class="card-header details-header">
-                <button
-                  class="btn btn-sm btn-white-glass position-absolute top-0 end-0 m-3 rounded-circle"
-                  (click)="selectedUser = null"
-                  type="button"
-                  aria-label="Cerrar"
-                >
-                  <i class="bi bi-x-lg"></i>
-                </button>
-
-                <div class="avatar-circle-lg mx-auto mb-3 shadow bg-white text-primary fw-bold">
-                  {{ getInitials(selectedUser.fullName) }}
+            <div class="sticky-top" style="top: 100px; z-index: 10;">
+              <div class="card glass-card detail-card animate-fade-in">
+                
+                <div class="card-header bg-transparent border-0 pt-4 pb-0 text-center position-relative">
+                  <button class="btn btn-sm btn-close-absolute" (click)="selectedUser = null">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+                  
+                  <div class="avatar-xl mx-auto mb-3 shadow-lg" [ngClass]="getAvatarColor(selectedUser.id)">
+                    {{ getInitials(selectedUser.fullName) }}
+                  </div>
+                  <h5 class="fw-bold text-main mb-0">{{ selectedUser.fullName }}</h5>
+                  <p class="text-muted small mb-0">{{ selectedUser.email }}</p>
                 </div>
-                <h5 class="mb-0 fw-bold">{{ selectedUser.fullName }}</h5>
-                <small class="opacity-75">{{ selectedUser.email }}</small>
-              </div>
 
-              <div class="card-body p-4">
-                <div class="row g-2 mb-4">
-                  <div class="col-6">
-                    <div class="info-box">
-                      <small class="text-muted d-block mb-1">DNI</small>
-                      <span class="fw-bold text-dark">{{ selectedUser.dni }}</span>
+                <div class="card-body p-4">
+                  <div class="row g-3 mb-4">
+                    <div class="col-6">
+                      <div class="info-tile">
+                        <label>DNI</label>
+                        <div class="value">{{ selectedUser.dni }}</div>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="info-tile">
+                        <label>Rol</label>
+                        <select 
+                          class="form-select form-select-sm border-0 bg-transparent p-0 fw-bold text-primary shadow-none" 
+                          [ngModel]="selectedUser.role" 
+                          (ngModelChange)="updateRole($event)"
+                        >
+                          @for(role of availableRoles; track role) {
+                            <option [value]="role">{{ roleLabels[role] || role }}</option>
+                          }
+                        </select>
+                      </div>
                     </div>
                   </div>
 
-                  <div class="col-6">
-                    <div class="info-box position-relative">
-                      <small class="text-muted d-block mb-1">Rol / Permisos</small>
-                      <select
-                        class="form-select form-select-sm role-select"
-                        [ngModel]="selectedUser.role"
-                        (ngModelChange)="updateRole($event)"
-                      >
-                        @for(role of availableRoles; track role) {
-                        <option [value]="role">{{ roleLabels[role] || role }}</option>
+                  <hr class="border-light my-4">
+
+                  <div class="mb-3">
+                    <h6 class="fw-bold text-main mb-3 d-flex align-items-center gap-2">
+                      <i class="bi bi-journal-bookmark-fill text-primary"></i> Cursos Matriculados
+                    </h6>
+                    
+                    <div class="input-group mb-3 shadow-sm rounded-3 overflow-hidden">
+                      <select class="form-select border-0 bg-white" [(ngModel)]="selectedCourseIdToAdd">
+                        <option [ngValue]="null">Añadir curso...</option>
+                        @for (course of courses; track course.id) {
+                          <option [ngValue]="course.id">{{ course.title }}</option>
                         }
                       </select>
-                      <i class="bi bi-caret-down-fill role-caret"></i>
-                    </div>
-                  </div>
-                </div>
-
-                <hr class="text-muted opacity-25 my-4" />
-
-                <h6 class="section-title">
-                  <i class="bi bi-mortarboard-fill me-2 text-primary"></i>Nueva Matrícula
-                </h6>
-
-                <div class="input-group mb-3">
-                  <select class="form-select enroll-select" [(ngModel)]="selectedCourseIdToAdd">
-                    <option [ngValue]="null">Selecciona un curso...</option>
-                    @for (course of courses; track course.id) {
-                    <option [ngValue]="course.id">{{ course.title }}</option>
-                    }
-                  </select>
-
-                  <button
-                    class="btn btn-primary fw-bold"
-                    (click)="addCourse()"
-                    [disabled]="!selectedCourseIdToAdd"
-                    type="button"
-                    aria-label="Añadir curso"
-                  >
-                    <i class="bi bi-plus-lg"></i>
-                  </button>
-                </div>
-
-                <div class="mt-4">
-                  <h6 class="section-title d-flex justify-content-between align-items-center">
-                    <span>Cursos Activos</span>
-                    <span class="badge bg-light text-dark border">{{ userCourses.length }}</span>
-                  </h6>
-
-                  @if (userCourses.length > 0) {
-                  <div class="d-flex flex-column gap-2">
-                    @for (course of userCourses; track course.id) {
-                    <div
-                      class="course-card d-flex justify-content-between align-items-center p-3 rounded-3"
-                    >
-                      <div class="d-flex align-items-center overflow-hidden">
-                        <div class="me-3 text-primary opacity-75">
-                          <i class="bi bi-journal-bookmark-fill h5 mb-0"></i>
-                        </div>
-
-                        <div class="d-flex flex-column course-info">
-                          <span class="fw-bold text-dark text-truncate small">{{
-                            course.title
-                          }}</span>
-                          <span class="text-muted course-sub">Acceso concedido</span>
-                        </div>
-                      </div>
-
-                      <button
-                        class="btn-trash-modern"
-                        (click)="removeCourse(course.id)"
-                        type="button"
-                        title="Eliminar curso"
-                        aria-label="Eliminar curso"
-                      >
-                        <i class="bi bi-trash3"></i>
+                      <button class="btn btn-primary px-3" (click)="addCourse()" [disabled]="!selectedCourseIdToAdd">
+                        <i class="bi bi-plus-lg"></i>
                       </button>
                     </div>
-                    }
+
+                    <div class="course-list d-flex flex-column gap-2">
+                      @for (course of userCourses; track course.id) {
+                        <div class="course-item glass-card p-2 d-flex align-items-center justify-content-between">
+                          <span class="text-truncate ps-2 small fw-semibold text-main">{{ course.title }}</span>
+                          <button class="btn btn-sm text-danger btn-icon-only" (click)="removeCourse(course.id)" title="Desmatricular">
+                            <i class="bi bi-trash"></i>
+                          </button>
+                        </div>
+                      } @empty {
+                        <p class="text-muted small text-center my-3 fst-italic">Sin cursos activos.</p>
+                      }
+                    </div>
                   </div>
-                  } @else {
-                  <div class="text-center p-4 bg-light rounded-3 border border-dashed">
-                    <small class="text-muted">Sin cursos activos.</small>
-                  </div>
-                  }
+
                 </div>
               </div>
             </div>
-          </div>
           } @else {
-          <div
-            class="card border-0 border-dashed bg-transparent text-center py-5 d-none d-lg-block"
-          >
-            <div class="text-muted opacity-50">
-              <i class="bi bi-arrow-left-circle display-4"></i>
-              <p class="mt-3 fw-medium mb-0">Selecciona un estudiante</p>
+            <div class="empty-selection d-none d-lg-flex flex-column align-items-center justify-content-center text-center p-5 text-muted">
+              <i class="bi bi-arrow-left-circle display-4 mb-3 opacity-25"></i>
+              <p>Selecciona un estudiante de la lista para ver y editar sus detalles.</p>
             </div>
-          </div>
           }
         </div>
+
       </div>
     </div>
   </div>

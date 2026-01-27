@@ -1,93 +1,257 @@
-/* courses-catalog.scss */
+/* courses-catalog.scss - TEMA CLARO ACADÉMICO */
 
-$primary-color: #4f46e5;
+/* --- VARIABLES (Coherencia con Home) --- */
+$bg-color: #f8fafc;
+$bg-surface: #ffffff;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$primary: #6366f1;
+$accent: #ec4899;
+$border-light: rgba(0, 0, 0, 0.06);
+$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+$shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
 
 :host {
   display: block;
   width: 100%;
 }
 
-.courses-page {
+/* --- LAYOUT --- */
+.courses-wrapper {
+  position: relative;
   width: 100%;
-  padding: 1.25rem 0 2rem;
+  min-height: 100vh;
+  padding-top: 7rem; /* Espacio para navbar fija */
+  padding-bottom: 4rem;
+  background-color: $bg-color;
+  overflow-x: hidden;
 }
 
-.courses-wrap {
-  max-width: 1500px;
+.ra-container {
+  width: 100%;
+  max-width: 1380px; /* Alineado con Home */
   margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
 }
 
-.page-head {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 1rem;
+.content-relative {
+  position: relative;
+  z-index: 1;
+}
 
+/* --- FONDO AURORA (Copia exacta de Home) --- */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  background-color: $bg-color;
+  z-index: 0;
+  pointer-events: none;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.25;
+  z-index: -1;
+  animation: floatBlob 25s infinite alternate;
+}
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: lighten($primary, 10%);
+}
+.blob-2 {
+  bottom: 5%;
+  right: -5%;
+  width: 45vw;
+  height: 45vw;
+  background: lighten($accent, 15%);
+  animation-delay: -5s;
+}
+.blob-3 {
+  top: 30%;
+  left: 40%;
+  width: 35vw;
+  height: 35vw;
+  background: lighten(#06b6d4, 10%);
+  animation-delay: -10s;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
+}
+
+/* --- TYPOGRAPHY --- */
+.page-head {
   h2 {
-    color: #111827;
-    font-weight: 800;
-    letter-spacing: -0.3px;
+    color: $text-main;
+    letter-spacing: -0.02em;
+  }
+  p {
+    font-weight: 450;
   }
 }
 
-/* Card */
+/* --- COURSE CARD --- */
 .course-card {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
+  background: $bg-surface;
+  border: 1px solid $border-light;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-  background: #fff;
+  box-shadow: $shadow-soft;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  height: 100%;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.09);
+    transform: translateY(-5px);
+    box-shadow: $shadow-hover;
+    border-color: rgba($primary, 0.2);
+
+    .course-media img {
+      transform: scale(1.05);
+    }
   }
 }
 
 .course-media {
+  position: relative;
   aspect-ratio: 16 / 9;
-  background: #e5e7eb;
+  background: #f1f5f9;
+  overflow: hidden;
 
   img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .placeholder-img {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #e2e8f0, #f8fafc);
   }
 }
 
-.price {
-  font-weight: 900;
-  color: #16a34a; /* verde elegante */
-  letter-spacing: -0.2px;
+.course-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  .badge-pill {
+    background: rgba(255, 255, 255, 0.95);
+    color: $text-main;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(4px);
+  }
 }
 
-.badge.bg-primary {
-  background: $primary-color !important;
+.card-body {
+  padding: 1.5rem;
+}
+
+.card-title {
+  color: $text-main;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+}
+
+.price-tag {
+  font-size: 1.25rem;
   font-weight: 800;
-  border-radius: 999px;
-  padding: 0.45rem 0.75rem;
+  color: $primary;
+  letter-spacing: -0.02em;
 }
 
-/* Footer */
-.course-footer {
-  background: #fff;
-  border-top: 0;
-  padding: 1rem 1rem 1.1rem;
+.status-text {
+  font-weight: 700;
+  font-size: 0.9rem;
 }
 
+/* Truncate helpers */
+.text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* --- BUTTONS --- */
 .btn {
   border-radius: 12px;
+  padding: 0.8rem;
+  font-weight: 700;
+  transition: all 0.2s ease;
 }
 
-.btn-outline-primary {
-  border-width: 2px;
+.btn-glow {
+  background: $primary;
+  color: white;
+  border: none;
+  box-shadow: 0 8px 20px -5px rgba($primary, 0.4);
+  &:hover:not(:disabled) {
+    transform: translateY(-2px);
+    background: darken($primary, 5%);
+    box-shadow: 0 12px 25px -5px rgba($primary, 0.5);
+  }
+  &:disabled {
+    background: #e2e8f0;
+    color: #94a3b8;
+    box-shadow: none;
+  }
 }
 
-/* Empty state */
+.btn-glass {
+  background: #f1f5f9;
+  color: $text-main;
+  border: 1px solid transparent;
+  &:hover {
+    background: #e2e8f0;
+    color: $primary;
+  }
+}
+
+/* --- EMPTY STATE --- */
 .empty-state {
-  border: 1px dashed rgba(17, 24, 39, 0.18);
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  border: 2px dashed $border-light;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes floatBlob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(30px, 50px) scale(1.1);
+  }
 }

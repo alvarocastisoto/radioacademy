@@ -61,4 +61,9 @@ public class CourseController {
     public ResponseEntity<List<CourseDashboardDTO>> getMyCourses(Authentication authentication) {
         return ResponseEntity.ok(courseService.getMyCourses(authentication.getName()));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<CourseDetailDTO> getCourseById(@PathVariable UUID id) {
+        return ResponseEntity.ok(courseService.getCourseById(id));
+    }
 }

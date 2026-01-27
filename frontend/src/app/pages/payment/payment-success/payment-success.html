@@ -1,20 +1,46 @@
-<div class="container text-center mt-5">
-  <div class="card p-5 shadow-sm border-success">
-    <div class="card-body">
-      <h1 class="display-1" [class.text-success]="isConfirmed" [class.text-muted]="!isConfirmed">
-        <i
-          class="bi"
-          [class.bi-check-circle-fill]="isConfirmed"
-          [class.bi-hourglass-split]="!isConfirmed"
-        ></i>
-      </h1>
+<div class="status-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-      <h2 class="mt-3">{{ isConfirmed ? '¡Pago Exitoso!' : 'Procesando...' }}</h2>
-      <p class="lead">{{ status }}</p>
+  <div class="status-container">
+    <div class="card glass-card">
+      <div class="card-body text-center p-5">
+        <div class="icon-wrapper mb-4">
+          @if (isConfirmed) {
+            <div class="icon-circle success-circle animate-pop">
+              <i class="bi bi-check-lg"></i>
+            </div>
+          } @else {
+            <div class="icon-circle processing-circle">
+              <div class="spinner-border text-primary" role="status"></div>
+            </div>
+          }
+        </div>
 
-      <a *ngIf="isConfirmed" routerLink="/courses" class="btn btn-primary mt-3">
-        Ir a mis Cursos
-      </a>
+        <h1 class="fw-bold mb-3 text-main">
+          {{ isConfirmed ? '¡Pago Exitoso!' : 'Procesando...' }}
+        </h1>
+
+        <p class="text-muted lead mb-4">
+          {{ status }}
+        </p>
+
+        <div class="d-flex justify-content-center">
+          @if (isConfirmed) {
+            <a routerLink="/courses" class="btn btn-glow px-5 py-3">
+              <i class="bi bi-journal-bookmark-fill me-2"></i> Ir a mis Cursos
+            </a>
+          } @else {
+            <button class="btn btn-glass disabled" disabled>
+              <span class="spinner-border spinner-border-sm me-2"></span> Esperando confirmación...
+            </button>
+          }
+        </div>
+      </div>
     </div>
   </div>
 </div>

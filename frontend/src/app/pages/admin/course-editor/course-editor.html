@@ -1,0 +1,128 @@
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="content-relative">
+    <div class="ra-container">
+      
+      <div class="page-head text-center mb-5">
+        <h2 class="fw-bold display-6 mb-2 text-main">✏️ Editar Curso</h2>
+        <p class="text-muted lead mb-0">Actualiza la información básica y la portada.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+          
+          <div class="card glass-card">
+            <div class="card-body p-4 p-md-5">
+              
+              @if (loading) {
+                <div class="text-center py-5">
+                  <div class="spinner-border text-primary mb-3" role="status"></div>
+                  <p class="text-muted">Cargando datos del curso...</p>
+                </div>
+              } @else {
+                <form [formGroup]="editForm" (ngSubmit)="onSubmit()">
+                  
+                  <div class="mb-4">
+                    <label class="form-label">Título del Curso</label>
+                    <input 
+                      type="text" 
+                      class="form-control form-control-lg" 
+                      formControlName="title" 
+                      placeholder="Ej: Master en Angular 17"
+                    >
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="form-label">Descripción</label>
+                    <textarea 
+                      class="form-control" 
+                      formControlName="description" 
+                      rows="4"
+                      placeholder="Describe brevemente lo que aprenderán los alumnos..."
+                    ></textarea>
+                  </div>
+
+                  <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                      <label class="form-label">Precio (€)</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted">€</span>
+                        <input type="number" class="form-control border-start-0 ps-0" formControlName="price">
+                      </div>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Duración (Horas)</label>
+                      <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0 text-muted">
+                          <i class="bi bi-clock"></i>
+                        </span>
+                        <input type="number" class="form-control border-start-0 ps-0" formControlName="hours">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mb-5">
+                    <label class="form-label mb-3">Imagen de Portada</label>
+                    
+                    <div class="upload-area p-4 text-center rounded-4 border-dashed mb-3" [class.has-image]="previewImage">
+                      @if (previewImage) {
+                        <div class="position-relative d-inline-block">
+                          <img [src]="previewImage" alt="Preview" class="preview-img shadow-sm rounded-3">
+                          <div class="overlay-hover rounded-3 d-flex align-items-center justify-content-center">
+                            <span class="text-white fw-bold small">Cambiar imagen</span>
+                          </div>
+                        </div>
+                      } @else {
+                        <div class="py-4 text-muted opacity-50">
+                          <i class="bi bi-image display-4 mb-2 d-block"></i>
+                          <small>Sin imagen asignada</small>
+                        </div>
+                      }
+                    </div>
+
+                    <input 
+                      type="file" 
+                      class="form-control form-control-sm" 
+                      (change)="onFileSelected($event)" 
+                      accept="image/*"
+                    >
+                    <div class="form-text text-muted mt-2 small">
+                      <i class="bi bi-info-circle me-1"></i> Formatos aceptados: JPG, PNG. Máx 2MB.
+                    </div>
+                  </div>
+
+                  <div class="d-grid gap-3">
+                    <button 
+                      type="submit" 
+                      class="btn btn-glow btn-lg" 
+                      [disabled]="editForm.invalid || submitting"
+                    >
+                      @if (submitting) {
+                        <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+                      } @else {
+                        Actualizar Curso
+                      }
+                    </button>
+                    
+                    <a routerLink="/admin/courses" class="btn btn-glass text-center">
+                      Cancelar y Volver
+                    </a>
+                  </div>
+
+                </form>
+              }
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

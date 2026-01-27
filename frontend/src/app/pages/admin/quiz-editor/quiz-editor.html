@@ -1,141 +1,164 @@
-<div class="quiz-editor-page py-4 bg-light min-vh-100">
-  <div class="container">
-    
-    <form [formGroup]="quizForm" (ngSubmit)="onSubmit()">
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center gap-3">
-          <button type="button" class="btn btn-outline-secondary" routerLink="/admin">
-            <i class="bi bi-arrow-left"></i> Volver
+  <div class="content-relative">
+    <div class="ra-container">
+      <form [formGroup]="quizForm" (ngSubmit)="onSubmit()">
+        <div
+          class="page-head mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3"
+        >
+          <button type="button" class="btn btn-glass" routerLink="/admin">
+            <i class="bi bi-arrow-left me-2"></i> Volver
           </button>
-          <h2 class="fw-bold m-0">Editor de Examen 📝</h2>
+
+          <div class="text-center flex-grow-1">
+            <h2 class="fw-bold display-6 mb-0 text-main">📝 Editor de Examen</h2>
+            <p class="text-muted lead mb-0">Configura las preguntas y respuestas.</p>
+          </div>
+
+          <button type="submit" class="btn btn-glow" [disabled]="quizForm.invalid || isSubmitting">
+            @if (isSubmitting) {
+              <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
+            } @else {
+              <i class="bi bi-save me-2"></i> Guardar Examen
+            }
+          </button>
         </div>
 
-        <button 
-          type="submit" 
-          class="btn btn-success btn-lg px-4 shadow-sm"
-          [disabled]="quizForm.invalid || isSubmitting">
-          @if (isSubmitting) {
-            <span class="spinner-border spinner-border-sm me-2"></span> Guardando...
-          } @else {
-            <i class="bi bi-save me-2"></i> Guardar Examen
-          }
-        </button>
-      </div>
-
-      <div class="card shadow-sm border-0 mb-4">
-        <div class="card-body p-4">
-          <label class="form-label fw-bold text-uppercase small text-muted">Configuración General</label>
-          <input 
-            type="text" 
-            class="form-control form-control-lg fw-bold" 
-            formControlName="title"
-            placeholder="Ej: Examen Final - Módulo 1: Java Básico"
-            [class.is-invalid]="quizForm.get('title')?.invalid && quizForm.get('title')?.touched"
-          >
-          <div class="invalid-feedback">El título del examen es obligatorio.</div>
+        <div class="card glass-card mb-5">
+          <div class="card-body p-4 p-md-5">
+            <label class="form-label fw-bold text-uppercase small text-muted mb-2"
+              >Título del Examen</label
+            >
+            <input
+              type="text"
+              class="form-control form-control-lg fw-bold fs-3 border-0 bg-transparent px-0 shadow-none"
+              formControlName="title"
+              placeholder="Ej: Examen Final - Java Básico"
+              [class.is-invalid]="quizForm.get('title')?.invalid && quizForm.get('title')?.touched"
+              style="border-bottom: 2px solid #e2e8f0 !important; border-radius: 0"
+            />
+            @if (quizForm.get('title')?.invalid && quizForm.get('title')?.touched) {
+              <div class="invalid-feedback">El título es obligatorio.</div>
+            }
+          </div>
         </div>
-      </div>
 
-      <div formArrayName="questions">
-        
-        @for (questionCtrl of questionsArray.controls; track $index; let i = $index) {
-          <div [formGroupName]="i" class="card shadow-sm border-0 mb-4 position-relative">
-            
-            <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-start">
-              <span class="badge bg-primary rounded-pill">Pregunta {{ i + 1 }}</span>
-              
-              <button 
-                type="button" 
-                class="btn btn-outline-danger btn-sm" 
-                (click)="removeQuestion(i)"
-                title="Eliminar pregunta">
-                <i class="bi bi-trash"></i> Eliminar
-              </button>
-            </div>
+        <div formArrayName="questions" class="questions-list">
+          @for (questionCtrl of questionsArray.controls; track $index; let i = $index) {
+            <div [formGroupName]="i" class="card question-card mb-4">
+              <div
+                class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center"
+              >
+                <span class="badge badge-question">Pregunta {{ i + 1 }}</span>
 
-            <div class="card-body p-4 pt-2">
-              <div class="row g-3">
-                <div class="col-md-9">
-                  <label class="form-label">Enunciado</label>
-                  <input 
-                    type="text" 
-                    class="form-control" 
-                    formControlName="question" 
-                    placeholder="Escribe la pregunta aquí..."
-                  >
-                </div>
-
-                <div class="col-md-3">
-                  <label class="form-label">Puntos</label>
-                  <input 
-                    type="number" 
-                    class="form-control text-center" 
-                    formControlName="points"
-                    min="1"
-                  >
-                </div>
-              </div>
-
-              <div class="mt-4 ps-3 border-start border-3 border-light">
-                <label class="form-label text-muted small fw-bold mb-3">OPCIONES DE RESPUESTA</label>
-
-                <div formArrayName="options">
-                  @for (optionCtrl of getOptionsArray(i).controls; track $index; let j = $index) {
-                    <div [formGroupName]="j" class="input-group mb-2">
-                      
-                      <div class="input-group-text bg-white">
-                        <input 
-                          class="form-check-input mt-0" 
-                          type="checkbox" 
-                          formControlName="isCorrect"
-                          title="Marcar como respuesta correcta"
-                        >
-                      </div>
-
-                      <input 
-                        type="text" 
-                        class="form-control" 
-                        formControlName="text" 
-                        placeholder="Opción {{ j + 1 }}"
-                        [class.text-success]="optionCtrl.get('isCorrect')?.value"
-                        [class.fw-bold]="optionCtrl.get('isCorrect')?.value"
-                      >
-
-                      <button 
-                        type="button" 
-                        class="btn btn-outline-secondary" 
-                        (click)="removeOption(i, j)"
-                        [disabled]="getOptionsArray(i).length <= 2">
-                        <i class="bi bi-x-lg"></i>
-                      </button>
-                    </div>
-                  }
-                </div>
-
-                <button 
-                  type="button" 
-                  class="btn btn-sm btn-link text-decoration-none mt-2 ps-0"
-                  (click)="addOption(i)">
-                  + Añadir otra opción
+                <button
+                  type="button"
+                  class="btn btn-sm btn-icon-danger-soft"
+                  (click)="removeQuestion(i)"
+                  title="Eliminar pregunta"
+                >
+                  <i class="bi bi-trash"></i>
                 </button>
               </div>
 
+              <div class="card-body p-4 pt-2">
+                <div class="row g-4 mb-4">
+                  <div class="col-md-9">
+                    <label class="form-label text-muted small fw-bold text-uppercase"
+                      >Enunciado</label
+                    >
+                    <textarea
+                      class="form-control"
+                      formControlName="question"
+                      rows="2"
+                      placeholder="Escribe la pregunta aquí..."
+                    ></textarea>
+                  </div>
+
+                  <div class="col-md-3">
+                    <label class="form-label text-muted small fw-bold text-uppercase"
+                      >Puntuación</label
+                    >
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control text-center fw-bold text-primary"
+                        formControlName="points"
+                        min="1"
+                      />
+                      <span class="input-group-text bg-light border-start-0 text-muted">pts</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="options-container bg-surface-subtle p-3 rounded-3 border">
+                  <label class="d-block text-muted small fw-bold mb-3 text-uppercase"
+                    >Opciones de Respuesta</label
+                  >
+
+                  <div formArrayName="options" class="d-flex flex-column gap-2">
+                    @for (optionCtrl of getOptionsArray(i).controls; track $index; let j = $index) {
+                      <div [formGroupName]="j" class="option-row d-flex align-items-center gap-2">
+                        <div class="form-check m-0">
+                          <input
+                            class="form-check-input custom-check"
+                            type="checkbox"
+                            formControlName="isCorrect"
+                            title="Marcar como correcta"
+                          />
+                        </div>
+
+                        <div class="flex-grow-1">
+                          <input
+                            type="text"
+                            class="form-control form-control-sm"
+                            formControlName="text"
+                            placeholder="Opción {{ j + 1 }}"
+                            [class.is-correct]="optionCtrl.get('isCorrect')?.value"
+                          />
+                        </div>
+
+                        <button
+                          type="button"
+                          class="btn btn-sm text-muted btn-hover-danger p-1"
+                          (click)="removeOption(i, j)"
+                          [disabled]="getOptionsArray(i).length <= 2"
+                        >
+                          <i class="bi bi-x-lg"></i>
+                        </button>
+                      </div>
+                    }
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-dashed-add mt-3 w-100 py-2"
+                    (click)="addOption(i)"
+                  >
+                    + Añadir Opción
+                  </button>
+                </div>
+              </div>
             </div>
+          }
+        </div>
+
+        <div
+          class="add-question-area text-center py-5 glass-card cursor-pointer"
+          (click)="addQuestion()"
+        >
+          <div class="mb-2 text-primary opacity-50 display-4">
+            <i class="bi bi-plus-circle-dotted"></i>
           </div>
-        }
-      </div>
-
-<div 
-  class="text-center py-4 border-2 border-dashed rounded-3 bg-white" 
-  style="border-style: dashed !important; border-color: #dee2e6;"
-  (click)="addQuestion()" 
->
-  <button type="button" class="btn btn-primary px-4 rounded-pill">
-    <i class="bi bi-plus-lg me-2"></i> Añadir Nueva Pregunta
-  </button>
-</div>
-
-    </form>
+          <h5 class="fw-bold text-primary">Añadir Nueva Pregunta</h5>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

@@ -1,282 +1,281 @@
-/* students-admin.scss */
+/* students-admin.scss - TEMA CLARO ACADÉMICO */
 
-$primary-color: #4f46e5;
-$input-bg: #f9fafb;
+/* --- VARIABLES --- */
+$bg-color: #f8fafc;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$primary: #6366f1;
+$border-light: rgba(0, 0, 0, 0.06);
+$shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
 
 :host {
   display: block;
   width: 100%;
 }
 
-.students-page {
+/* --- LAYOUT --- */
+.admin-wrapper {
+  position: relative;
   width: 100%;
-  padding: 1.25rem 0 2rem;
+  min-height: 100vh;
+  padding-top: 7rem;
+  padding-bottom: 4rem;
+  background-color: $bg-color;
+  overflow-x: hidden;
 }
 
-.students-wrap {
-  max-width: 1500px;
+.ra-container {
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
 }
 
-/* Header */
-.page-header {
-  gap: 12px;
+.content-relative {
+  position: relative;
+  z-index: 1;
 }
 
-.stats-pill {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  padding: 0.55rem 0.9rem;
-  border-radius: 999px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.05);
-  white-space: nowrap;
-}
-
-h2 {
-  letter-spacing: -0.3px;
-}
-
-/* Search */
-.search-input {
-  border: 0 !important;
-  border-radius: 16px !important;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
-  padding-left: 3rem !important;
-
-  &:focus {
-    box-shadow: 0 0 0 4px rgba($primary-color, 0.12), 0 14px 30px rgba(0, 0, 0, 0.06);
+/* --- FONDO --- */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  background-color: $bg-color;
+  z-index: 0;
+  pointer-events: none;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
-
-.search-icon {
+.blob {
   position: absolute;
-  top: 50%;
-  left: 16px;
-  transform: translateY(-50%);
-  color: #9ca3af;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.25;
+  z-index: -1;
+  animation: floatBlob 25s infinite alternate;
+}
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: lighten($primary, 10%);
+}
+.blob-2 {
+  bottom: 5%;
+  right: -5%;
+  width: 45vw;
+  height: 45vw;
+  background: lighten(#ec4899, 15%);
+  animation-delay: -5s;
+}
+.blob-3 {
+  top: 30%;
+  left: 40%;
+  width: 35vw;
+  height: 35vw;
+  background: lighten(#06b6d4, 10%);
+  animation-delay: -10s;
+}
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
-/* Table card */
-.table-card {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+/* --- GLASS CARD GENERICA --- */
+.glass-card {
+  background: white;
+  border: 1px solid $border-light;
+  border-radius: 16px;
+  box-shadow: $shadow-soft;
 }
 
-.users-table {
-  thead {
-    background: #f9fafb;
-
-    th {
-      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-    }
-  }
-
-  td {
-    border-top: 1px solid rgba(17, 24, 39, 0.06);
-  }
+/* --- CABECERA --- */
+.page-head h2 {
+  color: $text-main;
+  letter-spacing: -0.02em;
 }
-
-.user-row {
-  cursor: pointer;
-  transition: background-color 0.15s ease;
-
-  &:hover {
-    background: rgba(79, 70, 229, 0.04);
-  }
-}
-
-/* Avatar */
-.avatar-circle {
+.icon-sq {
   width: 40px;
   height: 40px;
-  border-radius: 999px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
-  font-weight: 800;
-  color: #111827;
-  background: #e5e7eb;
+  font-size: 1.2rem;
 }
 
-.avatar-circle-lg {
-  width: 64px;
-  height: 64px;
-  border-radius: 999px;
+/* --- TABLA --- */
+.search-bar input {
+  font-size: 1rem;
+  color: $text-main;
+  &::placeholder {
+    color: $text-muted;
+  }
+}
+
+.custom-table {
+  thead th {
+    background: #f8fafc;
+    color: $text-muted;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    border-bottom: 1px solid $border-light;
+  }
+  tbody tr {
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+    &:last-child {
+      border-bottom: none;
+    }
+    &:hover {
+      background-color: #f1f5f9;
+    }
+    &.table-active {
+      background-color: #eef2ff;
+      border-left: 3px solid $primary;
+    }
+  }
+}
+
+.avatar-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: grid;
   place-items: center;
-}
-
-/* Estado */
-.indicator {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-}
-
-/* Roles */
-.role-badge {
-  border-radius: 999px;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid rgba(17, 24, 39, 0.12);
-  background: #fff;
+  color: white;
   font-weight: 700;
+  font-size: 0.85rem;
+  /* Colores generados dinámicamente en TS, aquí base */
+  background: $primary;
 }
 
-.role-admin {
-  border-color: rgba(79, 70, 229, 0.25);
-  background: rgba(79, 70, 229, 0.08);
-  color: #4338ca;
-}
-
-.role-teacher {
-  background: #fff;
-  color: #111827;
-}
-
-.role-student {
-  background: #fff;
-  color: #111827;
-}
-
-/* Action arrow */
-.btn-action-arrow {
-  border-radius: 999px;
-  width: 36px;
-  height: 36px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid rgba(17, 24, 39, 0.12);
-  background: #fff;
-
-  &:hover {
-    background: rgba(79, 70, 229, 0.06);
-  }
-}
-
-/* Details sticky */
-.details-sticky {
-  top: 2rem;
-  z-index: 10;
-}
-
-/* Details card */
-.details-card {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  border-radius: 18px;
-  overflow: hidden;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-}
-
-/* Header gradient */
-.details-header {
-  border: 0;
-  padding: 1.5rem;
-  color: #fff;
-  text-align: center;
-  position: relative;
-  background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
-}
-
-/* Glass close */
-.btn-white-glass {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  width: 36px;
-  height: 36px;
-  display: inline-grid;
-  place-items: center;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.28);
-  }
-}
-
-/* Info boxes */
-.info-box {
-  padding: 0.6rem 0.75rem;
-  background: $input-bg;
-  border-radius: 12px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  height: 100%;
-}
-
-/* Role select inside box */
-.role-select {
-  border: 0 !important;
-  background: transparent !important;
-  padding: 0 !important;
-  font-weight: 800;
-  color: $primary-color;
-  box-shadow: none !important;
-  cursor: pointer;
-}
-
-.role-caret {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
-  color: #9ca3af;
+.badge-role {
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
   font-size: 0.75rem;
-  pointer-events: none;
 }
 
-/* Section title */
-.section-title {
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 800;
-  font-size: 0.8rem;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
-/* Enroll select */
-.enroll-select {
-  background: $input-bg !important;
-  border: 0 !important;
+/* --- DETALLE (SIDEBAR DERECHA) --- */
+.detail-card {
+  border-top: 4px solid $primary; /* Acento superior */
 }
 
-.course-info {
-  max-width: 170px;
-}
-
-.course-sub {
-  font-size: 0.7rem;
-}
-
-/* Trash button */
-.btn-trash-modern {
-  width: 36px;
-  height: 36px;
-  border-radius: 12px;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  background: rgba(239, 68, 68, 0.08);
-  color: #b91c1c;
-  display: inline-grid;
+.avatar-xl {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
   place-items: center;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: $primary;
+  border: 4px solid white;
+}
 
+.btn-close-absolute {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: $text-muted;
+  transition: color 0.2s;
   &:hover {
-    background: rgba(239, 68, 68, 0.12);
+    color: $text-main;
   }
 }
 
-/* Responsive */
-@media (max-width: 992px) {
-  .details-sticky {
-    position: static !important;
-    top: auto;
+.info-tile {
+  background: #f8fafc;
+  padding: 0.8rem;
+  border-radius: 10px;
+  label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: $text-muted;
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .value {
+    font-weight: 600;
+    color: $text-main;
   }
 }
 
-@media (max-width: 768px) {
-  .stats-pill {
+/* Lista de cursos en detalle */
+.course-item {
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: all 0.2s;
+  &:hover {
+    border-color: rgba(0, 0, 0, 0.1);
+    transform: translateX(2px);
+  }
+}
+
+/* Animaciones */
+@keyframes floatBlob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(30px, 50px) scale(1.1);
+  }
+}
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Mobile */
+@media (max-width: 991px) {
+  .empty-selection {
     display: none;
   }
-
-  .course-info {
-    max-width: 220px;
+  .sticky-top {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1050;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem;
+    overflow-y: auto;
+  }
+  .detail-card {
+    min-height: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   }
 }

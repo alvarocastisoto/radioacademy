@@ -1,4 +1,4 @@
-/* module-new.scss - TEMA CLARO ACADÉMICO */
+/* edit-course.scss - TEMA CLARO ACADÉMICO */
 
 /* --- VARIABLES --- */
 $bg-color: #f8fafc;
@@ -125,6 +125,38 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .input-group-text {
   border-color: #e2e8f0;
   background: #f8fafc;
+}
+
+/* --- UPLOAD AREA --- */
+.upload-area {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  transition: all 0.2s;
+
+  &.has-image {
+    background: white;
+    border-style: solid;
+    border-color: $border-light;
+  }
+}
+
+.preview-img {
+  max-height: 220px;
+  width: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.overlay-hover {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.upload-area:hover .overlay-hover {
+  opacity: 1;
 }
 
 /* --- BOTONES --- */

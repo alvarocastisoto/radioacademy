@@ -1,80 +1,108 @@
-<!-- lesson-new.html -->
-<div class="lesson-form-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="lesson-form-wrap">
-      <div class="card form-card mx-auto">
-        <div class="card-body">
-          <div class="form-title">
-            <h3 class="m-0">Nueva Lección de Vídeo 🎥</h3>
-            <p class="text-muted mb-0">Añade el contenido y material de apoyo para esta lección.</p>
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head text-center mb-5">
+        <h2 class="fw-bold display-6 mb-2 text-main">
+          {{ isEditMode ? '✏️ Editar Lección' : '🎬 Nueva Lección' }}
+        </h2>
+        <p class="text-muted lead mb-0">Añade contenido audiovisual y material de apoyo.</p>
+      </div>
+
+      <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-8 col-xl-6">
+          <div class="card glass-card">
+            <div class="card-body p-4 p-md-5">
+              <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+                <div class="mb-4">
+                  <label class="form-label">Título de la Lección</label>
+                  <input
+                    type="text"
+                    formControlName="title"
+                    class="form-control form-control-lg"
+                    placeholder="Ej: Introducción a Rayos X"
+                    [class.is-invalid]="form.get('title')?.invalid && form.get('title')?.touched"
+                  />
+                  @if (form.get('title')?.invalid && form.get('title')?.touched) {
+                    <div class="invalid-feedback">El título es obligatorio.</div>
+                  }
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label">Enlace de Vídeo (YouTube)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted">
+                      <i class="bi bi-youtube"></i>
+                    </span>
+                    <input
+                      type="text"
+                      formControlName="videoUrl"
+                      class="form-control border-start-0 ps-0"
+                      placeholder="https://youtube.com/watch?v=..."
+                    />
+                  </div>
+                  <div class="form-text text-muted small mt-1">
+                    Copia la URL directa del navegador.
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label class="form-label mb-2">Material de Apoyo (PDF)</label>
+
+                  <div class="input-group mb-2">
+                    <input
+                      type="file"
+                      class="form-control"
+                      accept=".pdf"
+                      (change)="onFileSelected($event)"
+                      id="pdfUpload"
+                    />
+                    <label class="input-group-text cursor-pointer" for="pdfUpload">
+                      <i class="bi bi-cloud-upload me-2"></i> Subir
+                    </label>
+                  </div>
+
+                  @if (isEditMode && form.get('pdfUrl')?.value) {
+                    <div
+                      class="alert alert-success d-flex align-items-center py-2 px-3 small mt-2 mb-0"
+                    >
+                      <i class="bi bi-check-circle-fill me-2"></i>
+                      <div>
+                        <strong>Archivo actual:</strong> El PDF ya está cargado. Subir uno nuevo lo
+                        reemplazará.
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <div class="mb-5">
+                  <label class="form-label">Orden en el módulo</label>
+                  <input
+                    type="number"
+                    formControlName="orderIndex"
+                    class="form-control w-25"
+                    placeholder="1"
+                  />
+                </div>
+
+                <div class="d-grid gap-3">
+                  <button type="submit" class="btn btn-glow btn-lg" [disabled]="form.invalid">
+                    {{ isEditMode ? 'Guardar Cambios' : 'Crear Lección' }}
+                  </button>
+
+                  <button type="button" (click)="goBack()" class="btn btn-glass text-center">
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-            <div class="mb-3">
-              <label class="form-label" for="titleInput">Título de la Lección</label>
-              <input
-                id="titleInput"
-                type="text"
-                formControlName="title"
-                class="form-control"
-                [class.is-invalid]="form.get('title')?.invalid && form.get('title')?.touched"
-                placeholder="Ej: Cómo funcionan los Rayos X"
-              />
-              @if (form.get('title')?.invalid && form.get('title')?.touched) {
-              <div class="invalid-feedback">El título es obligatorio.</div>
-              }
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="videoUrlInput">Enlace de Vídeo (YouTube/Vimeo)</label>
-              <input
-                id="videoUrlInput"
-                type="text"
-                formControlName="videoUrl"
-                class="form-control"
-                placeholder="https://youtube.com/watch?v=..."
-              />
-              <div class="form-text">Copia y pega la URL directa del navegador.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="pdfInput">Material de Apoyo (PDF)</label>
-              <input
-                id="pdfInput"
-                type="file"
-                class="form-control"
-                accept=".pdf"
-                (change)="onFileSelected($event)"
-              />
-
-              @if (isEditMode && form.get('pdfUrl')?.value) {
-              <div class="form-text text-success">
-                ✅ Ya existe un archivo subido. Si subes otro, se reemplazará.
-              </div>
-              }
-
-              <div class="form-text">Opcional. Sube el archivo desde tu ordenador.</div>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="orderInput">Orden</label>
-              <input
-                id="orderInput"
-                type="number"
-                formControlName="orderIndex"
-                class="form-control"
-              />
-            </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <button type="button" (click)="goBack()" class="btn btn-outline-secondary">
-                Cancelar
-              </button>
-              <button type="submit" class="btn btn-primary px-4" [disabled]="form.invalid">
-                Guardar Lección
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </div>

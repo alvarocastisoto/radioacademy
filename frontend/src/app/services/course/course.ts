@@ -23,9 +23,14 @@ export class CourseService {
   deleteCourse(courseId: string): Observable<any> {
     return this.http.delete<any>(`${this.API_BASE}/courses/${courseId}`);
   }
+  // OBTENER POR ID (Para rellenar el formulario)
+  getCourseById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.API_BASE}/courses/${id}`);
+  }
 
-  updateCourse(courseId: string, courseData: any): Observable<any> {
-    return this.http.put<any>(`${this.API_BASE}/courses/${courseId}`, courseData);
+  // ACTUALIZAR (PUT)
+  updateCourse(id: string, courseData: any): Observable<any> {
+    return this.http.put<any>(`${this.API_BASE}/courses/${id}`, courseData);
   }
 
   // --- MÓDULOS ---

@@ -4,13 +4,14 @@ import { StudentService } from '../../services/student/student';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ProgressService } from '../../services/progress';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // 👈 IMPORTANTE
+import { FormsModule } from '@angular/forms';
 import { MediaService } from '../../services/media/media';
 import { QuizService } from '../../services/quiz/quiz';
+
 @Component({
   selector: 'app-course-player',
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule], // 👈 Añadido FormsModule
+  imports: [RouterModule, CommonModule, FormsModule],
   templateUrl: './course-player.html',
   styleUrls: ['./course-player.scss'],
 })
@@ -30,8 +31,6 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
 
   // Estados de media
   safeVideoUrl: SafeResourceUrl | null = null;
-
-  // ✅ PDF via Blob
   safePdfUrl: SafeResourceUrl | null = null;
   private pdfObjectUrl: string | null = null;
   pdfLoading = false;
@@ -46,21 +45,19 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   progressPercentage: number = 0;
   totalLessons: number = 0;
 
-  // 👇👇👇 NUEVAS VARIABLES PARA QUIZ 👇👇👇
-  activeQuiz: any = null; // Guarda el examen cargado
+  // Variables Quiz
+  activeQuiz: any = null;
   quizLoading = false;
   quizSubmitted = false;
   quizScore: number | null = null;
   quizPassed = false;
-  userAnswers: { [questionId: string]: string } = {}; // { "uuid-pregunta": "uuid-opcion" }
-  // 👆👆👆 FIN NUEVAS VARIABLES 👆👆👆
+  userAnswers: { [questionId: string]: string } = {};
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
       this.courseId = params.get('id') || '';
       if (this.courseId) {
-        this.loadCourseData();
-        this.loadProgress();
+        this.initData();
       } else {
         console.error('❌ ERROR: No llega ningún ID en la URL');
       }
@@ -78,23 +75,28 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
     }
   }
 
-  loadCourseData() {
+  initData() {
     this.loading = true;
+    this.loadCourseData();
+    this.loadProgress();
+  }
+
+  loadCourseData() {
     this.studentService.getCourseContent(this.courseId).subscribe({
       next: (data) => {
         this.course = data;
 
+        // Calcular total de lecciones
         const modulesList = this.course.modules || this.course.sections || [];
-
         this.totalLessons = 0;
         modulesList?.forEach((module: any) => {
           if (module.lessons) this.totalLessons += module.lessons.length;
         });
 
+        // Abrir primer módulo y seleccionar lección
         if (modulesList.length > 0) {
           const firstModule = modulesList[0];
           this.toggleModule(firstModule.id);
-
           if (firstModule.lessons?.length > 0) {
             this.selectLesson(firstModule.lessons[0]);
           }
@@ -111,32 +113,48 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
     });
   }
 
+  // 👇 CORRECCIÓN IMPORTANTE AQUÍ 👇
   loadProgress() {
+    console.log('🔄 Cargando progreso...');
     this.progressService.getCourseProgress(this.courseId).subscribe({
-      next: (ids) => {
+      next: (response: any) => {
+        console.log('✅ Respuesta Progreso:', response);
+
+        let ids: string[] = [];
+
+        // Caso 1: El backend devuelve el array directo ['id1', 'id2']
+        if (Array.isArray(response)) {
+          ids = response;
+        }
+        // Caso 2 (TU CASO): El backend devuelve objeto { completedLessonIds: [...] }
+        else if (response && Array.isArray(response.completedLessonIds)) {
+          ids = response.completedLessonIds;
+        }
+
         this.completedLessonIds = new Set(ids);
         this.calculateProgress();
+        this.cdr.detectChanges();
       },
-      error: (err) => console.error('Error cargando progreso', err),
+      error: (err) => console.error('❌ Error cargando progreso', err),
     });
   }
 
   toggleLessonCompletion(lessonId: string) {
     const wasCompleted = this.completedLessonIds.has(lessonId);
 
+    // Optimistic Update
     if (wasCompleted) this.completedLessonIds.delete(lessonId);
     else this.completedLessonIds.add(lessonId);
 
     this.calculateProgress();
 
     this.progressService.toggleProgress(lessonId).subscribe({
-      next: (isCompletedBackend) => {
-        if (isCompletedBackend) this.completedLessonIds.add(lessonId);
-        else this.completedLessonIds.delete(lessonId);
-        this.calculateProgress();
+      next: (res) => {
+        console.log('Guardado OK', res);
       },
       error: (err) => {
-        console.error('Error guardando progreso', err);
+        console.error('❌ Error guardando progreso:', err);
+        // Rollback
         if (wasCompleted) this.completedLessonIds.add(lessonId);
         else this.completedLessonIds.delete(lessonId);
         this.calculateProgress();
@@ -149,7 +167,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   }
 
   calculateProgress() {
-    if (this.totalLessons === 0) {
+    if (!this.totalLessons || this.totalLessons === 0) {
       this.progressPercentage = 0;
       return;
     }
@@ -164,20 +182,18 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   selectLesson(lesson: any) {
     this.currentLesson = lesson;
     this.isYouTube = false;
-
-    // Reset PDF state
     this.pdfError = null;
     this.safePdfUrl = null;
     this.revokePdfObjectUrl();
 
-    // 👇 RESET STATE QUIZ (Limpiamos datos del examen anterior)
+    // Reset Quiz
     this.activeQuiz = null;
     this.quizSubmitted = false;
     this.quizScore = null;
     this.quizPassed = false;
     this.userAnswers = {};
 
-    // 1. VIDEO
+    // VIDEO
     if (lesson.videoUrl) {
       if (this.isYouTubeUrl(lesson.videoUrl)) {
         this.isYouTube = true;
@@ -190,25 +206,20 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
       this.safeVideoUrl = null;
     }
 
-    // 2. PDF: NO construyas /uploads/pdfs/**. Pide blob por endpoint autenticado.
+    // PDF
     if (lesson.pdfUrl) {
       this.loadPdfPreview(lesson.id);
     }
 
-    // 3. QUIZ: Si la lección tiene examen, lo cargamos 👈
-    // Asumimos que el backend devuelve un campo 'quizId' en la lección
+    // QUIZ
     if (lesson.quizId) {
       this.loadQuiz(lesson.quizId);
     }
   }
 
-  // 👇👇👇 LÓGICA DE QUIZ (MÉTODOS NUEVOS) 👇👇👇
-
+  // --- QUIZ ---
   loadQuiz(quizId: string) {
     this.quizLoading = true;
-
-    // 3. USA quizService EN LUGAR DE studentService
-    // Y recuerda que el método lo llamamos 'getQuizById' en el servicio anterior
     this.quizService.getQuizById(quizId).subscribe({
       next: (quiz) => {
         this.activeQuiz = quiz;
@@ -223,16 +234,14 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   }
 
   selectOption(questionId: string, optionId: string) {
-    if (this.quizSubmitted) return; // No dejar cambiar si ya envió
+    if (this.quizSubmitted) return;
     this.userAnswers[questionId] = optionId;
   }
 
   submitQuiz() {
     if (!this.activeQuiz) return;
-
-    // 1. Mostrar spinner
     this.quizLoading = true;
-    this.cdr.detectChanges(); // Forzamos vista de carga
+    this.cdr.detectChanges();
 
     const payload = {
       quizId: this.activeQuiz.id,
@@ -241,33 +250,19 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
 
     this.quizService.submitQuiz(payload).subscribe({
       next: (result: any) => {
-        console.log('✅ RESPUESTA RECIBIDA:', result);
-
-        // 2. EJECUTAR DENTRO DE NGZONE (Seguridad Anti-Fallos de Angular)
         this.ngZone.run(() => {
-          // A. PRIMERO: Actualizamos los datos visuales (Lo más importante)
           this.quizScore = result.score;
           this.quizPassed = result.passed;
-          this.quizSubmitted = true; // Esto activa la pantalla de resultados
-          this.quizLoading = false; // Esto quita el spinner
+          this.quizSubmitted = true;
+          this.quizLoading = false;
 
-          // B. SEGUNDO: Intentamos marcar como completada (Lógica secundaria)
-          // Usamos un try-catch para que si esto falla, NO rompa la pantalla de la nota
-          try {
-            if (this.quizPassed && this.currentLesson && !this.isCompleted(this.currentLesson.id)) {
-              console.log('🎉 Aprobado -> Marcando lección como completada...');
-              this.toggleLessonCompletion(this.currentLesson.id);
-            }
-          } catch (e) {
-            console.warn('⚠️ Error menor actualizando progreso (pero el examen está bien):', e);
+          if (this.quizPassed && this.currentLesson && !this.isCompleted(this.currentLesson.id)) {
+            this.toggleLessonCompletion(this.currentLesson.id);
           }
-
-          // C. TERCERO: Forzamos el repintado final
           this.cdr.detectChanges();
         });
       },
       error: (err) => {
-        console.error('❌ ERROR:', err);
         this.ngZone.run(() => {
           this.quizLoading = false;
           this.cdr.detectChanges();
@@ -276,12 +271,11 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
       },
     });
   }
-  // 👆👆👆 FIN LÓGICA DE QUIZ 👆👆👆
 
+  // --- PDF ---
   private loadPdfPreview(lessonId: string) {
     this.pdfLoading = true;
     this.pdfError = null;
-
     this.mediaService.getLessonPdfBlob(lessonId, false).subscribe({
       next: (blob) => {
         this.revokePdfObjectUrl();
@@ -292,11 +286,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.pdfLoading = false;
-        this.pdfError =
-          err?.status === 403
-            ? 'No tienes acceso a este PDF (no matriculado).'
-            : 'Error cargando el PDF.';
-        console.error('🔥 Error PDF:', err);
+        this.pdfError = err?.status === 403 ? 'Acceso denegado.' : 'Error cargando PDF.';
         this.cdr.detectChanges();
       },
     });
@@ -307,14 +297,13 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
       window.open(this.pdfObjectUrl, '_blank', 'noopener');
       return;
     }
-
     this.mediaService.getLessonPdfBlob(this.currentLesson.id, false).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank', 'noopener');
-        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
       },
-      error: (err) => console.error('🔥 Error abriendo PDF:', err),
+      error: (err) => console.error('Error abriendo PDF:', err),
     });
   }
 
@@ -328,10 +317,11 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: (err) => console.error('🔥 Error descargando PDF:', err),
+      error: (err) => console.error('Error descargando PDF:', err),
     });
   }
 
+  // --- UTILS ---
   private isYouTubeUrl(url: string): boolean {
     return url.includes('youtube.com') || url.includes('youtu.be');
   }

@@ -1,107 +1,140 @@
-<!-- admin-syllabus.html (más ancho) -->
-<div class="admin-syllabus-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="admin-wrap">
-      <div class="d-flex justify-content-between align-items-center mb-4 page-header">
-        <button routerLink="/admin" class="btn btn-outline-secondary header-btn">⬅ Volver</button>
+<div class="admin-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-        <h2 class="fw-bold m-0 text-center flex-grow-1">Gestionar Temario</h2>
+  <div class="content-relative">
+    <div class="ra-container">
+      <div class="page-head mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
+        <button routerLink="/admin" class="btn btn-glass">
+          <i class="bi bi-arrow-left me-2"></i> Volver
+        </button>
 
-        <a
-          [routerLink]="['/admin/courses', courseId, 'new-module']"
-          class="btn btn-success header-btn"
-        >
-          + Añadir Módulo
+        <div class="text-center flex-grow-1">
+          <h2 class="fw-bold display-6 mb-0 text-main">Gestionar Temario</h2>
+          <p class="text-muted lead mb-0">Estructura del curso</p>
+        </div>
+
+        <a [routerLink]="['/admin/courses', courseId, 'new-module']" class="btn btn-glow">
+          <i class="bi bi-plus-lg me-2"></i> Nuevo Módulo
         </a>
       </div>
 
-      <div class="accordion shadow-sm" id="adminAccordion">
+      <div class="accordion admin-accordion" id="adminAccordion">
         @for (modulo of modules(); track modulo.id; let i = $index) {
-        <div class="accordion-item">
-          <h2 class="accordion-header">
-            <div class="d-flex w-100 align-items-center">
-              <button
-                class="accordion-button"
-                type="button"
-                data-bs-toggle="collapse"
-                [attr.data-bs-target]="'#collapse' + i"
-                style="flex: 1; min-width: 0"
-              >
-                <span class="badge bg-dark me-3">Módulo {{ modulo.orderIndex }}</span>
-                <span class="fw-bold text-truncate">{{ modulo.title }}</span>
-              </button>
-
-              <button
-                class="btn btn-danger ms-2 me-2"
-                style="position: relative; z-index: 10"
-                (click)="$event.stopPropagation(); deleteModule(modulo.id)"
-                title="Borrar módulo completo"
-                aria-label="Borrar módulo"
-              >
-                🗑️
-              </button>
-            </div>
-          </h2>
-
-          <div [id]="'collapse' + i" class="accordion-collapse collapse show">
-            <div class="accordion-body">
-              <ul class="list-group list-group-flush mb-3">
-                @for (lesson of modulo.lessons; track lesson.id) {
-                <li class="list-group-item bg-transparent border-bottom">
-                  <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="fw-bold text-dark text-truncate">🎥 {{ lesson.title }}</span>
-
-<a
-        [routerLink]="['/admin/lessons', lesson.id, 'quiz']"
-        class="btn btn-sm btn-outline-warning text-dark"
-        title="Gestionar Examen"
-      >
-        📝 Test
-      </a>
-      <button
-        class="btn btn-sm btn-outline-danger"
-        title="Borrar lección"
-        aria-label="Borrar lección"
-        (click)="$event.stopPropagation(); deleteLesson(lesson.id)"
-      >
-        🗑️
-      </button>
-                  </div>
-
-                  @if (lesson.videoUrl) {
-                  <div class="ratio ratio-16x9 mt-2 mb-3 shadow-sm overflow-hidden video-frame">
-                    <iframe
-                      [src]="lesson.videoUrl | safeVideo"
-                      title="YouTube video player"
-                      allowfullscreen
-                    ></iframe>
-                  </div>
-                  } @else {
-                  <p class="text-muted small fst-italic mb-0">🚫 Sin vídeo asignado</p>
-                  }
-                </li>
-                } @empty {
-                <li class="list-group-item bg-transparent text-muted small">
-                  No hay lecciones en este módulo aún.
-                </li>
-                }
-              </ul>
-
-              <div class="text-end">
-                <a
-                  [routerLink]="['/admin/modules', modulo.id, 'new-lesson']"
-                  class="btn btn-sm btn-outline-primary"
+          <div class="accordion-item glass-card mb-4">
+            <h2 class="accordion-header">
+              <div class="d-flex w-100 align-items-center p-2 pe-3">
+                <button
+                  class="accordion-button collapsed custom-trigger"
+                  type="button"
+                  data-bs-toggle="collapse"
+                  [attr.data-bs-target]="'#collapse' + i"
                 >
-                  + Añadir Lección aquí
-                </a>
+                  <div class="d-flex align-items-center gap-3">
+                    <span class="badge badge-module">Módulo {{ modulo.orderIndex }}</span>
+                    <span class="fw-bold text-main fs-5 text-truncate">{{ modulo.title }}</span>
+                  </div>
+                </button>
+
+                <div class="ms-3 border-start ps-3 py-1">
+                  <button
+                    class="btn btn-action-danger"
+                    (click)="$event.stopPropagation(); deleteModule(modulo.id)"
+                    title="Eliminar módulo"
+                  >
+                    <i class="bi bi-trash3-fill"></i>
+                  </button>
+                </div>
+              </div>
+            </h2>
+
+            <div [id]="'collapse' + i" class="accordion-collapse collapse show">
+              <div class="accordion-body bg-surface-subtle pt-0">
+                <div class="lessons-container">
+                  @for (lesson of modulo.lessons; track lesson.id) {
+                    <div class="lesson-card mt-3">
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                          <div class="drag-handle"><i class="bi bi-grip-vertical"></i></div>
+                          <span class="fw-bold text-main text-truncate">
+                            <i class="bi bi-camera-video me-2 text-primary"></i>
+                            {{ lesson.title }}
+                          </span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                          <a
+                            [routerLink]="['/admin/lessons', lesson.id, 'quiz']"
+                            class="btn btn-action-warning"
+                            title="Gestionar Examen"
+                          >
+                            <i class="bi bi-card-checklist"></i> Test
+                          </a>
+
+                          <button
+                            class="btn btn-action-danger-soft"
+                            title="Borrar lección"
+                            (click)="$event.stopPropagation(); deleteLesson(lesson.id)"
+                          >
+                            <i class="bi bi-trash3"></i>
+                          </button>
+                        </div>
+                      </div>
+
+                      @if (lesson.videoUrl) {
+                        <div
+                          class="video-preview-wrapper rounded-3 overflow-hidden border shadow-sm"
+                        >
+                          <div class="ratio ratio-16x9">
+                            <iframe
+                              [src]="lesson.videoUrl | safeVideo"
+                              title="Video preview"
+                              allowfullscreen
+                            ></iframe>
+                          </div>
+                        </div>
+                      } @else {
+                        <div
+                          class="empty-video-state p-2 rounded bg-light border border-dashed text-muted small"
+                        >
+                          <i class="bi bi-camera-video-off me-2"></i> Sin vídeo asignado
+                        </div>
+                      }
+                    </div>
+                  } @empty {
+                    <div class="text-center py-5 text-muted">
+                      <p class="mb-0 fst-italic">Este módulo está vacío.</p>
+                    </div>
+                  }
+                </div>
+
+                <div class="mt-4 pt-3 border-top">
+                  <a
+                    [routerLink]="['/admin/modules', modulo.id, 'new-lesson']"
+                    class="btn btn-dashed-add w-100"
+                  >
+                    <i class="bi bi-plus-circle-fill me-2"></i> Añadir Lección
+                  </a>
+                </div>
               </div>
             </div>
           </div>
-        </div>
         } @empty {
-        <div class="alert alert-info text-center mb-0">
-          Este curso está vacío. ¡Añade el primer módulo arriba! 👆
-        </div>
+          <div class="empty-state glass-card text-center py-5">
+            <div class="mb-3 fs-1 opacity-50">🏗️</div>
+            <h3 class="text-main fw-bold">Curso Vacío</h3>
+            <p class="text-muted mb-4">Comienza creando la estructura del curso.</p>
+            <a
+              [routerLink]="['/admin/courses', courseId, 'new-module']"
+              class="btn btn-primary btn-glow"
+            >
+              Crear Primer Módulo
+            </a>
+          </div>
         }
       </div>
     </div>

@@ -1,161 +1,167 @@
-<!-- register.html -->
-<div class="register-page">
-  <div class="container py-4">
-    <div class="row justify-content-center w-100">
-      <div class="col-12 col-sm-11 col-md-10 col-lg-8 col-xl-7">
-        <div class="card register-card">
-          <div class="card-body">
-            <h2 class="text-center fw-bold">Crear Cuenta</h2>
+<div class="auth-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-            <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
-              <div class="row g-3 mb-3">
-                <div class="col-12 col-md-6">
-                  <label class="form-label" for="name">Nombre</label>
-                  <input
-                    id="name"
-                    type="text"
-                    class="form-control"
-                    formControlName="name"
-                    autocomplete="given-name"
-                    placeholder="Sonia"
-                    [class.is-invalid]="isFieldInvalid('name')"
-                  />
-                  @if (isFieldInvalid('name')) {
-                  <div class="invalid-feedback">El nombre es obligatorio.</div>
-                  }
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <label class="form-label" for="surname">Apellidos</label>
-                  <input
-                    id="surname"
-                    type="text"
-                    class="form-control"
-                    formControlName="surname"
-                    autocomplete="family-name"
-                    placeholder="Rubianes"
-                    [class.is-invalid]="isFieldInvalid('surname')"
-                  />
-                  @if (isFieldInvalid('surname')) {
-                  <div class="invalid-feedback">Los apellidos son obligatorios.</div>
-                  }
-                </div>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label" for="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  class="form-control"
-                  formControlName="email"
-                  autocomplete="email"
-                  placeholder="sonia@email.com"
-                  [class.is-invalid]="isFieldInvalid('email')"
-                />
-                @if (isFieldInvalid('email')) {
-                <div class="invalid-feedback">Introduce un email válido.</div>
-                }
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label" for="password">Contraseña</label>
-                <input
-                  id="password"
-                  type="password"
-                  class="form-control"
-                  formControlName="password"
-                  autocomplete="new-password"
-                  [class.is-invalid]="isFieldInvalid('password')"
-                  aria-describedby="password-help"
-                />
-
-                @if (isFieldInvalid('password')) {
-                <div id="password-help" class="password-requirements mt-2" role="alert">
-                  @if (password?.hasError('required')) {
-                  <div>• La contraseña es obligatoria.</div>
-                  } @if (password?.hasError('minlength')) {
-                  <div>• Mínimo 8 caracteres.</div>
-                  } @if (password?.hasError('pattern')) {
-                  <div class="lh-sm">
-                    • Debe contener al menos:
-                    <ul class="mb-0 ps-3 mt-1">
-                      <li>Una mayúscula y una minúscula</li>
-                      <li>Un número</li>
-                      <li>Un símbolo (@#$%^&+=!._*-)</li>
-                    </ul>
-                  </div>
-                  }
-                </div>
-                }
-              </div>
-
-              <div class="row g-3 mb-3">
-                <div class="col-12 col-md-6">
-                  <label class="form-label" for="dni">DNI</label>
-                  <input
-                    id="dni"
-                    type="text"
-                    class="form-control"
-                    formControlName="dni"
-                    autocomplete="off"
-                    placeholder="12345678Z"
-                    [class.is-invalid]="isFieldInvalid('dni')"
-                  />
-                  @if (isFieldInvalid('dni')) {
-                  <div class="invalid-feedback">DNI obligatorio.</div>
-                  }
-                </div>
-
-                <div class="col-12 col-md-6">
-                  <label class="form-label" for="phone">Teléfono</label>
-                  <input
-                    id="phone"
-                    type="tel"
-                    class="form-control"
-                    formControlName="phone"
-                    autocomplete="tel"
-                    placeholder="600 000 000"
-                    [class.is-invalid]="isFieldInvalid('phone')"
-                  />
-                  @if (isFieldInvalid('phone')) {
-                  <div class="invalid-feedback">Teléfono inválido.</div>
-                  }
-                </div>
-              </div>
-
-              <div class="form-check mb-3">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  id="terms"
-                  formControlName="termsAccepted"
-                  [class.is-invalid]="isFieldInvalid('termsAccepted')"
-                />
-                <label class="form-check-label" for="terms"
-                  >Acepto los términos y condiciones</label
-                >
-                @if (isFieldInvalid('termsAccepted')) {
-                <div class="invalid-feedback d-block">Debes aceptar los términos.</div>
-                }
-              </div>
-
-              <div class="d-grid">
-                <button
-                  type="submit"
-                  class="btn btn-primary btn-lg"
-                  [disabled]="registerForm.invalid"
-                >
-                  Registrarse
-                </button>
-              </div>
-
-              <div class="text-center mt-3">
-                <small>¿Ya tienes cuenta? <a routerLink="/login">Inicia sesión</a></small>
-              </div>
-            </form>
-          </div>
+  <div class="auth-container">
+    <div class="card glass-card auth-card">
+      <div class="card-body p-4 p-md-5">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold mb-1">Crear Cuenta</h2>
+          <p class="text-muted mb-0">Únete a RadioAcademy y empieza a preparar tu OPE.</p>
         </div>
+
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" novalidate>
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="name">Nombre</label>
+              <input
+                id="name"
+                type="text"
+                class="form-control"
+                formControlName="name"
+                autocomplete="given-name"
+                placeholder="Ej. Laura"
+                [class.is-invalid]="isFieldInvalid('name')"
+              />
+              @if (isFieldInvalid('name')) {
+                <div class="invalid-feedback">El nombre es obligatorio.</div>
+              }
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="surname">Apellidos</label>
+              <input
+                id="surname"
+                type="text"
+                class="form-control"
+                formControlName="surname"
+                autocomplete="family-name"
+                placeholder="Ej. García"
+                [class.is-invalid]="isFieldInvalid('surname')"
+              />
+              @if (isFieldInvalid('surname')) {
+                <div class="invalid-feedback">Los apellidos son obligatorios.</div>
+              }
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              class="form-control"
+              formControlName="email"
+              autocomplete="email"
+              placeholder="nombre@email.com"
+              [class.is-invalid]="isFieldInvalid('email')"
+            />
+            @if (isFieldInvalid('email')) {
+              <div class="invalid-feedback">Introduce un email válido.</div>
+            }
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label" for="password">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              class="form-control"
+              formControlName="password"
+              autocomplete="new-password"
+              placeholder="Mínimo 8 caracteres"
+              [class.is-invalid]="isFieldInvalid('password')"
+            />
+
+            @if (isFieldInvalid('password')) {
+              <div
+                class="invalid-feedback d-block mt-2 p-2 bg-light rounded border border-danger-subtle"
+              >
+                @if (password?.hasError('required')) {
+                  <div>• La contraseña es obligatoria.</div>
+                }
+                @if (password?.hasError('minlength')) {
+                  <div>• Mínimo 8 caracteres.</div>
+                }
+                @if (password?.hasError('pattern')) {
+                  <div class="small lh-sm">• Requiere: Mayúscula, minúscula, número y símbolo.</div>
+                }
+              </div>
+            }
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="dni">DNI</label>
+              <input
+                id="dni"
+                type="text"
+                class="form-control"
+                formControlName="dni"
+                placeholder="12345678Z"
+                [class.is-invalid]="isFieldInvalid('dni')"
+              />
+              @if (isFieldInvalid('dni')) {
+                <div class="invalid-feedback">DNI inválido.</div>
+              }
+            </div>
+
+            <div class="col-12 col-md-6">
+              <label class="form-label" for="phone">Teléfono</label>
+              <input
+                id="phone"
+                type="tel"
+                class="form-control"
+                formControlName="phone"
+                placeholder="600 000 000"
+                [class.is-invalid]="isFieldInvalid('phone')"
+              />
+              @if (isFieldInvalid('phone')) {
+                <div class="invalid-feedback">Teléfono inválido.</div>
+              }
+            </div>
+          </div>
+
+          <div class="form-check mb-4">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="terms"
+              formControlName="termsAccepted"
+              [class.is-invalid]="isFieldInvalid('termsAccepted')"
+            />
+            <label class="form-check-label small text-muted" for="terms">
+              He leído y acepto los
+              <a href="#" class="text-primary text-decoration-none">términos y condiciones</a>.
+            </label>
+            @if (isFieldInvalid('termsAccepted')) {
+              <div class="invalid-feedback d-block">Debes aceptar para continuar.</div>
+            }
+          </div>
+
+          <div class="d-grid">
+            <button
+              type="submit"
+              class="btn btn-primary btn-glow btn-lg"
+              [disabled]="registerForm.invalid"
+            >
+              Crear mi cuenta
+            </button>
+          </div>
+
+          <div class="text-center mt-4">
+            <p class="small text-muted mb-0">
+              ¿Ya tienes cuenta?
+              <a routerLink="/login" class="text-primary fw-bold text-decoration-none"
+                >Inicia sesión</a
+              >
+            </p>
+          </div>
+        </form>
       </div>
     </div>
   </div>

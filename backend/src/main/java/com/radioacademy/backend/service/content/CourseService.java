@@ -133,6 +133,13 @@ public class CourseService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
+    public CourseDetailDTO getCourseById(UUID id) {
+        Course course = courseRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado."));
+
+        return mapToDetailDTO(course);
+    }
     // --- Helpers Privados (Limpian el código principal) ---
 
     private CourseDetailDTO mapToDetailDTO(Course course) {

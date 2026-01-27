@@ -1,51 +1,89 @@
-<!-- home.html -->
-<div class="home-page">
-  <div class="container-fluid px-3 px-lg-5">
-    <div class="home-wrap">
-      <!-- HERO -->
-      <section class="hero-card">
-        <h1 class="hero-title">Domina la Radiología ☢️</h1>
-        <p class="hero-subtitle">
-          La plataforma líder para preparar tu OPE y mejorar tu carrera técnica.
-        </p>
+<div class="home-wrapper">
+  <div class="aurora-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-        <div class="hero-actions">
-          <a routerLink="/register" class="btn btn-primary btn-lg px-4">Empezar Gratis</a>
-          <a routerLink="/courses" class="btn btn-outline-secondary btn-lg px-4">Ver Cursos</a>
+  <div class="content-relative">
+    <div class="ra-container">
+      <section class="hero-section">
+        <div class="hero-grid">
+          <div class="hero-left">
+            <div class="pill-badge glass-effect mb-4 animate-fade-in-up">
+              <span class="dot pulse"></span>
+              <span class="badge-text">Nueva OPE 2026 Confirmada</span>
+              <span class="badge-sep"></span>
+              <span class="badge-mini">IA adaptativa</span>
+            </div>
+
+            <h1 class="hero-title animate-fade-in-up delay-1">
+              La Radiología del <br />
+              <span class="text-gradient-animated">Futuro es Ahora.</span>
+            </h1>
+
+            <p class="hero-subtitle animate-fade-in-up delay-2">
+              No estudies más, estudia mejor. Plataforma premium con IA que se adapta a tus fallos,
+              prioriza lo que te falta y te prepara para el examen con intención.
+            </p>
+
+            <div class="hero-actions animate-fade-in-up delay-3">
+              <a routerLink="/register" class="btn btn-glow me-2">Empezar gratis</a>
+              <a routerLink="/courses" class="btn btn-glass">Ver demo</a>
+            </div>
+
+            <div class="hero-metrics glass-card mt-4 animate-fade-in-up delay-4">
+              <div class="metric">
+                <div class="metric-value">4K</div>
+                <div class="metric-label">Videoclases</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">IA</div>
+                <div class="metric-label">Tests adaptativos</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">Offline</div>
+                <div class="metric-label">App móvil</div>
+              </div>
+              <div class="metric">
+                <div class="metric-value">Ranking</div>
+                <div class="metric-label">Competición</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="hero-right animate-fade-in-up delay-4">
+            <div class="hero-dashboard-preview">
+              <img src="/assets/img/dashboard.png" alt="Plataforma RadioAcademy" loading="lazy" />
+              <div class="glow-under"></div>
+            </div>
+          </div>
         </div>
       </section>
 
-      <!-- FEATURES -->
-      <section class="features">
-        <div class="row g-4 text-center">
-          <div class="col-12 col-md-4">
-            <div class="feature-card">
-              <div class="feature-icon">🎓</div>
-              <h4 class="feature-title">Temario Actualizado</h4>
-              <p class="feature-text">
-                Contenido adaptado a las últimas convocatorias OPE de tu comunidad.
-              </p>
-            </div>
+      <section class="logos-section pb-5">
+        <div class="logos-card glass-card">
+          <div class="logos-title">Usado para preparar oposiciones con enfoque real</div>
+          <div class="logos-row">
+            <span class="logo-item">Radiología</span>
+            <span class="logo-item">Urgencias</span>
+            <span class="logo-item">TC</span>
+            <span class="logo-item">RM</span>
+            <span class="logo-item">PACS</span>
           </div>
+        </div>
+      </section>
 
-          <div class="col-12 col-md-4">
-            <div class="feature-card">
-              <div class="feature-icon">📹</div>
-              <h4 class="feature-title">Clases en Vídeo</h4>
-              <p class="feature-text">
-                Aprende a tu ritmo con lecciones grabadas en alta definición.
-              </p>
-            </div>
+      <section class="cta-section pb-5">
+        <div class="cta-card glass-card">
+          <div class="cta-left">
+            <h2 class="cta-title">Empieza hoy y deja de estudiar a ciegas.</h2>
+            <p class="cta-subtitle">Registro en 60 segundos. Sin fricción. Sin postureo.</p>
           </div>
-
-          <div class="col-12 col-md-4">
-            <div class="feature-card">
-              <div class="feature-icon">📝</div>
-              <h4 class="feature-title">Tests Reales</h4>
-              <p class="feature-text">
-                Practica con miles de preguntas de exámenes oficiales anteriores.
-              </p>
-            </div>
+          <div class="cta-right">
+            <a routerLink="/register" class="btn btn-glow w-100">Crear cuenta</a>
+            <a routerLink="/courses" class="btn btn-glass w-100 mt-2">Ver catálogo</a>
           </div>
         </div>
       </section>

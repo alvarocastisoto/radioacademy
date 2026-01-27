@@ -1,114 +1,219 @@
-/* teacher-panel.scss */
+/* teacher-panel.scss - TEMA CLARO ACADÉMICO */
+
+/* --- VARIABLES --- */
+$bg-color: #f8fafc;
+$text-main: #0f172a;
+$text-muted: #64748b;
+$primary: #6366f1;
+$border-light: rgba(0, 0, 0, 0.08);
+$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
   width: 100%;
 }
 
-.teacher-panel-page {
+/* --- LAYOUT --- */
+.admin-wrapper {
+  position: relative;
   width: 100%;
-  padding: 1.25rem 0 2rem;
+  min-height: 100vh;
+  padding-top: 7rem;
+  padding-bottom: 4rem;
+  background-color: $bg-color;
+  overflow-x: hidden;
 }
 
-.teacher-wrap {
-  max-width: 1500px;
+.ra-container {
+  width: 100%;
+  max-width: 1400px;
   margin: 0 auto;
+  padding-inline: clamp(24px, 5vw, 60px);
 }
 
-/* Header */
-.page-header {
-  gap: 12px;
+.content-relative {
+  position: relative;
+  z-index: 1;
 }
 
-h2 {
-  color: #111827;
-  letter-spacing: -0.3px;
+/* --- FONDO --- */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  background-color: $bg-color;
+  z-index: 0;
+  pointer-events: none;
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.4;
+    mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  }
+}
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.25;
+  z-index: -1;
+  animation: floatBlob 25s infinite alternate;
+}
+.blob-1 {
+  top: -10%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: lighten($primary, 10%);
+}
+.blob-2 {
+  bottom: 5%;
+  right: -5%;
+  width: 45vw;
+  height: 45vw;
+  background: lighten(#ec4899, 15%);
+  animation-delay: -5s;
+}
+.grid-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 1;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
-.header-btn {
-  white-space: nowrap;
-  border-radius: 12px;
-  font-weight: 700;
+/* --- HEADER --- */
+.page-head h2 {
+  color: $text-main;
+  letter-spacing: -0.02em;
 }
 
-/* Card */
-.panel-card {
-  border: 1px solid rgba(17, 24, 39, 0.08);
+/* --- TABLA GLASS --- */
+.glass-card {
+  background: white;
+  border: 1px solid $border-light;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: $shadow-soft;
 }
 
-/* Table */
-.panel-table {
-  thead {
-    background: #f9fafb;
-
-    th {
-      font-weight: 700;
-      color: #374151;
-      border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-      padding-top: 0.9rem;
-      padding-bottom: 0.9rem;
-      white-space: nowrap;
-    }
+.custom-table {
+  thead th {
+    background: #f8fafc;
+    color: $text-muted;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    border-bottom: 1px solid $border-light;
   }
-
   tbody tr {
-    transition: background-color 0.15s ease;
-  }
-
-  tbody tr:hover {
-    background: rgba(79, 70, 229, 0.04); /* hover suave */
-  }
-
-  td {
-    vertical-align: middle;
-    padding-top: 0.9rem;
-    padding-bottom: 0.9rem;
-    border-top: 1px solid rgba(17, 24, 39, 0.06);
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+    &:last-child {
+      border-bottom: none;
+    }
+    &:hover {
+      background-color: #f1f5f9;
+    }
   }
 }
 
-/* Badges */
-.badge.bg-secondary {
-  border-radius: 999px;
-  padding: 0.45rem 0.7rem;
-  font-weight: 700;
+.course-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #eef2ff;
+  color: $primary;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
 }
 
-/* Buttons */
-.btn {
-  border-radius: 12px;
+.badge-hours {
+  background: #f1f5f9;
+  color: $text-muted;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
 }
 
-.btn-outline-primary,
-.btn-outline-danger {
-  border-width: 2px;
-}
-
-.btn-warning {
+/* --- BOTONES --- */
+.btn-glow {
+  background: $primary;
+  color: white;
   border: none;
-  font-weight: 700;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 4px 15px rgba($primary, 0.3);
+  font-weight: 600;
+  &:hover {
+    background: darken($primary, 5%);
+    transform: translateY(-1px);
+  }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .page-header {
-    flex-wrap: wrap;
+.btn-glass {
+  background: white;
+  border: 1px solid $border-light;
+  color: $text-main;
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  &:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+}
 
-    .header-btn {
-      width: 100%;
-    }
+.text-primary-dark {
+  color: $primary !important;
+}
+
+/* Botón Rojo Pequeño (FIX BLINDADO) */
+.btn-action-danger-soft {
+  /* Dimensiones fijas obligatorias */
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+
+  border-radius: 8px;
+  background: white;
+  color: #ef4444;
+  border: 1px solid #fca5a5;
+
+  /* Flexbox para centrar icono */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1rem;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #fef2f2;
+    color: #dc2626;
+    border-color: #ef4444;
   }
 
-  /* En móvil, las acciones ocupan mucho: bajamos un poco */
-  .panel-table {
-    th:nth-child(2),
-    td:nth-child(2),
-    th:nth-child(3),
-    td:nth-child(3) {
-      white-space: nowrap;
-    }
+  /* Asegurar icono visible */
+  i {
+    display: block;
+    line-height: 1;
+  }
+}
+
+@keyframes floatBlob {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(30px, 50px) scale(1.1);
   }
 }
