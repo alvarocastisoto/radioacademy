@@ -40,6 +40,7 @@ public class DataSeeder implements CommandLineRunner {
             admin.setEmail(adminEmail);
             admin.setDni("00000000X"); // DNI dummy para admin
             admin.setRegion("CyberSpace");
+            admin.setPhone("000000000");
             admin.setTermsAccepted(true);
             admin.setCreatedAt(LocalDateTime.now());
 
