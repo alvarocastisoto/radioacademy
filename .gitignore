@@ -114,6 +114,8 @@ surefire-reports/
 failsafe-reports/
 test-results/
 reports/
+results.txt
+test_results.txt
 
 # =========================
 # Runtime uploads / generated content
