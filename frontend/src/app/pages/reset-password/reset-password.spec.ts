@@ -1,20 +1,37 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ResetPasswordComponent } from './reset-password';
+import { AuthService } from '../../services/auth/auth';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { ResetPassword } from './reset-password';
-
-describe('ResetPassword', () => {
-  let component: ResetPassword;
-  let fixture: ComponentFixture<ResetPassword>;
+describe('ResetPasswordComponent', () => {
+  let component: ResetPasswordComponent;
+  let fixture: ComponentFixture<ResetPasswordComponent>;
+  let authServiceSpy: any;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [ResetPassword]
-    })
-    .compileComponents();
+    authServiceSpy = { resetPassword: vi.fn() };
 
-    fixture = TestBed.createComponent(ResetPassword);
+    await TestBed.configureTestingModule({
+      imports: [ResetPasswordComponent, ReactiveFormsModule],
+      providers: [
+        { provide: AuthService, useValue: authServiceSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({ token: 'test-token' })
+          }
+        },
+        provideRouter([])
+      ]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(ResetPasswordComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

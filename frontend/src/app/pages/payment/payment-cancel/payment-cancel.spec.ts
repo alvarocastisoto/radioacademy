@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { PaymentCancel } from './payment-cancel';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('PaymentCancel', () => {
   let component: PaymentCancel;
@@ -10,11 +10,11 @@ describe('PaymentCancel', () => {
     await TestBed.configureTestingModule({
       imports: [PaymentCancel]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(PaymentCancel);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

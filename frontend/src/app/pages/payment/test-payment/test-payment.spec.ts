@@ -1,20 +1,28 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestPaymentComponent } from './test-payment';
+import { PaymentService } from '../../../services/payment/payment';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { TestPayment } from './test-payment';
-
-describe('TestPayment', () => {
-  let component: TestPayment;
-  let fixture: ComponentFixture<TestPayment>;
+describe('TestPaymentComponent', () => {
+  let component: TestPaymentComponent;
+  let fixture: ComponentFixture<TestPaymentComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TestPayment]
+      imports: [TestPaymentComponent],
+      providers: [
+        PaymentService,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
     })
-    .compileComponents();
+      .compileComponents();
 
-    fixture = TestBed.createComponent(TestPayment);
+    fixture = TestBed.createComponent(TestPaymentComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

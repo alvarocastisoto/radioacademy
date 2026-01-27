@@ -1,20 +1,36 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { PaymentSuccessComponent } from './payment-success';
+import { PaymentService } from '../../../services/payment/payment';
+import { ActivatedRoute, provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { PaymentSuccess } from './payment-success';
-
-describe('PaymentSuccess', () => {
-  let component: PaymentSuccess;
-  let fixture: ComponentFixture<PaymentSuccess>;
+describe('PaymentSuccessComponent', () => {
+  let component: PaymentSuccessComponent;
+  let fixture: ComponentFixture<PaymentSuccessComponent>;
+  let paymentServiceSpy: any;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [PaymentSuccess]
-    })
-    .compileComponents();
+    paymentServiceSpy = { confirmPayment: vi.fn() };
 
-    fixture = TestBed.createComponent(PaymentSuccess);
+    await TestBed.configureTestingModule({
+      imports: [PaymentSuccessComponent],
+      providers: [
+        { provide: PaymentService, useValue: paymentServiceSpy },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: of({ session_id: 'test-session' })
+          }
+        },
+        provideRouter([])
+      ]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(PaymentSuccessComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

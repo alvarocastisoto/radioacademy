@@ -1,20 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { StudentDashboardComponent } from './student-dashboard';
+import { StudentService } from '../../services/student/student';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { StudentDashboard } from './student-dashboard';
-
-describe('StudentDashboard', () => {
-  let component: StudentDashboard;
-  let fixture: ComponentFixture<StudentDashboard>;
+describe('StudentDashboardComponent', () => {
+  let component: StudentDashboardComponent;
+  let fixture: ComponentFixture<StudentDashboardComponent>;
+  let studentServiceSpy: any;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [StudentDashboard]
-    })
-    .compileComponents();
+    studentServiceSpy = { getMyCourses: vi.fn().mockReturnValue(of([])) };
 
-    fixture = TestBed.createComponent(StudentDashboard);
+    await TestBed.configureTestingModule({
+      imports: [StudentDashboardComponent],
+      providers: [
+        { provide: StudentService, useValue: studentServiceSpy },
+        provideRouter([])
+      ]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(StudentDashboardComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {

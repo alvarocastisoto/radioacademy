@@ -1,13 +1,26 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
+import { PaymentService } from './payment';
 
-import { Payment } from './payment';
-
-describe('Payment', () => {
-  let service: Payment;
+describe('PaymentService', () => {
+  let service: PaymentService;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Payment);
+    TestBed.configureTestingModule({
+      providers: [
+        PaymentService,
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+    service = TestBed.inject(PaymentService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should be created', () => {

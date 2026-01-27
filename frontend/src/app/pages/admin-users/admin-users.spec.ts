@@ -1,20 +1,33 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AdminUsersComponent } from './admin-users';
+import { AdminService } from '../../services/admin/admin';
+import { of } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { AdminUsers } from './admin-users';
-
-describe('AdminUsers', () => {
-  let component: AdminUsers;
-  let fixture: ComponentFixture<AdminUsers>;
+describe('AdminUsersComponent', () => {
+  let component: AdminUsersComponent;
+  let fixture: ComponentFixture<AdminUsersComponent>;
+  let adminServiceSpy: any;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AdminUsers]
-    })
-    .compileComponents();
+    adminServiceSpy = {
+      getUsers: vi.fn().mockReturnValue(of([])),
+      getCoursesLight: vi.fn().mockReturnValue(of([])),
+      getUserCourses: vi.fn().mockReturnValue(of([]))
+    };
 
-    fixture = TestBed.createComponent(AdminUsers);
+    await TestBed.configureTestingModule({
+      imports: [AdminUsersComponent, FormsModule],
+      providers: [
+        { provide: AdminService, useValue: adminServiceSpy }
+      ]
+    })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(AdminUsersComponent);
     component = fixture.componentInstance;
-    await fixture.whenStable();
+    fixture.detectChanges();
   });
 
   it('should create', () => {
