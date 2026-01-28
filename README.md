@@ -212,6 +212,3 @@ Academia/
 3.  Haz Commit de tus cambios (`git commit -m 'Añadir NuevaFuncionalidad'`).
 4.  Haz Push a la rama (`git push origin feature/NuevaFuncionalidad`).
 5.  Abre un Pull Request.
-
----
-*Documentación generada automáticamente para RadioAcademy.*
