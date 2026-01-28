@@ -1,5 +1,5 @@
 /* quiz-editor.scss - TEMA CLARO ACADÉMICO */
-
+@use 'sass:color';
 /* --- VARIABLES --- */
 $bg-color: #f8fafc;
 $text-main: #0f172a;
@@ -66,14 +66,14 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale($primary, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten(#f59e0b, 20%);
+  background: color.scale(#f59e0b, $lightness: 20%);
   animation-delay: -5s;
 }
 .grid-overlay {
@@ -205,7 +205,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     transform: translateY(-2px);
     box-shadow: 0 15px 30px -5px rgba($primary, 0.5);
   }

@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-admin-dashboard',
-  imports: [CurrencyPipe, RouterLink, SlicePipe], // DatePipe para formatear fechas si las hubiera
+  imports: [CurrencyPipe, RouterLink],
   templateUrl: './admin-dashboard.html',
   styleUrl: './admin-dashboard.scss',
 })

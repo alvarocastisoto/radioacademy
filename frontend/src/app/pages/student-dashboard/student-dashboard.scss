@@ -1,5 +1,5 @@
 /* my-courses.scss - TEMA CLARO ACADÉMICO */
-
+@use 'sass:color';
 /* --- VARIABLES --- */
 $bg-color: #f8fafc;
 $text-main: #0f172a;
@@ -67,14 +67,14 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten($accent, 15%);
+  background: color.scale($accent, $lightness: 15%);
   animation-delay: -5s;
 }
 .grid-overlay {
@@ -219,7 +219,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   border: none;
   box-shadow: 0 4px 15px rgba($primary, 0.25);
   &:hover {
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     transform: translateY(-1px);
     box-shadow: 0 8px 20px rgba($primary, 0.35);
   }

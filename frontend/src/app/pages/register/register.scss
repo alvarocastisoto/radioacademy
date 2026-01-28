@@ -1,4 +1,5 @@
 /* register.scss - TEMA CLARO ACADÉMICO */
+@use 'sass:color';
 
 $bg-color: #f8fafc;
 $text-main: #0f172a;
@@ -53,14 +54,14 @@ $error: #ef4444;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: -10%;
   right: -10%;
   width: 45vw;
   height: 45vw;
-  background: lighten($accent, 15%);
+  background: color.scale($accent, $lightness: 15%);
   animation-delay: -5s;
 }
 .blob-3 {
@@ -68,7 +69,7 @@ $error: #ef4444;
   left: 40%;
   width: 40vw;
   height: 40vw;
-  background: lighten(#06b6d4, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
   animation-delay: -10s;
 }
 .grid-overlay {
@@ -175,7 +176,7 @@ h2 {
   transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     transform: translateY(-2px);
     box-shadow: 0 15px 30px -5px rgba($primary, 0.5);
   }
@@ -191,7 +192,7 @@ h2 {
 a {
   transition: color 0.2s;
   &:hover {
-    color: darken($primary, 10%) !important;
+    color: color.scale($primary, $lightness: -10%) !important;
     text-decoration: underline;
   }
 }

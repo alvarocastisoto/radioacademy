@@ -1,5 +1,6 @@
 /* admin-syllabus.scss - TEMA CLARO ACADÉMICO + FIX BOTONES */
-
+@use 'sass:color';
+@use 'variables' as *;
 /* --- VARIABLES --- */
 $bg-color: #f8fafc;
 $text-main: #0f172a;
@@ -67,14 +68,14 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten($warning, 20%);
+  background: color.scale($warning, $lightness: 20%);
   animation-delay: -5s;
 }
 .grid-overlay {
@@ -286,7 +287,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   box-shadow: 0 4px 15px rgba($primary, 0.3);
   font-weight: 600;
   &:hover {
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     transform: translateY(-1px);
   }
 }

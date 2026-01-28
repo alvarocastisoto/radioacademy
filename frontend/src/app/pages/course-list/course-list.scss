@@ -1,5 +1,5 @@
 /* courses-catalog.scss - TEMA CLARO ACADÉMICO */
-
+@use 'sass:color';
 /* --- VARIABLES (Coherencia con Home) --- */
 $bg-color: #f8fafc;
 $bg-surface: #ffffff;
@@ -68,14 +68,14 @@ $shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten($accent, 15%);
+  background: color.scale($accent, $lightness: 15%);
   animation-delay: -5s;
 }
 .blob-3 {
@@ -83,7 +83,7 @@ $shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
   left: 40%;
   width: 35vw;
   height: 35vw;
-  background: lighten(#06b6d4, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
   animation-delay: -10s;
 }
 
@@ -220,7 +220,7 @@ $shadow-hover: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
   box-shadow: 0 8px 20px -5px rgba($primary, 0.4);
   &:hover:not(:disabled) {
     transform: translateY(-2px);
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     box-shadow: 0 12px 25px -5px rgba($primary, 0.5);
   }
   &:disabled {

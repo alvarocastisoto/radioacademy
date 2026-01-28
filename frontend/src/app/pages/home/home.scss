@@ -1,5 +1,6 @@
 /* home.component.scss - TEMA CLARO FINAL (SIN BENTO) */
-
+@use 'sass:color';
+@use 'variables' as *;
 /* --- PALETA CLARA --- */
 $bg-color: #f8fafc; /* Fondo Slate 50 */
 $bg-surface: #ffffff; /* Blanco puro */
@@ -98,14 +99,14 @@ section {
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten($accent, 15%);
+  background: color.scale($accent, $lightness: 15%);
   animation-delay: -7s;
 }
 .blob-3 {
@@ -113,7 +114,7 @@ section {
   left: 40%;
   width: 40vw;
   height: 40vw;
-  background: lighten(#06b6d4, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
   animation-delay: -14s;
 }
 
@@ -335,7 +336,7 @@ p {
   box-shadow: 0 8px 20px -5px rgba($primary, 0.5);
   &:hover {
     transform: translateY(-2px);
-    background: darken($primary, 5%);
+    background: color.scale($primary, $lightness: -5%);
     box-shadow: 0 15px 30px -5px rgba($primary, 0.6);
   }
 }
@@ -344,7 +345,7 @@ p {
   color: $text-main;
   border: 2px solid rgba($primary, 0.15);
   &:hover {
-    background: lighten($primary, 42%);
+    background: color.scale($primary, $lightness: 42%);
     border-color: $primary;
     transform: translateY(-2px);
   }
@@ -391,7 +392,11 @@ p {
 /* CTA */
 .cta-card {
   padding: 4rem;
-  background: linear-gradient(135deg, $bg-surface 0%, lighten($bg-surface, 2%) 100%);
+  background: linear-gradient(
+    135deg,
+    $bg-surface 0%,
+    color.scale($bg-surface, $lightness: 2%) 100%
+  );
   .cta-title {
     color: $text-main;
   }

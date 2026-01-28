@@ -1,4 +1,6 @@
 /* students-admin.scss - TEMA CLARO ACADÉMICO */
+@use 'sass:color';
+@use 'variables' as *;
 
 /* --- VARIABLES --- */
 $bg-color: #f8fafc;
@@ -65,14 +67,14 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: lighten($primary, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: lighten(#ec4899, 15%);
+  background: color.scale($accent, $lightness: 15%);
   animation-delay: -5s;
 }
 .blob-3 {
@@ -80,7 +82,7 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   left: 40%;
   width: 35vw;
   height: 35vw;
-  background: lighten(#06b6d4, 10%);
+  background: color.scale(#06b6d4, $lightness: 10%);
   animation-delay: -10s;
 }
 .grid-overlay {

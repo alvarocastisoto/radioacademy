@@ -2,8 +2,8 @@
 
 /* 1. CONFIGURACIÓN BASE */
 /* Importar iconos desde node_modules */
-@import 'bootstrap-icons/font/bootstrap-icons.css';
-@import 'bootstrap/scss/bootstrap';
+@use 'bootstrap-icons/font/bootstrap-icons.css';
+@use 'bootstrap/scss/bootstrap';
 html,
 body {
   width: 100%;
