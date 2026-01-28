@@ -10,15 +10,15 @@ Aquí puedes ver cómo luce la aplicación. *Nota: Puedes subir tus propias capt
 
 ### 🎓 Vista del Estudiante
 Una interfaz limpia y moderna donde los estudiantes pueden ver su progreso y acceder a sus cursos.
-![Vista del Estudiante](uploads/dashboard-estudiante.png)
+![Vista del Estudiante](screenshots/dashboard-estudiante.png)
 
 ### 🛠️ Panel de Administración
 Herramientas potentes para gestionar usuarios, cursos y contenido.
-![Panel de Administración](uploads/dashboard-admin.png)
+![Panel de Administración](screenshots/dashboard-admin.png)
 
 ### 🎧 Reproductor Multimedia
 Soporte nativo para lecciones de audio y video.
-![Reproductor Multimedia](uploads/player-demo.png)
+![Reproductor Multimedia](screenshot/player-demo.png)
 
 ---
 
