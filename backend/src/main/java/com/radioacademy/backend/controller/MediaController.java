@@ -23,19 +23,25 @@ public class MediaController {
 
     /**
      * SUBIDA (Solo ADMIN)
+     * Ahora acepta un parámetro opcional "folder" (ej: "courses", "users")
      */
     @PreAuthorize("hasAnyAuthority('ADMIN','ROLE_ADMIN')")
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "folder", required = false) String folder // 👈 NUEVO PARÁMETRO
+    ) {
 
-        // Delegamos validación y guardado
-        String storedPath = mediaService.uploadMedia(file);
+        // Delegamos validación y guardado pasando la carpeta destino
+        String storedPath = mediaService.uploadMedia(file, folder);
 
+        // Devolvemos la ruta relativa (ej: "uploads/images/courses/foto.jpg")
         return ResponseEntity.ok(Map.of("path", storedPath));
     }
 
     /**
      * DESCARGA (Genérica Autenticada)
+     * Este método no cambia, ya que el "path" incluye la carpeta
      */
     @GetMapping("/download")
     public ResponseEntity<Resource> download(
@@ -45,7 +51,7 @@ public class MediaController {
         // 1. Obtener el recurso validado
         Resource resource = mediaService.loadMediaResource(path);
 
-        // 2. Preparar Headers HTTP (Esto es responsabilidad del Controller)
+        // 2. Preparar Headers HTTP
         String filename = resource.getFilename() != null ? resource.getFilename() : "file";
         String disposition = (download ? "attachment" : "inline") + "; filename=\"" + filename + "\"";
         MediaType mediaType = mediaService.determineMediaType(filename);

@@ -1,7 +1,6 @@
 package com.radioacademy.backend.service;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.nio.file.*;
 import java.util.Locale;
 import java.util.UUID;
@@ -29,7 +27,11 @@ public class StorageService {
         Files.createDirectories(uploadsRoot.resolve("pdfs"));
     }
 
-    public String store(MultipartFile file) {
+    /**
+     * Guarda el archivo. Si es imagen, permite subcarpeta (ej: "courses").
+     * Si es PDF, ignora la subcarpeta y va a /pdfs por seguridad.
+     */
+    public String store(MultipartFile file, String subFolder) {
         try {
             if (file == null || file.isEmpty()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo está vacío.");
@@ -40,28 +42,58 @@ public class StorageService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de archivo desconocido.");
             }
 
-            String subdir = resolveSubdir(contentType);
-            Path targetDir = uploadsRoot.resolve(subdir);
-            Files.createDirectories(targetDir);
+            // 1. Determinar directorio base y construir ruta destino
+            String baseCategory = resolveBaseCategory(contentType); // "images" o "pdfs"
+            Path targetDir;
 
+            if (baseCategory.equals("images") && subFolder != null && !subFolder.isBlank()) {
+                // Validación de seguridad para el nombre de la carpeta
+                if (subFolder.contains("..") || subFolder.contains("/") || subFolder.contains("\\")) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre de carpeta inválido.");
+                }
+                // uploads/images/courses
+                targetDir = uploadsRoot.resolve("images").resolve(subFolder);
+            } else {
+                // uploads/images o uploads/pdfs (sin subcarpeta extra)
+                targetDir = uploadsRoot.resolve(baseCategory);
+            }
+
+            // Crear directorios si no existen
+            if (!Files.exists(targetDir)) {
+                Files.createDirectories(targetDir);
+            }
+
+            // 2. Generar nombre único
             String extension = detectExtension(file.getOriginalFilename(), contentType);
             String filename = UUID.randomUUID() + extension;
 
+            // 3. Validar ruta final (Anti Path Traversal)
             Path destinationFile = targetDir.resolve(filename).normalize().toAbsolutePath();
             if (!destinationFile.startsWith(uploadsRoot)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ruta inválida.");
             }
 
+            // 4. Copiar archivo
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            return "uploads/" + subdir + "/" + filename;
+            // 5. Retornar ruta relativa para BBDD
+            // Ejemplo: uploads/images/courses/uuid.jpg
+            // Calculamos la ruta relativa respecto al root del proyecto para que sea
+            // portable
+            Path relativePath = uploadsRoot.getParent().relativize(destinationFile);
+            return relativePath.toString().replace("\\", "/");
 
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error al guardar el archivo: " + e.getMessage());
         }
+    }
+
+    // Sobrecarga para mantener compatibilidad si alguien llama sin carpeta
+    public String store(MultipartFile file) {
+        return store(file, null);
     }
 
     public Resource loadAsResource(String relativePath) {
@@ -75,6 +107,7 @@ public class StorageService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path inválido.");
             }
 
+            // Quitamos "uploads/" para resolverlo contra uploadsRoot
             String withoutPrefix = normalized.substring("uploads/".length());
             Path file = uploadsRoot.resolve(withoutPrefix).normalize().toAbsolutePath();
 
@@ -96,32 +129,25 @@ public class StorageService {
         }
     }
 
-    /**
-     * Borra un archivo a partir de su path relativo o URL (legacy).
-     */
     public void delete(String filenameOrUrl) {
         try {
             if (filenameOrUrl == null || filenameOrUrl.isBlank())
                 return;
 
             String s = filenameOrUrl.replace("\\", "/");
-
-            // 1) Extrae desde la primera aparición de "uploads/"
             int idx = s.indexOf("uploads/");
             if (idx < 0)
                 return;
 
-            String path = s.substring(idx); // "uploads/images/.."
-
-            // 2) Normaliza y valida
+            String path = s.substring(idx);
             String normalized = Paths.get(path).normalize().toString().replace("\\", "/");
+
             if (!normalized.startsWith("uploads/"))
                 return;
 
             String withoutPrefix = normalized.substring("uploads/".length());
             Path file = uploadsRoot.resolve(withoutPrefix).normalize().toAbsolutePath();
 
-            // 3) Anti path traversal
             if (!file.startsWith(uploadsRoot.toAbsolutePath()))
                 return;
 
@@ -132,7 +158,7 @@ public class StorageService {
         }
     }
 
-    private String resolveSubdir(String contentType) {
+    private String resolveBaseCategory(String contentType) {
         if (contentType.equals("application/pdf"))
             return "pdfs";
         if (contentType.startsWith("image/"))
@@ -141,10 +167,8 @@ public class StorageService {
     }
 
     private String detectExtension(String originalFilename, String contentType) {
-        // Si viene extensión, úsala (con normalización)
         if (originalFilename != null && originalFilename.contains(".")) {
             String ext = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase(Locale.ROOT);
-            // lista blanca básica
             if (contentType.equals("application/pdf") && ext.equals(".pdf"))
                 return ".pdf";
             if (contentType.startsWith("image/")
@@ -152,8 +176,6 @@ public class StorageService {
                 return ext.equals(".jpeg") ? ".jpg" : ext;
             }
         }
-
-        // Si no viene, decide por contentType
         if (contentType.equals("application/pdf"))
             return ".pdf";
         if (contentType.equals("image/png"))
@@ -162,5 +184,4 @@ public class StorageService {
             return ".webp";
         return ".jpg";
     }
-
 }

@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { StudentService } from '../../services/student/student';
 import { Router, RouterModule } from '@angular/router';
-import { DashboardCourse } from '../../models/dashboard-course'; // 👈 Importa la interfaz
+import { StudentService } from '../../services/student/student';
+import { MediaService } from '../../services/media/media'; // 👈 Importamos MediaService
+import { DashboardCourse } from '../../models/dashboard-course';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -13,9 +14,10 @@ import { DashboardCourse } from '../../models/dashboard-course'; // 👈 Importa
 })
 export class StudentDashboardComponent implements OnInit {
   private studentService = inject(StudentService);
+  private mediaService = inject(MediaService); // 👈 Inyectamos
   private router = inject(Router);
 
-  // ✅ USAMOS SIGNALS (Más eficiente y reactivo)
+  // ✅ USAMOS SIGNALS
   courses = signal<DashboardCourse[]>([]);
   loading = signal<boolean>(true);
 
@@ -24,27 +26,32 @@ export class StudentDashboardComponent implements OnInit {
   }
 
   loadDashboard() {
-    this.loading.set(true); // Activamos carga
+    this.loading.set(true);
 
     this.studentService.getMyCourses().subscribe({
       next: (data) => {
-        console.log('✅ Dashboard cargado:', data);
-
-        // TypeScript confiará en que data cumple la interfaz si el servicio está tipado,
-        // si no, el cast es seguro aquí porque sabemos lo que envía el backend.
+        // console.log('✅ Dashboard cargado:', data);
         this.courses.set(data as DashboardCourse[]);
-
-        this.loading.set(false); // Desactivamos carga
+        this.loading.set(false);
       },
       error: (e) => {
         console.error('🔥 Error cargando dashboard:', e);
         this.loading.set(false);
-        // Aquí podrías mostrar un toast o mensaje de error en la UI
       },
     });
   }
 
+  // ✅ Helper para procesar la imagen de portada
+  getCourseImage(path: string | null | undefined): string {
+    if (!path) return 'assets/img/placeholder-course.jpg'; // Imagen por defecto si no hay
+    return this.mediaService.toPublicUrl(path);
+  }
+
   enterCourse(courseId: string) {
+    // Redirige a la vista de detalles del curso (donde está el temario)
     this.router.navigate(['/course-player', courseId]);
+
+    // O si prefieres ir directo al reproductor:
+    // this.router.navigate(['/course-player', courseId]);
   }
 }

@@ -8,53 +8,63 @@
 
   <div class="content-relative">
     <div class="ra-container">
-      
-      <div class="page-head text-center mb-5">
+      <div class="page-head text-center mb-5 animate-fade-in-up">
         <h2 class="fw-bold display-6 mb-2 text-main">👤 Mi Perfil</h2>
         <p class="text-muted lead mb-0">Gestiona tu información personal y seguridad.</p>
       </div>
 
       <div class="row justify-content-center">
-        <div class="col-md-10 col-lg-8 col-xl-7">
-          
-          <div class="card glass-card">
+        <div class="col-md-10 col-lg-8 col-xl-7 animate-fade-in-up delay-1">
+          <div class="card glass-card border-0">
             <div class="card-body p-4 p-md-5">
-
-              @if (successMessage) {
-                <div class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+              @if (successMessage()) {
+                <div
+                  class="alert alert-success d-flex align-items-center mb-4 border-0 shadow-sm animate-fade-in-up"
+                  role="alert"
+                >
                   <i class="bi bi-check-circle-fill me-2 fs-5"></i>
-                  <div>{{ successMessage }}</div>
+                  <div>{{ successMessage() }}</div>
                 </div>
-              } 
-              @if (errorMessage) {
-                <div class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm" role="alert">
+              }
+              @if (errorMessage()) {
+                <div
+                  class="alert alert-danger d-flex align-items-center mb-4 border-0 shadow-sm animate-fade-in-up"
+                  role="alert"
+                >
                   <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
-                  <div>{{ errorMessage }}</div>
+                  <div>{{ errorMessage() }}</div>
                 </div>
               }
 
               <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
-                
                 <div class="text-center mb-5">
                   <div class="avatar-wrapper position-relative d-inline-block">
                     <img
-                      [src]="avatarUrl || 'assets/images/default-avatar.png'"
+                      [src]="avatarUrl() || 'assets/img/default-avatar.png'"
                       (error)="handleImageError()"
                       alt="Avatar"
-                      class="profile-avatar shadow-lg"
+                      class="profile-avatar shadow-lg rounded-circle object-fit-cover"
+                      width="120"
+                      height="120"
                     />
 
                     <label
                       for="avatarInput"
-                      class="btn-camera shadow-sm"
+                      class="btn-camera shadow-sm position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                      style="width: 36px; height: 36px; cursor: pointer; transition: transform 0.2s"
                       title="Cambiar foto de perfil"
                     >
-                      <i class="bi bi-camera-fill"></i>
+                      <i class="bi bi-camera-fill small"></i>
                     </label>
 
-                    @if (isUploading) {
-                      <div class="avatar-overlay">
-                        <div class="spinner-border text-white spinner-border-sm" role="status"></div>
+                    @if (isUploading()) {
+                      <div
+                        class="avatar-overlay position-absolute top-0 start-0 w-100 h-100 rounded-circle bg-dark bg-opacity-50 d-flex align-items-center justify-content-center"
+                      >
+                        <div
+                          class="spinner-border text-white spinner-border-sm"
+                          role="status"
+                        ></div>
                       </div>
                     }
                   </div>
@@ -66,7 +76,9 @@
                     accept="image/*"
                     (change)="onFileSelected($event)"
                   />
-                  <div class="mt-2 text-muted small">Haz clic en la cámara para actualizar tu foto.</div>
+                  <div class="mt-2 text-muted small">
+                    Haz clic en la cámara para actualizar tu foto.
+                  </div>
                 </div>
 
                 <h5 class="section-title text-primary fw-bold mb-4 d-flex align-items-center">
@@ -119,7 +131,7 @@
                   </div>
                 </div>
 
-                <hr class="border-light my-5" />
+                <hr class="border-light my-5 opacity-10" />
 
                 <h5 class="section-title text-primary fw-bold mb-2 d-flex align-items-center">
                   <i class="bi bi-shield-lock-fill me-2"></i> Seguridad
@@ -130,7 +142,9 @@
 
                 <div class="row g-3">
                   <div class="col-12">
-                    <label class="form-label" for="currentPass">Contraseña Actual <span class="text-danger">*</span></label>
+                    <label class="form-label" for="currentPass"
+                      >Contraseña Actual <span class="text-danger">*</span></label
+                    >
                     <input
                       type="password"
                       class="form-control"
@@ -167,34 +181,38 @@
                         profileForm.value.confirmPassword
                       "
                     />
-                    @if (profileForm.value.newPassword !== profileForm.value.confirmPassword && profileForm.value.confirmPassword) {
+                    @if (
+                      profileForm.value.newPassword !== profileForm.value.confirmPassword &&
+                      profileForm.value.confirmPassword
+                    ) {
                       <div class="invalid-feedback">Las contraseñas no coinciden.</div>
                     }
                   </div>
                 </div>
 
-                <div class="d-flex justify-content-end mt-5 pt-3 border-top">
+                <div class="d-flex justify-content-end mt-5 pt-3 border-top border-light-subtle">
                   <button
                     type="submit"
-                    class="btn btn-glow px-5"
-                    [disabled]="profileForm.invalid || loading || isUploading"
+                    class="btn btn-glow px-5 py-2"
+                    [disabled]="profileForm.invalid || loading() || isUploading()"
                   >
-                    @if (loading) {
-                      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    @if (loading()) {
+                      <span
+                        class="spinner-border spinner-border-sm me-2"
+                        role="status"
+                        aria-hidden="true"
+                      ></span>
                       Guardando...
                     } @else {
                       Guardar Cambios
                     }
                   </button>
                 </div>
-
               </form>
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
   </div>
 </div>

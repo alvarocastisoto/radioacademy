@@ -1,4 +1,4 @@
-<div class="syllabus-wrapper">
+<div class="course-details-wrapper">
   <div class="aurora-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -8,107 +8,166 @@
 
   <div class="content-relative">
     <div class="ra-container">
-      <div class="page-head mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
-        <button routerLink="/courses" class="btn btn-glass">
-          <i class="bi bi-arrow-left"></i> Volver
+      <div class="mb-4 pt-4">
+        <button routerLink="/courses" class="btn btn-glass btn-sm">
+          <i class="bi bi-arrow-left"></i> Volver al catálogo
         </button>
-
-        <div class="text-center flex-grow-1">
-          <h2 class="fw-bold display-6 mb-0 text-main">Temario del Curso</h2>
-          <p class="text-muted lead mb-0">Estructura completa de módulos y lecciones</p>
-        </div>
-
-        <div class="spacer d-none d-lg-block" style="width: 100px"></div>
       </div>
 
-      <div class="accordion syllabus-accordion shadow-lg" id="temarioAccordion">
-        @for (modulo of modules(); track modulo.id; let i = $index) {
-          <div class="accordion-item mb-3">
-            <h2 class="accordion-header">
-              <button
-                class="accordion-button collapsed"
-                type="button"
-                data-bs-toggle="collapse"
-                [attr.data-bs-target]="'#collapse' + i"
-              >
-                <div class="d-flex align-items-center w-100">
-                  <span class="badge badge-module me-3">Módulo {{ i + 1 }}</span>
-                  <span class="fw-bold text-main fs-5 text-truncate">{{ modulo.title }}</span>
+      @if (loading()) {
+        <div class="text-center py-5 glass-card">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <p class="text-muted">Cargando información del curso...</p>
+        </div>
+      } @else {
+        <section class="course-hero glass-card p-4 p-md-5 mb-5 animate-fade-in-up">
+          <div class="row align-items-center g-4">
+            <div class="col-md-5 col-lg-4">
+              <div class="course-image-wrapper">
+                <img
+                  [src]="getCoverImageUrl()"
+                  [alt]="course()?.title"
+                  class="img-fluid rounded-4 shadow-lg course-cover"
+                />
+                <div class="glow-under"></div>
+              </div>
+            </div>
+
+            <div class="col-md-7 col-lg-8">
+              <div class="d-flex gap-2 mb-3">
+                <span
+                  class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3"
+                >
+                  {{ course()?.category?.name || 'General' }}
+                </span>
+                <span
+                  class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3"
+                >
+                  {{ course()?.level?.name || 'Nivel único' }}
+                </span>
+              </div>
+
+              <h1 class="fw-bold display-5 text-main mb-3">{{ course()?.title }}</h1>
+
+              <p class="text-muted lead mb-4">
+                {{ course()?.description }}
+              </p>
+
+              <div class="d-flex align-items-center gap-4 flex-wrap">
+                <div class="price-tag">
+                  <span class="fs-2 fw-bold text-main">{{
+                    course()?.price | currency: 'EUR'
+                  }}</span>
                 </div>
-              </button>
-            </h2>
 
-            <div
-              [id]="'collapse' + i"
-              class="accordion-collapse collapse"
-              data-bs-parent="#temarioAccordion"
-            >
-              <div class="accordion-body">
-                @if (modulo.lessons && modulo.lessons.length > 0) {
-                  <div class="list-group list-group-flush">
-                    @for (lesson of modulo.lessons; track lesson.id; let j = $index) {
-                      <div class="list-group-item lesson-row">
-                        <div class="lesson-left">
-                          <span class="lesson-number">{{ j + 1 }}</span>
-                          <div class="lesson-info">
-                            <span class="lesson-title">{{ lesson.title }}</span>
+                <div class="meta-info d-flex gap-3 text-muted small">
+                  <span><i class="bi bi-clock me-1"></i> {{ course()?.hours }} Horas</span>
+                  <span><i class="bi bi-camera-video me-1"></i> Online</span>
+                </div>
+              </div>
 
-                            <div class="lesson-badges">
-                              @if (lesson.videoUrl) {
-                                <i class="bi bi-play-circle text-primary" title="Tiene Video"></i>
-                              }
-                              @if (lesson.pdfUrl) {
-                                <i class="bi bi-file-earmark-pdf text-danger" title="Tiene PDF"></i>
-                              }
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="lesson-actions">
-                          @if (lesson.videoUrl) {
-                            <a [href]="lesson.videoUrl" target="_blank" class="btn btn-glass">
-                              <i class="bi bi-play-fill text-primary"></i> Ver Video
-                            </a>
-                          }
-
-                          @if (lesson.pdfUrl) {
-                            <button
-                              type="button"
-                              class="btn btn-glass"
-                              (click)="openLessonPdf(lesson.id)"
-                            >
-                              <i class="bi bi-eye"></i> Ver
-                            </button>
-
-                            <button
-                              type="button"
-                              class="btn btn-glow"
-                              (click)="downloadLessonPdf(lesson.id, lesson.title)"
-                            >
-                              <i class="bi bi-download"></i> Descargar
-                            </button>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <div class="text-center py-4 text-muted">
-                    <i class="bi bi-inbox fs-3 d-block mb-2 opacity-50"></i>
-                    Aún no hay lecciones publicadas en este módulo.
-                  </div>
-                }
+              <div class="mt-4 pt-3 border-top border-light-subtle">
+                <button class="btn btn-glow px-4 py-2">Matricularme ahora</button>
               </div>
             </div>
           </div>
-        } @empty {
-          <div class="empty-state text-center py-5">
-            <div class="mb-3 fs-1 opacity-50">📂</div>
-            <h3 class="text-main fw-bold">No hay contenido disponible</h3>
-            <p class="text-muted">El temario de este curso aún no ha sido publicado.</p>
+        </section>
+
+        <section class="syllabus-section">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h2 class="fw-bold h3 text-main mb-0">Temario del Curso</h2>
+            <span class="text-muted small">{{ modules().length }} Módulos disponibles</span>
           </div>
-        }
-      </div>
+
+          <div class="accordion syllabus-accordion shadow-sm" id="temarioAccordion">
+            @for (modulo of modules(); track modulo.id; let i = $index) {
+              <div
+                class="accordion-item mb-3 glass-card border-0 overflow-hidden animate-fade-in-up"
+                [style.animation-delay]="i * 100 + 'ms'"
+              >
+                <h2 class="accordion-header">
+                  <button
+                    class="accordion-button collapsed bg-transparent shadow-none"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    [attr.data-bs-target]="'#collapse' + i"
+                  >
+                    <div class="d-flex align-items-center w-100 gap-3">
+                      <span class="badge-number">{{ i + 1 }}</span>
+                      <span class="fw-bold text-main fs-5 text-truncate">{{ modulo.title }}</span>
+                    </div>
+                  </button>
+                </h2>
+
+                <div
+                  [id]="'collapse' + i"
+                  class="accordion-collapse collapse"
+                  data-bs-parent="#temarioAccordion"
+                >
+                  <div class="accordion-body pt-0">
+                    @if (modulo.lessons && modulo.lessons.length > 0) {
+                      <div class="list-group list-group-flush rounded-3">
+                        @for (lesson of modulo.lessons; track lesson.id; let j = $index) {
+                          <div
+                            class="list-group-item lesson-row bg-transparent border-light-subtle d-flex flex-wrap gap-3 align-items-center justify-content-between p-3"
+                          >
+                            <div class="d-flex align-items-center gap-3">
+                              <i class="bi bi-play-circle-fill fs-4 text-primary opacity-75"></i>
+                              <div>
+                                <span class="d-block text-main fw-medium">{{ lesson.title }}</span>
+                                <small class="text-muted">Lección {{ i + 1 }}.{{ j + 1 }}</small>
+                              </div>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                              @if (lesson.videoUrl) {
+                                <a
+                                  [href]="lesson.videoUrl"
+                                  target="_blank"
+                                  class="btn btn-sm btn-glass icon-only"
+                                  title="Ver Video"
+                                >
+                                  <i class="bi bi-play-fill"></i>
+                                </a>
+                              }
+                              @if (lesson.pdfUrl) {
+                                <button
+                                  (click)="openLessonPdf(lesson.id)"
+                                  class="btn btn-sm btn-glass icon-only"
+                                  title="Ver PDF"
+                                >
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                                <button
+                                  (click)="downloadLessonPdf(lesson.id, lesson.title)"
+                                  class="btn btn-sm btn-glass icon-only"
+                                  title="Descargar PDF"
+                                >
+                                  <i class="bi bi-download"></i>
+                                </button>
+                              }
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    } @else {
+                      <div class="text-center py-4 text-muted bg-dark-subtle rounded-3">
+                        <small>No hay lecciones en este módulo aún.</small>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-state glass-card text-center py-5">
+                <i class="bi bi-journal-x fs-1 text-muted mb-3 d-block"></i>
+                <h3 class="h5 text-main">Temario no disponible</h3>
+                <p class="text-muted small">El contenido se está cocinando...</p>
+              </div>
+            }
+          </div>
+        </section>
+      }
     </div>
   </div>
 </div>

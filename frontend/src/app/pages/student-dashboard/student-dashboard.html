@@ -8,19 +8,18 @@
 
   <div class="content-relative">
     <div class="ra-container">
-      <div class="page-head mb-5 text-center text-lg-start">
+      <div class="page-head mb-5 text-center text-lg-start animate-fade-in-up">
         <h2 class="fw-bold display-6 mb-1 text-main">👋 Mis Cursos</h2>
         <p class="text-muted lead mb-0">Continúa donde lo dejaste y sigue aprendiendo.</p>
       </div>
 
       @if (loading()) {
-        <div class="state state-loading glass-card text-center p-5">
+        <div class="state state-loading glass-card text-center p-5 animate-fade-in-up">
           <div class="spinner-border text-primary mb-3" role="status"></div>
-          <p class="text-muted">Calculando tu progreso...</p>
+          <p class="text-muted">Sincronizando tu progreso...</p>
         </div>
-
       } @else if (courses().length === 0) {
-        <div class="state state-empty glass-card text-center p-5">
+        <div class="state state-empty glass-card text-center p-5 animate-fade-in-up">
           <div class="mb-3 fs-1 opacity-50">🎓</div>
           <h4 class="fw-bold text-main">Aún no tienes cursos</h4>
           <p class="text-muted mb-4">Parece que no estás matriculado en ningún curso todavía.</p>
@@ -28,43 +27,53 @@
             Explorar Catálogo <i class="bi bi-arrow-right ms-2"></i>
           </button>
         </div>
-
       } @else {
         <div class="row g-4">
           @for (course of courses(); track course.id) {
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="card course-card h-100">
-                <div class="course-cover">
-                  @if (course.coverImage) {
-                    <img
-                      [src]="course.coverImage"
-                      [alt]="course.title"
-                      class="course-img"
-                      loading="lazy"
-                      onerror="
-                        this.style.display = 'none';
-                        this.nextElementSibling.classList.remove('d-none');
-                        this.nextElementSibling.classList.add('d-flex');
-                      "
-                    />
-                    <div class="fallback-icon d-none">
-                      <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
-                    </div>
-                  } @else {
-                    <div class="fallback-icon d-flex">
-                      <i class="bi bi-mortarboard-fill display-4 opacity-50"></i>
-                    </div>
-                  }
+            <div
+              class="col-12 col-md-6 col-xl-4 animate-fade-in-up"
+              [style.animation-delay]="$index * 100 + 'ms'"
+            >
+              <div class="card course-card h-100 glass-card border-0 overflow-hidden">
+                <div class="course-cover position-relative" (click)="enterCourse(course.id)">
+                  <img
+                    [src]="getCourseImage(course.coverImage)"
+                    [alt]="course.title"
+                    class="course-img w-100"
+                    loading="lazy"
+                    onerror="
+                      this.style.display = 'none';
+                      this.nextElementSibling.classList.remove('d-none');
+                    "
+                  />
+                  <div
+                    class="fallback-icon d-none position-absolute inset-0 bg-dark d-flex align-items-center justify-content-center w-100 h-100"
+                  >
+                    <i class="bi bi-image text-muted fs-1"></i>
+                  </div>
 
-                  <div class="course-badge">
-                    <span class="badge-pill">
+                  <div class="hover-overlay">
+                    <i class="bi bi-play-circle-fill display-4 text-white"></i>
+                  </div>
+
+                  <div class="course-badge position-absolute top-0 end-0 m-3">
+                    <span
+                      class="badge rounded-pill backdrop-blur"
+                      [class.bg-success-subtle]="course.progress === 100"
+                      [class.text-success]="course.progress === 100"
+                      [class.bg-primary-subtle]="course.progress < 100"
+                      [class.text-primary]="course.progress < 100"
+                    >
                       {{ course.progress === 100 ? 'Completado' : 'En curso' }}
                     </span>
                   </div>
                 </div>
 
                 <div class="card-body d-flex flex-column p-4">
-                  <h5 class="course-title text-truncate-2 mb-2" [title]="course.title">
+                  <h5
+                    class="course-title fw-bold text-main text-truncate-2 mb-2"
+                    [title]="course.title"
+                  >
                     {{ course.title }}
                   </h5>
 
@@ -77,7 +86,7 @@
                       <span>Tu avance</span>
                       <span class="text-primary">{{ course.progress }}%</span>
                     </div>
-                    <div class="progress progress-thin">
+                    <div class="progress progress-thin bg-secondary-subtle" style="height: 6px">
                       <div
                         class="progress-bar bg-primary rounded-pill"
                         role="progressbar"
@@ -88,24 +97,16 @@
                   </div>
 
                   <div class="d-flex gap-2 mt-auto">
-                    <button class="btn btn-glow flex-grow-1" (click)="enterCourse(course.id)">
+                    <button
+                      class="btn btn-glow flex-grow-1 btn-sm fw-bold"
+                      (click)="enterCourse(course.id)"
+                    >
                       @if (course.progress > 0) {
                         Continuar <i class="bi bi-play-fill ms-1"></i>
                       } @else {
                         Empezar <i class="bi bi-arrow-right ms-1"></i>
                       }
                     </button>
-
-                    @if (course.pdfUrl) {
-                      <a
-                        [href]="course.pdfUrl"
-                        target="_blank"
-                        class="btn btn-glass px-3"
-                        title="Descargar PDF"
-                      >
-                        <i class="bi bi-file-earmark-pdf text-danger"></i>
-                      </a>
-                    }
                   </div>
                 </div>
               </div>

@@ -3,14 +3,13 @@ package com.radioacademy.backend.service.media;
 import com.radioacademy.backend.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import java.nio.file.Paths;
-import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -19,8 +18,8 @@ public class MediaService {
     private static final long MAX_BYTES = 20L * 1024 * 1024; // 20 MB
     private final StorageService storageService;
 
-    // ✅ LÓGICA DE SUBIDA
-    public String uploadMedia(MultipartFile file) {
+    // ✅ LÓGICA DE SUBIDA (Actualizada con folderName)
+    public String uploadMedia(MultipartFile file, String folderName) {
         // 1. Validar existencia
         if (file == null || file.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo está vacío");
@@ -38,11 +37,18 @@ public class MediaService {
                     "Tipo de archivo no permitido (solo PDF o imágenes)");
         }
 
-        // 4. Delegar almacenamiento físico
-        return storageService.store(file);
+        // 4. Delegar almacenamiento físico pasando la carpeta
+        // Si folderName es null, StorageService lo manejará correctamente (poniéndolo
+        // en raíz de images)
+        return storageService.store(file, folderName);
     }
 
-    // ✅ LÓGICA DE DESCARGA (Recuperación)
+    // Sobrecarga para mantener compatibilidad si alguien llama sin carpeta
+    public String uploadMedia(MultipartFile file) {
+        return uploadMedia(file, null);
+    }
+
+    // ✅ LÓGICA DE DESCARGA (Se mantiene igual, la seguridad ya es robusta)
     public Resource loadMediaResource(String path) {
         if (path == null || path.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El path es obligatorio");
@@ -56,10 +62,13 @@ public class MediaService {
             // Si intentan acceder a /etc/passwd o salir de uploads, cortamos
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Acceso denegado a esta ruta");
         }
+
+        // Bloqueo específico de PDFs (solo accesibles vía endpoint seguro)
         if (normalized.startsWith("uploads/pdfs/")) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                     "PDFs solo vía endpoint /api/student/lessons/{id}/pdf");
         }
+
         // 2. Cargar recurso físico
         Resource resource = storageService.loadAsResource(normalized);
 
@@ -75,7 +84,7 @@ public class MediaService {
         if (filename.toLowerCase().endsWith(".pdf")) {
             return MediaType.APPLICATION_PDF;
         }
-        // Para imágenes u otros, stream genérico o podrías detectar image/jpeg
+        // Para imágenes u otros, stream genérico o detección automática
         return MediaType.APPLICATION_OCTET_STREAM;
     }
 }

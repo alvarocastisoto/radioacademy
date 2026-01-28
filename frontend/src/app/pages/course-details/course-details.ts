@@ -1,55 +1,89 @@
-// course-details.ts
+// src/app/pages/course-details/course-details.ts
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CommonModule, CurrencyPipe } from '@angular/common';
 import { CourseService } from '../../services/course/course';
-import { CommonModule } from '@angular/common';
 import { MediaService } from '../../services/media/media';
 
 @Component({
   selector: 'app-course-details',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, CurrencyPipe],
   templateUrl: './course-details.html',
   styleUrl: './course-details.scss',
 })
 export class CourseDetails implements OnInit {
   private route = inject(ActivatedRoute);
   private courseService = inject(CourseService);
-  private mediaService = inject(MediaService);
+  public mediaService = inject(MediaService); // Público para usarlo en el HTML si quieres
 
+  // Signals para reactividad
+  course = signal<any>(null);
   modules = signal<any[]>([]);
+  loading = signal<boolean>(true);
+
   courseId: string = '';
 
   ngOnInit() {
     this.courseId = this.route.snapshot.paramMap.get('id') || '';
-    if (this.courseId) this.loadSyllabus();
+    
+    if (this.courseId) {
+      this.loadCourseData();
+      this.loadSyllabus();
+    }
   }
 
+  // 1. Cargar metadatos del curso (Título, Precio, Imagen)
+  loadCourseData() {
+    this.loading.set(true);
+    this.courseService.getCourseById(this.courseId).subscribe({
+      next: (data) => {
+        this.course.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Error cargando curso:', err);
+        this.loading.set(false);
+      }
+    });
+  }
+
+  // 2. Cargar Temario (Módulos y Lecciones)
   loadSyllabus() {
     this.courseService.getCourseModules(this.courseId).subscribe((modulesData) => {
+      // Cargamos los módulos primero
+      this.modules.set(modulesData);
+
+      // Iteramos para cargar las lecciones de cada módulo
       modulesData.forEach((modulo) => {
         this.courseService.getModuleLessons(modulo.id).subscribe((lessonsData) => {
           modulo.lessons = lessonsData;
-          // refresca señal (por si no actualiza la vista al mutar nested)
-          this.modules.set([...modulesData]);
+          // Forzamos actualización del signal creando un nuevo array reference
+          this.modules.update((current) => [...current]); 
         });
       });
-
-      this.modules.set(modulesData);
     });
   }
+
+  // 3. Helper para la imagen de portada (Usa tu nuevo MediaService)
+  getCoverImageUrl(): string {
+    const c = this.course();
+    if (!c || !c.coverImage) return 'assets/img/placeholder-course.jpg'; // Fallback
+    return this.mediaService.toPublicUrl(c.coverImage);
+  }
+
+  // --- LÓGICA DE PDFS (Se mantiene igual, funciona bien) ---
 
   openLessonPdf(lessonId: string) {
     this.mediaService.getLessonPdfBlob(lessonId, false).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank', 'noopener');
+        // Revocar URL tras 1 min para liberar memoria
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       },
       error: (err) => {
-        if (err?.status === 403)
-          console.error('403: No tienes acceso a este PDF (no matriculado o no logueado).');
-        else console.error('Error abriendo PDF', err);
+        this.handlePdfError(err);
       },
     });
   }
@@ -60,18 +94,23 @@ export class CourseDetails implements OnInit {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-
         const safeTitle = (title || 'lesson').replace(/[\\/:*?"<>|]/g, '').trim();
         a.download = `${safeTitle || 'lesson'}.pdf`;
-
         a.click();
         URL.revokeObjectURL(url);
       },
       error: (err) => {
-        if (err?.status === 403)
-          console.error('403: No tienes acceso a este PDF (no matriculado o no logueado).');
-        else console.error('Error descargando PDF', err);
+        this.handlePdfError(err);
       },
     });
+  }
+
+  private handlePdfError(err: any) {
+    if (err?.status === 403) {
+      alert('🔒 No tienes acceso a este contenido. Por favor, matricúlate en el curso.');
+    } else {
+      console.error('Error con el PDF:', err);
+      alert('Ocurrió un error al cargar el documento.');
+    }
   }
 }

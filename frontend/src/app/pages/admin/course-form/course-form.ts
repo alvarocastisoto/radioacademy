@@ -41,7 +41,7 @@ export class CourseForm {
       const file = input.files[0];
 
       // ✅ CORRECCIÓN 1: uploadFile (no uploadImage)
-      this.mediaService.uploadFile(file).subscribe({
+      this.mediaService.uploadFile(file, 'courses').subscribe({
         next: (relativePath) => {
           // 1. Guardamos el path relativo en el formulario (para la BD)
           this.courseForm.patchValue({ coverImage: relativePath });

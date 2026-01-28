@@ -1,10 +1,10 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectorRef, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { StudentService } from '../../services/student/student';
-import { AuthService } from '../../services/auth/auth';
 import { HttpErrorResponse } from '@angular/common/http';
 import { finalize } from 'rxjs/operators';
+import { StudentService } from '../../services/student/student';
+import { AuthService } from '../../services/auth/auth';
 import { MediaService } from '../../services/media/media';
 
 @Component({
@@ -19,16 +19,19 @@ export class ProfileComponent implements OnInit {
   private studentService = inject(StudentService);
   private authService = inject(AuthService);
   private cd = inject(ChangeDetectorRef);
-  public mediaService = inject(MediaService); // 👈 Hacemos público para usar toPublicUrl en el HTML si hiciera falta
+  public mediaService = inject(MediaService);
 
-  currentEmail: string = '';
-  avatarUrl: string | null = null;
+  // Estados reactivos
+  currentEmail = signal<string>('');
+  avatarUrl = signal<string | null>(null);
+  loading = signal<boolean>(false);
+  isUploading = signal<boolean>(false);
+
+  // Mensajes de feedback
+  successMessage = signal<string>('');
+  errorMessage = signal<string>('');
 
   profileForm: FormGroup;
-  loading = false;
-  successMessage = '';
-  errorMessage = '';
-  isUploading = false;
 
   constructor() {
     this.profileForm = this.fb.group({
@@ -39,7 +42,7 @@ export class ProfileComponent implements OnInit {
       currentPassword: [''],
       newPassword: ['', [Validators.minLength(6)]],
       confirmPassword: [''],
-      avatar: [''],
+      avatar: [''], // Guardamos el path relativo (uploads/...)
     });
   }
 
@@ -48,43 +51,39 @@ export class ProfileComponent implements OnInit {
   }
 
   loadProfile() {
-    this.loading = true;
+    this.loading.set(true);
+
     this.studentService
       .getProfile()
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          this.cd.detectChanges();
-        })
-      )
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (user) => {
-          this.currentEmail = user.email;
+          this.currentEmail.set(user.email);
 
-          // ✅ CORRECCIÓN 1: Convertimos el path relativo (uploads/...) a URL completa
-          // para que el navegador pueda mostrar la imagen.
-          this.avatarUrl = this.mediaService.toPublicUrl(user.avatar);
+          // Convertimos path relativo a URL pública para mostrar
+          const publicAvatar = this.mediaService.toPublicUrl(user.avatar);
+          this.avatarUrl.set(publicAvatar);
 
           this.profileForm.patchValue({
             name: user.name,
             surname: user.surname,
             email: user.email,
             phone: user.phone,
-            avatar: user.avatar, // En el form guardamos el path relativo (para BD)
+            avatar: user.avatar,
           });
         },
-        error: (err: any) => {
-          // 👈 Tipamos como any para evitar quejas
+        error: (err) => {
           console.error('Error cargando perfil', err);
-          this.errorMessage = 'No se pudieron cargar tus datos.';
+          this.errorMessage.set('No se pudieron cargar tus datos.');
         },
       });
   }
 
+  // Si la imagen falla (404), ponemos un avatar generado por iniciales
   handleImageError() {
     const name = this.profileForm.get('name')?.value || 'U';
-    // Si falla la imagen, ponemos un avatar por defecto
-    this.avatarUrl = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`;
+    const fallback = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`;
+    this.avatarUrl.set(fallback);
   }
 
   onFileSelected(event: Event): void {
@@ -96,92 +95,83 @@ export class ProfileComponent implements OnInit {
   }
 
   uploadAvatar(file: File): void {
-    this.isUploading = true;
-    this.errorMessage = '';
+    this.isUploading.set(true);
+    this.errorMessage.set('');
 
-    // ✅ CORRECCIÓN 2: El método se llama uploadFile, no uploadImage
-    this.mediaService
-      .uploadFile(file)
-      .pipe()
-      .subscribe({
-        next: (relativePath) => {
-          // El backend devuelve "uploads/images/xxx.jpg"
-          console.log('✅ Imagen subida a disco. Path:', relativePath);
+    // Especificamos la carpeta 'users' para organizar mejor las fotos
+    this.mediaService.uploadFile(file, 'users').subscribe({
+      next: (relativePath) => {
+        console.log('✅ Avatar subido:', relativePath);
 
-          // 1. Actualizamos visualmente (Convertimos a URL completa)
-          this.avatarUrl = this.mediaService.toPublicUrl(relativePath);
+        // 1. Actualizamos visualmente
+        this.avatarUrl.set(this.mediaService.toPublicUrl(relativePath));
 
-          // 2. Actualizamos el formulario con el path relativo
-          this.profileForm.patchValue({ avatar: relativePath });
+        // 2. Actualizamos el formulario con el path relativo
+        this.profileForm.patchValue({ avatar: relativePath });
 
-          // 3. Guardamos en BD (enviamos el path relativo, que es lo correcto)
-          this.saveAvatarToDatabase(relativePath);
-        },
-        error: (err: any) => {
-          console.error('❌ Error subiendo fichero:', err);
-          this.isUploading = false;
-          this.errorMessage = 'Error al subir la imagen.';
-          this.cd.detectChanges();
-        },
-      });
+        // 3. Guardamos en BD inmediatamente (UX mejora)
+        this.saveAvatarToDatabase(relativePath);
+      },
+      error: (err) => {
+        console.error('❌ Error subiendo fichero:', err);
+        this.isUploading.set(false);
+        this.errorMessage.set('Error al subir la imagen.');
+      },
+    });
   }
 
   saveAvatarToDatabase(relativePath: string) {
     const formValues = this.profileForm.value;
-
     const dto = {
       name: formValues.name,
       surname: formValues.surname,
       email: formValues.email,
       phone: formValues.phone,
-      avatar: relativePath, // 👈 Enviamos path relativo (uploads/...)
+      avatar: relativePath,
     };
 
     this.studentService
       .updateProfile(dto)
-      .pipe(
-        finalize(() => {
-          this.isUploading = false;
-          this.cd.detectChanges();
-        })
-      )
+      .pipe(finalize(() => this.isUploading.set(false)))
       .subscribe({
         next: () => {
-          console.log('💾 Avatar guardado en base de datos');
-          this.successMessage = '¡Foto de perfil actualizada!';
+          this.successMessage.set('¡Foto de perfil actualizada!');
 
+          // Actualizamos estado global de Auth para que el navbar se entere
           this.authService.updateUserFields({
             ...dto,
             avatar: relativePath,
           });
 
-          setTimeout(() => (this.successMessage = ''), 3000);
+          setTimeout(() => this.successMessage.set(''), 3000);
         },
-        error: (err: any) => {
+        error: (err) => {
           console.error('Error guardando perfil:', err);
-          this.errorMessage = 'La imagen se subió, pero no se pudo guardar en tu perfil.';
+          this.errorMessage.set('La imagen se subió, pero no se pudo guardar en tu perfil.');
         },
       });
   }
 
   onSubmit() {
     if (this.profileForm.invalid) return;
-    this.successMessage = '';
-    this.errorMessage = '';
+
+    this.successMessage.set('');
+    this.errorMessage.set('');
 
     const formValues = this.profileForm.value;
 
+    // Validaciones extra de contraseña
     if (formValues.newPassword && formValues.newPassword !== formValues.confirmPassword) {
-      this.errorMessage = 'Las contraseñas no coinciden.';
+      this.errorMessage.set('Las contraseñas no coinciden.');
       return;
     }
 
     if (formValues.newPassword && !formValues.currentPassword) {
-      this.errorMessage = 'Por seguridad, introduce tu contraseña actual para cambiarla.';
+      this.errorMessage.set('Por seguridad, introduce tu contraseña actual para cambiarla.');
       return;
     }
 
-    this.loading = true;
+    this.loading.set(true);
 
     const dto = {
       name: formValues.name,
@@ -195,28 +185,26 @@ export class ProfileComponent implements OnInit {
 
     this.studentService
       .updateProfile(dto)
-      .pipe(
-        finalize(() => {
-          this.loading = false;
-          this.cd.detectChanges();
-        })
-      )
+      .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (res) => {
-          this.successMessage = '¡Perfil actualizado correctamente!';
+        next: () => {
+          this.successMessage.set('¡Perfil actualizado correctamente!');
 
+          // Limpiamos campos de password
           this.profileForm.patchValue({
             currentPassword: '',
             newPassword: '',
             confirmPassword: '',
           });
 
-          if (dto.email !== this.currentEmail) {
+          // Si cambió el email, forzamos logout
+          if (dto.email !== this.currentEmail()) {
             alert(
-              'Has cambiado tu correo electrónico. Por seguridad, debes iniciar sesión de nuevo.'
+              'Has cambiado tu correo electrónico. Por seguridad, debes iniciar sesión de nuevo.',
             );
             this.authService.logout();
           } else {
+            // Actualizamos estado global
             this.authService.updateUserFields({
               name: dto.name,
               surname: dto.surname,
@@ -225,16 +213,17 @@ export class ProfileComponent implements OnInit {
               avatar: dto.avatar,
             });
           }
+
+          setTimeout(() => this.successMessage.set(''), 3000);
         },
         error: (error: HttpErrorResponse) => {
           console.error('❌ Error recibido:', error);
-
           if (error.status === 409) {
-            this.errorMessage = 'Ese correo electrónico ya está en uso.';
-          } else if (error.error && error.error.error) {
-            this.errorMessage = error.error.error;
+            this.errorMessage.set('Ese correo electrónico ya está en uso.');
+          } else if (error.error?.error) {
+            this.errorMessage.set(error.error.error);
           } else {
-            this.errorMessage = 'Ocurrió un error al guardar.';
+            this.errorMessage.set('Ocurrió un error al guardar los cambios.');
           }
         },
       });
