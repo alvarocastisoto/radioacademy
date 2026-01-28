@@ -18,7 +18,7 @@ Herramientas potentes para gestionar usuarios, cursos y contenido.
 
 ### 🎧 Reproductor Multimedia
 Soporte nativo para lecciones de audio y video.
-![Reproductor Multimedia](screenshot/player-demo.png)
+![Reproductor Multimedia](screenshots/player-demo.png)
 
 ---
 
