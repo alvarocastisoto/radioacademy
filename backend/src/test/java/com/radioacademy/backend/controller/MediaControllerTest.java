@@ -62,7 +62,7 @@ class MediaControllerTest {
                 "file", "test.pdf", "application/pdf", "test content".getBytes());
         String storedPath = "uploads/images/test.pdf";
 
-        when(mediaService.uploadMedia(any())).thenReturn(storedPath);
+        when(mediaService.uploadMedia(any(), any())).thenReturn(storedPath);
 
         // Act & Assert
         mockMvc.perform(multipart("/api/media/upload").file(file).with(csrf()))

@@ -53,12 +53,12 @@ class MediaServiceTest {
     @Test
     void uploadMedia_ShouldStore_WhenValid() {
         MockMultipartFile file = new MockMultipartFile("file", "test.png", "image/png", "content".getBytes());
-        when(storageService.store(file)).thenReturn("uploads/images/test.png");
+        when(storageService.store(file, null)).thenReturn("uploads/images/test.png");
 
         String result = mediaService.uploadMedia(file);
 
         assertEquals("uploads/images/test.png", result);
-        verify(storageService).store(file);
+        verify(storageService).store(file, null);
     }
 
     @Test

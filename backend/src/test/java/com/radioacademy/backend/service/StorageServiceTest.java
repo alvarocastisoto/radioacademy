@@ -25,8 +25,20 @@ class StorageServiceTest {
     @BeforeEach
     void setUp() throws IOException {
         storageService = new StorageService();
-        // Redirect uploads to the temporary directory
-        ReflectionTestUtils.setField(storageService, "uploadsRoot", tempDir);
+        // Redirect uploads to the temporary directory, deeper nesting to simulate
+        // "uploads" relative to project root
+        // effectively making tempDir act as the project root equivalent for this test's
+        // "uploadsRoot" logic
+        // But wait, the service does: relativePath =
+        // uploadsRoot.getParent().relativize(destinationFile)
+        // So if uploadsRoot is tempDir/uploads, parent is tempDir.
+        // dest is tempDir/uploads/images/file.
+        // relativize -> uploads/images/file. CORRECT.
+
+        Path simulatedUploadsRoot = tempDir.resolve("uploads");
+        Files.createDirectories(simulatedUploadsRoot); // Create 'uploads' dir
+
+        ReflectionTestUtils.setField(storageService, "uploadsRoot", simulatedUploadsRoot);
         storageService.init();
     }
 
@@ -47,7 +59,7 @@ class StorageServiceTest {
         // But internally it resolves against uploadsRoot + "images".
 
         // Let's check internal file system
-        Path imagesDir = tempDir.resolve("images");
+        Path imagesDir = tempDir.resolve("uploads/images");
         assertTrue(Files.exists(imagesDir));
 
         // Find the file
@@ -88,7 +100,7 @@ class StorageServiceTest {
     @Test
     void loadAsResource_ShouldReturnResource_WhenExists() throws IOException {
         // Arrange: create a file manually in tempDir
-        Path imageDir = tempDir.resolve("images");
+        Path imageDir = tempDir.resolve("uploads/images");
         Files.createDirectories(imageDir);
         Path file = imageDir.resolve("test.jpg");
         Files.writeString(file, "content");
@@ -118,7 +130,7 @@ class StorageServiceTest {
     @Test
     void delete_ShouldRemoveFile() throws IOException {
         // Arrange
-        Path imageDir = tempDir.resolve("images");
+        Path imageDir = tempDir.resolve("uploads/images");
         Files.createDirectories(imageDir);
         Path file = imageDir.resolve("delete-me.jpg");
         Files.writeString(file, "content");

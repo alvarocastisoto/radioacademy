@@ -1,6 +1,5 @@
-version: '3.8'
-
 services:
+  # --- BASE DE DATOS ---
   postgres:
     image: postgres:16
     container_name: radio_postgres
@@ -8,11 +7,34 @@ services:
       POSTGRES_DB: radio_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: password123
-    ports: 
+    ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always
 
-volumes:  
+  # --- BACKEND (SPRING BOOT) ---
+  app:
+    build: .
+    container_name: radio_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    volumes:
+      # Mapeamos la carpeta de subidas de tu PC al contenedor
+      # Así las fotos NO se borran al apagar Docker
+      - ./uploads:/app/uploads
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/radio_db
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password123
+      - JWT_SECRET=${JWT_SECRET}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - ADMIN_EMAIL=${ADMIN_EMAIL}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+    restart: on-failure
+
+volumes:
   postgres_data:
