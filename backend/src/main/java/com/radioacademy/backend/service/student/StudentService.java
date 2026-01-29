@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.core.io.Resource;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,8 @@ public class StudentService {
     private final LessonProgressRepository progressRepository;
     private final QuizRepository quizRepository;
     private final StorageService storageService;
+
+    private final QuizAttemptRepository attemptRepository;
 
     // ✅ 1. DASHBOARD
     @Transactional(readOnly = true)
@@ -65,7 +68,6 @@ public class StudentService {
     public CourseContentDTO getCourseContent(UUID courseId, String userEmail) {
         User user = getUser(userEmail);
 
-        // Security Check
         if (!enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes acceso a este curso.");
         }
@@ -73,35 +75,36 @@ public class StudentService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
-        // Progress Calculation
         Set<UUID> completedLessonIds = progressRepository.findCompletedLessonIdsByUserId(user.getId());
         long totalLessons = lessonRepository.countByCourseId(courseId);
         long completedInThisCourse = progressRepository.countCompletedLessons(user.getId(), courseId);
         int progressPercentage = calculatePercentage(completedInThisCourse, totalLessons);
 
-        // Complex Mapping: Course -> Modules -> Lessons
         List<ModuleDTO> sectionDTOs = course.getModules().stream()
-                .sorted(Comparator.comparingInt(m -> m.getOrderIndex())).map(module -> new ModuleDTO(
-                        module.getId(),
-                        module.getTitle(),
-                        module.getOrderIndex(),
-                        module.getLessons().stream()
-                                .distinct()
-                                .sorted(Comparator.comparingInt(Lesson::getOrderIndex))
-                                .map(lesson -> {
-                                    boolean isCompleted = completedLessonIds.contains(lesson.getId());
-                                    UUID quizId = (lesson.getQuiz() != null) ? lesson.getQuiz().getId() : null;
+                .sorted(Comparator.comparingInt(m -> m.getOrderIndex())).map(module -> {
 
-                                    return new LessonDTO(
+                    // 🆕 LÓGICA NUEVA: El examen pertenece al Módulo
+                    UUID quizId = (module.getQuiz() != null) ? module.getQuiz().getId() : null;
+
+                    return new ModuleDTO(
+                            module.getId(),
+                            module.getTitle(),
+                            module.getOrderIndex(),
+                            quizId, // 👈 AÑADIDO: Pasamos el QuizID aquí (necesitas actualizar ModuleDTO)
+                            module.getLessons().stream()
+                                    .distinct()
+                                    .sorted(Comparator.comparingInt(Lesson::getOrderIndex))
+                                    .map(lesson -> new LessonDTO(
                                             lesson.getId(),
                                             lesson.getTitle(),
                                             lesson.getVideoUrl(),
                                             lesson.getPdfUrl(),
                                             lesson.getDuration(),
-                                            isCompleted,
-                                            quizId);
-                                })
-                                .collect(Collectors.toList())))
+                                            completedLessonIds.contains(lesson.getId()),
+                                            null // ❌ YA NO HAY QUIZ EN LECCIÓN (Ponemos null o quitamos el campo)
+                    ))
+                                    .collect(Collectors.toList()));
+                })
                 .collect(Collectors.toList());
 
         return new CourseContentDTO(
@@ -127,43 +130,89 @@ public class StudentService {
                 new OptionDTO(o.getId(), o.getText(), false)).toList(),
                 q.getPoints())).toList();
 
-        return new QuizDTO(quiz.getId(), quiz.getTitle(), quiz.getLesson().getId(), questions);
+        // 🆕 CAMBIO: Devolvemos moduleId, no lessonId
+        return new QuizDTO(quiz.getId(), quiz.getTitle(), quiz.getModule().getId(), questions);
     }
 
     // ✅ 4. CORREGIR EXAMEN
+    // 3. SUBMIT (Corregido para el nuevo DTO y guardando historial)
     @Transactional
-    public QuizResultDTO submitQuiz(QuizSubmissionDTO submission) {
+    public QuizResultDTO submitQuiz(QuizSubmissionDTO submission, String userEmail) {
+        // 1. Buscamos usuario y examen
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         Quiz quiz = quizRepository.findById(submission.quizId())
-                .orElseThrow(() -> new EntityNotFoundException("Examen no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Examen no encontrado"));
 
-        int totalPoints = 0;
-        int earnedPoints = 0;
+        // 2. Preparamos el intento (Historial)
+        QuizAttempt attempt = new QuizAttempt();
+        attempt.setUser(user);
+        attempt.setQuiz(quiz);
+        attempt.setCompletedAt(LocalDateTime.now());
 
-        for (Question question : quiz.getQuestions()) {
-            totalPoints += question.getPoints();
+        // 3. Mapas para el feedback visual (Lo que te faltaba)
+        Map<UUID, Boolean> questionResults = new HashMap<>();
+        Map<UUID, UUID> correctOptions = new HashMap<>();
 
-            // Look up student's answer
-            UUID selectedOptionId = submission.answers().get(question.getId());
+        // Calculamos sobre las preguntas ACTIVAS
+        List<Question> activeQuestions = quiz.getQuestions().stream()
+                .filter(Question::isActive).toList();
 
-            if (selectedOptionId != null) {
-                Option selectedOption = question.getOptions().stream()
-                        .filter(o -> o.getId().equals(selectedOptionId))
-                        .findFirst()
-                        .orElse(null);
+        int totalQuestions = activeQuestions.size();
+        int correctCount = 0;
 
-                if (selectedOption != null && selectedOption.isCorrect()) {
-                    earnedPoints += question.getPoints();
-                }
+        for (Question question : activeQuestions) {
+            UUID userOptionId = submission.answers().get(question.getId());
+
+            // Guardamos la respuesta en BD
+            QuizAnswer answer = new QuizAnswer();
+            answer.setAttempt(attempt);
+            answer.setQuestion(question);
+
+            boolean isCorrect = false;
+            Option selectedOpt = null;
+
+            if (userOptionId != null) {
+                selectedOpt = question.getOptions().stream()
+                        .filter(o -> o.getId().equals(userOptionId)).findFirst().orElse(null);
+
+                answer.setSelectedOption(selectedOpt);
+                isCorrect = selectedOpt != null && selectedOpt.isCorrect();
             }
+
+            answer.setCorrect(isCorrect);
+            attempt.getAnswers().add(answer);
+
+            if (isCorrect)
+                correctCount++;
+
+            // --- LLENAMOS LOS DATOS PARA EL DTO ---
+
+            // 1. Decimos si acertó o falló esta pregunta
+            questionResults.put(question.getId(), isCorrect);
+
+            // 2. Buscamos cuál era la opción correcta para chivársela al usuario
+            question.getOptions().stream()
+                    .filter(Option::isCorrect)
+                    .findFirst()
+                    .ifPresent(opt -> correctOptions.put(question.getId(), opt.getId()));
         }
 
-        int score = (totalPoints > 0) ? (int) ((earnedPoints * 100.0) / totalPoints) : 0;
-        boolean passed = score >= 50;
+        // 4. Cálculos finales
+        double score = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
+        attempt.setScore(score);
+        attempt.setPassed(score >= 50.0);
 
-        // Optional: Log result
-        log.info("Quiz submitted: ID={} | Score={} | Passed={}", quiz.getId(), score, passed);
+        // 5. Guardamos en BD
+        attemptRepository.save(attempt);
 
-        return new QuizResultDTO(score, passed);
+        // 6. Retornamos el DTO con los 4 argumentos
+        return new QuizResultDTO(
+                score,
+                attempt.isPassed(),
+                questionResults, // ✅ Mapa de aciertos/fallos
+                correctOptions // ✅ Mapa de respuestas correctas
+        );
     }
 
     // --- Private Helpers ---

@@ -1,14 +1,5 @@
-/* payment-cancel.scss */
+/* payment-cancel.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-@use 'variables' as *;
-
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$danger: #ef4444;
-$border-light: rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
@@ -23,7 +14,7 @@ $border-light: rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   padding: 1.5rem;
   overflow: hidden;
 }
@@ -41,6 +32,7 @@ $border-light: rgba(0, 0, 0, 0.08);
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  background-color: var(--ra-bg); // Adaptativo
   &::before {
     content: '';
     position: absolute;
@@ -50,6 +42,7 @@ $border-light: rgba(0, 0, 0, 0.08);
     mix-blend-mode: multiply;
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -58,41 +51,42 @@ $border-light: rgba(0, 0, 0, 0.08);
   animation: floatBlob 20s infinite alternate;
   z-index: -1;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
 }
+
 .blob-2 {
   bottom: -10%;
   right: -10%;
   width: 45vw;
   height: 45vw;
-  background: color.scale($accent, $lightness: 15%);
+  background: var(--ra-accent); // Adaptativo
   animation-delay: -5s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 50px 50px;
   mask-image: radial-gradient(circle at center, black 40%, transparent 100%);
 }
 
 /* --- TARJETA --- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--ra-surface) !important; // Adaptativo
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--ra-border) !important; // Adaptativo
   border-radius: 24px;
-  box-shadow:
-    0 25px 50px -12px rgba(0, 0, 0, 0.1),
-    0 0 0 1px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--ra-shadow); // Adaptativo
   animation: floatUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
@@ -102,42 +96,49 @@ $border-light: rgba(0, 0, 0, 0.08);
   animation-delay: 0.2s;
 
   i {
+    color: #ef4444; // Danger color fijo para error de pago
     text-shadow: 0 10px 20px rgba(239, 68, 68, 0.2);
   }
 }
 
 h1 {
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   letter-spacing: -0.03em;
+}
+
+p {
+  color: var(--ra-text-muted); // Adaptativo
 }
 
 /* --- BOTONES --- */
 .btn-glow {
-  background: $primary;
+  background: var(--ra-primary); // Adaptativo
   border: none;
   color: white;
   border-radius: 12px;
   padding: 0.8rem 1.5rem;
   font-weight: 700;
-  box-shadow: 0 10px 20px -5px rgba($primary, 0.4);
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
   transition: all 0.2s ease;
+
   &:hover {
-    background: color.scale($primary, $lightness: -5%);
+    opacity: 0.9;
     transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba($primary, 0.5);
+    box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
   }
 }
 
 .btn-glass {
   background: transparent;
-  border: 1px solid $border-light;
-  color: $text-main;
+  border: 1px solid var(--ra-border); // Adaptativo
+  color: var(--ra-text-main); // Adaptativo
   border-radius: 12px;
   padding: 0.8rem 1.5rem;
   font-weight: 600;
+
   &:hover {
-    background: rgba(0, 0, 0, 0.03);
-    border-color: #cbd5e1;
+    background: var(--ra-surface-subtle);
+    border-color: var(--ra-text-muted);
   }
 }
 
@@ -152,6 +153,7 @@ h1 {
     transform: translateY(0) scale(1);
   }
 }
+
 @keyframes floatBlob {
   0% {
     transform: translate(0, 0) scale(1);

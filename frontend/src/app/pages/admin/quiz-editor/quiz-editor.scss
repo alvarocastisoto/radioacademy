@@ -1,13 +1,5 @@
-/* quiz-editor.scss - TEMA CLARO ACADÉMICO */
+/* quiz-editor.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$success: #10b981;
-$border-light: rgba(0, 0, 0, 0.08);
-$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
@@ -20,8 +12,8 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   width: 100%;
   min-height: 100vh;
   padding-top: 7rem;
-  padding-bottom: 8rem; /* Extra padding bottom */
-  background-color: $bg-color;
+  padding-bottom: 8rem;
+  background-color: var(--ra-bg); // Adaptativo
   overflow-x: hidden;
 }
 
@@ -37,11 +29,11 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   z-index: 1;
 }
 
-/* --- FONDO --- */
+/* --- FONDO (Aurora) --- */
 .aurora-bg {
   position: fixed;
   inset: 0;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   z-index: 0;
   pointer-events: none;
   &::before {
@@ -53,6 +45,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -61,51 +54,50 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   z-index: -1;
   animation: floatBlob 25s infinite alternate;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale($primary, $lightness: 10%);
+  background: var(--ra-primary);
 }
+
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: color.scale(#f59e0b, $lightness: 20%);
+  background: var(--ra-accent);
   animation-delay: -5s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   opacity: 1;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
 /* --- TARJETAS --- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  border-radius: 24px;
-  box-shadow: $shadow-soft;
+  /* Se beneficia de la configuración global en styles.scss */
 }
 
 .question-card {
-  background: white;
-  border: 1px solid $border-light;
+  background: var(--ra-surface); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
   border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--ra-shadow);
   transition: all 0.2s;
 
   &:hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border-color: rgba($primary, 0.3);
+    border-color: var(--ra-primary);
+    transform: translateY(-2px);
   }
 }
 
@@ -113,40 +105,34 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .form-label {
   font-size: 0.75rem;
   letter-spacing: 0.05em;
-  color: $text-muted;
+  color: var(--ra-text-muted); // Adaptativo
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .form-control {
-  background-color: #f8fafc;
-  border: 1px solid #e2e8f0;
+  background-color: var(--ra-input-bg); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
   border-radius: 10px;
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   transition: all 0.2s;
 
   &:focus {
-    background-color: white;
-    border-color: $primary;
-    box-shadow: 0 0 0 4px rgba($primary, 0.1);
+    background-color: var(--ra-surface);
+    border-color: var(--ra-primary);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+    color: var(--ra-text-main);
   }
 }
 
-/* Input título especial */
-.form-control-lg.bg-transparent {
-  &:focus {
-    background: transparent;
-    box-shadow: none;
-    border-color: $primary !important;
-  }
-}
-
-/* --- OPCIONES --- */
+/* --- OPCIONES Y ESTADOS --- */
 .bg-surface-subtle {
-  background: #fdfdfd;
-  border-color: #f1f5f9 !important;
+  background: var(--ra-surface-subtle); // Adaptativo
+  border-color: var(--ra-border) !important;
 }
 
 .badge-question {
-  background: $primary;
+  background: var(--ra-primary);
   color: white;
   font-size: 0.75rem;
   padding: 0.35rem 0.7rem;
@@ -160,82 +146,86 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   width: 1.3em;
   height: 1.3em;
   cursor: pointer;
-  &:checked {
-    background-color: $success;
-    border-color: $success;
+  accent-color: #10b981;
+}
+
+/* Input que se vuelve verde si es correcto (Adaptado para noche) */
+.is-correct {
+  border-color: #10b981 !important;
+  background-color: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+  font-weight: 600;
+
+  body.dark-mode & {
+    background-color: rgba(16, 185, 129, 0.05) !important;
   }
 }
 
-/* Input que se vuelve verde si es correcto */
-.is-correct {
-  border-color: $success !important;
-  background-color: #f0fdf4 !important; /* Green 50 */
-  color: #166534 !important;
-  font-weight: 600;
-}
-
 .btn-hover-danger:hover {
-  color: #dc2626 !important;
-  background: #fef2f2;
+  color: #f87171 !important;
+  background: rgba(239, 68, 68, 0.1);
   border-radius: 50%;
 }
 
 /* --- ÁREA AÑADIR PREGUNTA --- */
 .add-question-area {
-  border: 2px dashed $border-light;
-  background: rgba(255, 255, 255, 0.6);
+  border: 2px dashed var(--ra-border); // Adaptativo
+  background: var(--ra-surface-subtle); // Adaptativo
   transition: all 0.2s;
+  border-radius: 16px;
 
   &:hover {
-    border-color: $primary;
-    background: #eef2ff;
+    border-color: var(--ra-primary);
+    background: rgba(99, 102, 241, 0.05);
     transform: translateY(-2px);
   }
 }
 
 /* --- BOTONES --- */
 .btn-glow {
-  background: $primary;
+  background: var(--ra-primary);
   color: white;
   border: none;
   border-radius: 12px;
   padding: 0.8rem 1.5rem;
   font-weight: 700;
-  box-shadow: 0 10px 20px -5px rgba($primary, 0.4);
+  box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
   transition: all 0.2s;
 
   &:hover:not(:disabled) {
-    background: color.scale($primary, $lightness: -5%);
+    opacity: 0.9;
     transform: translateY(-2px);
-    box-shadow: 0 15px 30px -5px rgba($primary, 0.5);
+    box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.5);
   }
 }
 
 .btn-glass {
-  background: white;
-  border: 1px solid $border-light;
-  color: $text-main;
+  background: var(--ra-surface);
+  border: 1px solid var(--ra-border);
+  color: var(--ra-text-main);
   border-radius: 12px;
   padding: 0.6rem 1rem;
   font-weight: 600;
   &:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--ra-bg);
+    border-color: var(--ra-text-muted);
   }
 }
 
 .btn-dashed-add {
-  border: 1px dashed #cbd5e1;
-  color: $text-muted;
+  border: 1px dashed var(--ra-border);
+  background: var(--ra-input-bg);
+  color: var(--ra-text-muted);
   font-weight: 600;
+  border-radius: 10px;
   &:hover {
-    border-color: $primary;
-    color: $primary;
-    background: #f8fafc;
+    border-color: var(--ra-primary);
+    color: var(--ra-primary);
+    background: var(--ra-surface-subtle);
   }
 }
 
-/* Botón Eliminar Pregunta (Mismo fix que Admin Syllabus) */
+/* Botón Eliminar Pregunta */
 .btn-icon-danger-soft {
   width: 32px !important;
   height: 32px !important;
@@ -243,15 +233,14 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: white;
-  color: #ef4444;
-  border: 1px solid #fca5a5;
+  background: var(--ra-surface);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
   transition: all 0.2s;
 
   &:hover {
-    background: #fef2f2;
-    color: #dc2626;
-    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
   }
 }
 

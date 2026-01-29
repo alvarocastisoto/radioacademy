@@ -63,7 +63,7 @@ export const routes: Routes = [
 
   // Exámenes
   {
-    path: 'admin/lessons/:lessonId/quiz',
+    path: 'admin/module/:moduleId/quiz',
     component: QuizEditorComponent,
     canActivate: [adminGuard],
   },

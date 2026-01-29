@@ -6,5 +6,5 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface QuizRepository extends JpaRepository<Quiz, UUID> {
-    Optional<Quiz> findByLessonId(UUID lessonId);
+    Optional<Quiz> findByModuleId(UUID moduleId);
 }

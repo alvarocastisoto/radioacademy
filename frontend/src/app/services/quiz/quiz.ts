@@ -4,15 +4,16 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 // --- Interfaces (DTOs) ---
+
 export interface OptionDTO {
-  id?: string;
+  id: string; // 👈 CAMBIO 1: ID obligatorio (sin ?) para usarlo de índice
   text: string;
   isCorrect: boolean;
 }
 
 export interface QuestionDTO {
-  id?: string;
-  question: string;
+  id: string;
+  content: string; // 👈 CAMBIO 2: Renombrado a 'content' (antes 'question')
   points: number;
   options: OptionDTO[];
 }
@@ -20,7 +21,7 @@ export interface QuestionDTO {
 export interface QuizDTO {
   id?: string;
   title: string;
-  lessonId: string;
+  moduleId: string;
   questions: QuestionDTO[];
 }
 
@@ -28,6 +29,8 @@ export interface QuizDTO {
 export interface QuizResultDTO {
   score: number;
   passed: boolean;
+  questionResults: { [key: string]: boolean }; // ID pregunta -> true/false
+  correctOptions: { [key: string]: string }; // ID pregunta -> ID opción correcta
 }
 
 @Injectable({
@@ -40,28 +43,31 @@ export class QuizService {
   private apiUrl = `${environment.apiUrl}/quizzes`;
 
   // 1. Crear o Editar (ADMIN)
-  createQuiz(quiz: QuizDTO): Observable<any> {
-    return this.http.post<any>(this.apiUrl, quiz);
+  createQuiz(quiz: QuizDTO): Observable<QuizDTO> {
+    // Devolvemos QuizDTO
+    return this.http.post<QuizDTO>(this.apiUrl, quiz);
   }
 
-  // 2. Obtener por Lección (ADMIN - Para editar)
-  getQuizByLesson(lessonId: string): Observable<QuizDTO> {
-    // GET /api/quizzes/lesson/{lessonId}
-    return this.http.get<QuizDTO>(`${this.apiUrl}/lesson/${lessonId}`);
+  // 2. Obtener por Módulo (ADMIN - Para editar)
+  getQuizByModule(moduleId: string): Observable<QuizDTO> {
+    return this.http.get<QuizDTO>(`${this.apiUrl}/module/${moduleId}`);
   }
 
-  // 3. Obtener por ID (ESTUDIANTE - Para realizar el examen)
+  // 3. Obtener por ID (ESTUDIANTE - Pool aleatorio de 50)
   getQuizById(quizId: string): Observable<QuizDTO> {
-    // GET /api/quizzes/{quizId}
     return this.http.get<QuizDTO>(`${this.apiUrl}/${quizId}`);
   }
 
-  // 4. Enviar respuestas (ESTUDIANTE - Para corregir) 🚀 NUEVO
+  // 4. Enviar respuestas (ESTUDIANTE - Para corregir y recibir feedback)
   submitQuiz(submission: {
     quizId: string;
     answers: Record<string, string>;
   }): Observable<QuizResultDTO> {
-    // POST /api/quizzes/submit
     return this.http.post<QuizResultDTO>(`${this.apiUrl}/submit`, submission);
+  }
+
+  // 5. SMART RETRY (Banco de Fallos Persistente)
+  getSmartFailedQuiz(quizId: string): Observable<QuizDTO> {
+    return this.http.get<QuizDTO>(`${this.apiUrl}/${quizId}/smart-retry`);
   }
 }

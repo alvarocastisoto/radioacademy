@@ -1,15 +1,5 @@
-/* admin-syllabus.scss - TEMA CLARO ACADÉMICO + FIX BOTONES */
+/* admin-syllabus.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-@use 'variables' as *;
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$danger: #ef4444;
-$warning: #f59e0b;
-$border-light: rgba(0, 0, 0, 0.08);
-$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
@@ -23,7 +13,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   min-height: 100vh;
   padding-top: 7rem;
   padding-bottom: 4rem;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   overflow-x: hidden;
 }
 
@@ -43,7 +33,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .aurora-bg {
   position: fixed;
   inset: 0;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   z-index: 0;
   pointer-events: none;
   &::before {
@@ -55,6 +45,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -63,50 +54,53 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   z-index: -1;
   animation: floatBlob 25s infinite alternate;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
 }
+
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: color.scale($warning, $lightness: 20%);
+  background: var(--ra-accent); // Adaptativo
   animation-delay: -5s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   opacity: 1;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
 /* --- HEADERS --- */
 .page-head h2 {
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   letter-spacing: -0.02em;
 }
 
-/* --- ACORDEÓN --- */
+/* --- ACORDEÓN / CARDS --- */
 .glass-card {
-  background: white;
-  border: 1px solid $border-light;
+  background: var(--ra-surface); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: $shadow-soft;
+  box-shadow: var(--ra-shadow); // Adaptativo
   transition: all 0.3s ease;
 }
 
 .accordion-header {
-  background: white;
+  background: var(--ra-surface); // Adaptativo
   border-bottom: 1px solid transparent;
 }
 
@@ -114,21 +108,17 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   background: transparent !important;
   box-shadow: none !important;
   padding: 0.8rem 1rem;
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   flex-grow: 1;
   border-radius: 12px;
   transition: background 0.2s;
   &:hover {
-    background: #f8fafc !important;
-  }
-  &::after {
-    margin-left: auto;
-    background-size: 1rem;
+    background: var(--ra-bg) !important; // Adaptativo
   }
 }
 
 .badge-module {
-  background: #1e293b;
+  background: #1e293b; // Mantener oscuro por estética de badge
   color: white;
   font-size: 0.75rem;
   padding: 0.35rem 0.6rem;
@@ -139,24 +129,24 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 .bg-surface-subtle {
-  background: white;
-  border-top: 1px solid $border-light;
+  background: var(--ra-surface); // Adaptativo
+  border-top: 1px solid var(--ra-border); // Adaptativo
 }
 
 /* --- LECCIONES --- */
 .lesson-card {
   padding: 1.25rem;
   border-radius: 12px;
-  border: 1px solid $border-light;
-  background: white;
+  border: 1px solid var(--ra-border); // Adaptativo
+  background: var(--ra-bg); // Usar fondo base para que resalte sobre el surface de la card
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
   &:hover {
-    border-color: #cbd5e1;
+    border-color: var(--ra-primary); // Adaptativo
   }
 }
 
 .drag-handle {
-  color: #cbd5e1;
+  color: var(--ra-text-muted); // Adaptativo
   cursor: grab;
   font-size: 1.2rem;
   margin-right: 0.5rem;
@@ -169,27 +159,25 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 /* =========================================
-   BOTONES DE ACCIÓN (FIX VISUAL DEFINITIVO)
+   BOTONES DE ACCIÓN (Mantenemos Dimensiones)
    ========================================= */
 
 /* 1. Botón Rojo Grande (Borrar Módulo) */
 .btn-action-danger {
-  /* Forzamos dimensiones fijas para evitar colapsos */
   width: 42px !important;
   height: 42px !important;
   min-width: 42px !important;
-  padding: 0 !important; /* Reseteamos padding */
-
+  padding: 0 !important;
   border-radius: 10px;
-  background: #fee2e2;
-  color: #dc2626;
-  border: 1px solid #fecaca;
 
-  /* Flexbox para centrar icono pase lo que pase */
+  // Colores adaptativos para error
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   font-size: 1.2rem;
   transition: all 0.2s ease;
 
@@ -197,12 +185,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background: #dc2626;
     color: white;
     border-color: #dc2626;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
-  }
-
-  i {
-    display: block;
-    line-height: 1;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
   }
 }
 
@@ -212,41 +195,37 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   height: 36px !important;
   min-width: 36px !important;
   padding: 0 !important;
-
   border-radius: 8px;
-  background: white;
+
+  background: var(--ra-surface); // Adaptativo
   color: #ef4444;
-  border: 1px solid #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   font-size: 1rem;
   transition: all 0.2s;
 
   &:hover {
-    background: #fef2f2;
+    background: rgba(239, 68, 68, 0.1);
     color: #dc2626;
-    border-color: #ef4444;
-  }
-  i {
-    display: block;
-    line-height: 1;
   }
 }
 
 /* 3. Botón Quiz (Texto + Icono) */
 .btn-action-warning {
   height: 36px;
-  padding: 0 1rem !important; /* Padding lateral */
+  padding: 0 1rem !important;
   border-radius: 8px;
-  background: #fffbeb;
-  color: #b45309;
-  border: 1px solid #fcd34d;
+
+  // Naranja suave adaptativo
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.2);
+
   font-weight: 600;
   font-size: 0.85rem;
-
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -254,8 +233,8 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
   &:hover {
     background: #fbbf24;
-    color: white;
-    border-color: #d97706;
+    color: #000;
+    border-color: #fbbf24;
   }
 }
 
@@ -264,42 +243,42 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   display: block;
   padding: 1rem;
   border-radius: 12px;
-  border: 2px dashed $border-light;
-  background: #f8fafc;
-  color: $text-muted;
+  border: 2px dashed var(--ra-border); // Adaptativo
+  background: var(--ra-bg); // Adaptativo
+  color: var(--ra-text-muted); // Adaptativo
   font-weight: 700;
   text-align: center;
   transition: all 0.2s;
   &:hover {
-    border-color: $primary;
-    color: $primary;
-    background: #eef2ff;
+    border-color: var(--ra-primary);
+    color: var(--ra-primary);
+    background: rgba(99, 102, 241, 0.05);
   }
 }
 
 /* Botones Generales */
 .btn-glow {
-  background: $primary;
+  background: var(--ra-primary); // Adaptativo
   color: white;
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1.2rem;
-  box-shadow: 0 4px 15px rgba($primary, 0.3);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   font-weight: 600;
   &:hover {
-    background: color.scale($primary, $lightness: -5%);
+    opacity: 0.9;
     transform: translateY(-1px);
   }
 }
 
 .btn-glass {
-  background: white;
-  border: 1px solid $border-light;
-  color: $text-main;
+  background: var(--ra-surface); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
+  color: var(--ra-text-main); // Adaptativo
   border-radius: 8px;
   &:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--ra-bg);
+    border-color: var(--ra-text-muted);
   }
 }
 

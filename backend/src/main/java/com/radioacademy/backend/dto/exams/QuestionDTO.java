@@ -7,8 +7,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record QuestionDTO(
-                UUID id,
-                @NotBlank String question,
-                @NotNull List<OptionDTO> options,
-                @NotNull Integer points) {
+        UUID id,
+        @NotBlank String content,
+        @NotNull List<OptionDTO> options,
+        @NotNull Integer points) {
 }

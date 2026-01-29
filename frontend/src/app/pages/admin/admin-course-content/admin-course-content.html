@@ -40,10 +40,22 @@
                   </div>
                 </button>
 
-                <div class="ms-3 border-start ps-3 py-1">
+                <div
+                  class="ms-3 border-start ps-3 py-1 d-flex align-items-center gap-2"
+                  (click)="$event.stopPropagation()"
+                >
+                  <a
+                    [routerLink]="['/admin/module', modulo.id, 'quiz']"
+                    class="btn btn-action-warning"
+                    title="Gestionar Examen del Módulo"
+                  >
+                    <i class="bi bi-card-checklist"></i>
+                    <span class="d-none d-md-inline ms-1">Examen</span>
+                  </a>
+
                   <button
                     class="btn btn-action-danger"
-                    (click)="$event.stopPropagation(); deleteModule(modulo.id)"
+                    (click)="deleteModule(modulo.id)"
                     title="Eliminar módulo"
                   >
                     <i class="bi bi-trash3-fill"></i>
@@ -67,14 +79,6 @@
                         </div>
 
                         <div class="d-flex gap-2">
-                          <a
-                            [routerLink]="['/admin/lessons', lesson.id, 'quiz']"
-                            class="btn btn-action-warning"
-                            title="Gestionar Examen"
-                          >
-                            <i class="bi bi-card-checklist"></i> Test
-                          </a>
-
                           <button
                             class="btn btn-action-danger-soft"
                             title="Borrar lección"

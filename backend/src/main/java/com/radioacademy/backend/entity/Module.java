@@ -53,4 +53,8 @@ public class Module {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    @OneToOne(mappedBy = "module", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Quiz quiz;
 }

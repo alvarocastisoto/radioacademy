@@ -39,6 +39,16 @@
           <a class="nav-link ra-link" routerLink="/courses" routerLinkActive="active">Cursos</a>
         </li>
 
+        <li class="nav-item ms-lg-2">
+          <button type="button" class="btn btn-link nav-link" (click)="themeService.toggleTheme()">
+            @if (themeService.isDarkMode()) {
+              <i class="bi bi-sun-fill text-warning"></i>
+            } @else {
+              <i class="bi bi-moon-stars-fill text-info"></i>
+            }
+          </button>
+        </li>
+
         @if (!authService.isLoggedIn()) {
           <li class="nav-item ms-lg-2">
             <a class="btn btn-sm fw-bold ra-btn ra-btn-ghost" routerLink="/login">

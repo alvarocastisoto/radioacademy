@@ -1,14 +1,5 @@
-/* students-admin.scss - TEMA CLARO ACADÉMICO */
+/* students-admin.scss - ADAPTADO PARA MODO NOCHE CORREGIDO */
 @use 'sass:color';
-@use 'variables' as *;
-
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$border-light: rgba(0, 0, 0, 0.06);
-$shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
 
 :host {
   display: block;
@@ -22,7 +13,7 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   min-height: 100vh;
   padding-top: 7rem;
   padding-bottom: 4rem;
-  background-color: $bg-color;
+  background-color: var(--ra-bg);
   overflow-x: hidden;
 }
 
@@ -38,11 +29,11 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   z-index: 1;
 }
 
-/* --- FONDO --- */
+/* --- FONDO (Aurora) --- */
 .aurora-bg {
   position: fixed;
   inset: 0;
-  background-color: $bg-color;
+  background-color: var(--ra-bg);
   z-index: 0;
   pointer-events: none;
   &::before {
@@ -54,6 +45,7 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -62,19 +54,20 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   z-index: -1;
   animation: floatBlob 25s infinite alternate;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
 }
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: color.scale($accent, $lightness: 15%);
+  background: var(--ra-accent);
   animation-delay: -5s;
 }
 .blob-3 {
@@ -82,33 +75,27 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   left: 40%;
   width: 35vw;
   height: 35vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
   animation-delay: -10s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   opacity: 1;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
-/* --- GLASS CARD GENERICA --- */
-.glass-card {
-  background: white;
-  border: 1px solid $border-light;
-  border-radius: 16px;
-  box-shadow: $shadow-soft;
-}
-
 /* --- CABECERA --- */
 .page-head h2 {
-  color: $text-main;
+  color: var(--ra-text-main);
   letter-spacing: -0.02em;
 }
+
 .icon-sq {
   width: 40px;
   height: 40px;
@@ -116,43 +103,54 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   display: grid;
   place-items: center;
   font-size: 1.2rem;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--ra-primary);
 }
 
-/* --- TABLA --- */
+/* --- TABLA (Reset para Modo Noche) --- */
 .search-bar input {
-  font-size: 1rem;
-  color: $text-main;
+  background-color: var(--ra-input-bg) !important;
+  border: 1px solid var(--ra-border) !important;
+  color: var(--ra-text-main) !important;
   &::placeholder {
-    color: $text-muted;
+    color: var(--ra-text-muted);
   }
 }
 
 .custom-table {
+  background-color: transparent !important;
+
   thead th {
-    background: #f8fafc;
-    color: $text-muted;
+    background: var(--ra-bg) !important;
+    color: var(--ra-text-muted);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 700;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid var(--ra-border);
   }
+
   tbody tr {
+    background-color: transparent !important;
     transition: background 0.15s;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
-    &:last-child {
-      border-bottom: none;
-    }
+    border-bottom: 1px solid var(--ra-border-subtle);
+    color: var(--ra-text-main);
+
     &:hover {
-      background-color: #f1f5f9;
+      background-color: var(--ra-surface-subtle) !important;
     }
+
     &.table-active {
-      background-color: #eef2ff;
-      border-left: 3px solid $primary;
+      background-color: rgba(99, 102, 241, 0.1) !important;
+      border-left: 3px solid var(--ra-primary);
     }
+  }
+  td {
+    background-color: transparent !important;
   }
 }
 
+/* --- COMPONENTES DE FILA --- */
 .avatar-circle {
   width: 36px;
   height: 36px;
@@ -162,8 +160,7 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   color: white;
   font-weight: 700;
   font-size: 0.85rem;
-  /* Colores generados dinámicamente en TS, aquí base */
-  background: $primary;
+  background: var(--ra-primary);
 }
 
 .badge-role {
@@ -171,18 +168,32 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
   font-size: 0.75rem;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  display: inline-block;
+  background: var(--ra-surface-subtle);
+  color: var(--ra-text-muted);
 }
 
 /* --- DETALLE (SIDEBAR DERECHA) --- */
 .detail-card {
-  border-top: 4px solid $primary; /* Acento superior */
+  border-top: 4px solid var(--ra-primary) !important;
+  background: var(--ra-surface) !important;
+  padding: 2rem;
+  color: var(--ra-text-main); // Color base legible
+
+  // FIX: Forzar color del nombre del estudiante
+  h4,
+  .h4,
+  h5,
+  .h5 {
+    color: var(--ra-text-main) !important;
+    font-weight: 700;
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  p,
+  span {
+    color: var(--ra-text-muted);
+  }
 }
 
 .avatar-xl {
@@ -194,46 +205,51 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
   color: white;
   font-size: 1.5rem;
   font-weight: 700;
-  background: $primary;
-  border: 4px solid white;
-}
-
-.btn-close-absolute {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  color: $text-muted;
-  transition: color 0.2s;
-  &:hover {
-    color: $text-main;
-  }
+  background: var(--ra-primary);
+  border: 4px solid var(--ra-surface);
 }
 
 .info-tile {
-  background: #f8fafc;
+  background: var(--ra-bg);
   padding: 0.8rem;
   border-radius: 10px;
+  border: 1px solid var(--ra-border-subtle);
+
   label {
     font-size: 0.7rem;
     text-transform: uppercase;
-    color: $text-muted;
+    color: var(--ra-text-muted);
     display: block;
     margin-bottom: 4px;
     font-weight: 700;
   }
   .value {
     font-weight: 600;
-    color: $text-main;
+    color: var(--ra-text-main);
   }
 }
 
-/* Lista de cursos en detalle */
 .course-item {
-  border: 1px solid rgba(0, 0, 0, 0.04);
+  background: var(--ra-surface-subtle);
+  border: 1px solid var(--ra-border-subtle);
+  color: var(--ra-text-main);
   transition: all 0.2s;
   &:hover {
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: var(--ra-primary);
     transform: translateX(2px);
+    color: var(--ra-text-main);
+  }
+}
+
+.btn-close-absolute {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: var(--ra-text-muted) !important;
+  background: none;
+  border: none;
+  &:hover {
+    color: var(--ra-text-main) !important;
   }
 }
 
@@ -246,38 +262,9 @@ $shadow-soft: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
     transform: translate(30px, 50px) scale(1.1);
   }
 }
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-/* Mobile */
 @media (max-width: 991px) {
-  .empty-selection {
-    display: none;
-  }
   .sticky-top {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1050;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 1rem;
-    overflow-y: auto;
-  }
-  .detail-card {
-    min-height: auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.7) !important;
   }
 }

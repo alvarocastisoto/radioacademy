@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 public record QuizDTO(
                 UUID id,
                 @NotBlank String title,
-                @NotNull UUID lessonId,
+                @NotNull UUID moduleId,
                 @NotNull List<QuestionDTO> questions) {
 
 }

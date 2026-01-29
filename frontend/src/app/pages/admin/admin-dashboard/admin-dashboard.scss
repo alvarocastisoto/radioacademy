@@ -1,14 +1,5 @@
-/* teacher-panel.scss - TEMA CLARO ACADÉMICO */
+/* teacher-panel.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-@use 'variables' as *;
-
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$border-light: rgba(0, 0, 0, 0.08);
-$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
@@ -22,7 +13,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   min-height: 100vh;
   padding-top: 7rem;
   padding-bottom: 4rem;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   overflow-x: hidden;
 }
 
@@ -42,7 +33,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .aurora-bg {
   position: fixed;
   inset: 0;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   z-index: 0;
   pointer-events: none;
   &::before {
@@ -54,6 +45,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -62,65 +54,88 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   z-index: -1;
   animation: floatBlob 25s infinite alternate;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
 }
+
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: color.scale($accent, $lightness: 15%);
+  background: var(--ra-accent); // Adaptativo
   animation-delay: -5s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   opacity: 1;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
 
 /* --- HEADER --- */
 .page-head h2 {
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   letter-spacing: -0.02em;
 }
 
 /* --- TABLA GLASS --- */
 .glass-card {
-  background: white;
-  border: 1px solid $border-light;
+  background: var(--ra-surface); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
   border-radius: 16px;
-  box-shadow: $shadow-soft;
+  box-shadow: var(--ra-shadow); // Adaptativo
+  overflow: hidden; // Evita que fondos internos sobresalgan de las esquinas
 }
 
 .custom-table {
+  background-color: transparent !important; // Forzamos transparencia de base
+
   thead th {
-    background: #f8fafc;
-    color: $text-muted;
+    background: rgba(0, 0, 0, 0.15) !important; // Oscurecemos un poco la cabecera para contraste
+    color: var(--ra-text-muted);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 700;
-    border-bottom: 1px solid $border-light;
+    border-bottom: 1px solid var(--ra-border);
+    padding: 1rem;
   }
+
+  tbody {
+    background-color: transparent !important;
+  }
+
   tbody tr {
+    background-color: transparent !important; // LIMPIEZA TOTAL DE FILAS
     transition: background 0.15s;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
+    border-bottom: 1px solid var(--ra-border-subtle);
+
     &:last-child {
       border-bottom: none;
     }
+
     &:hover {
-      background-color: #f1f5f9;
+      // Un ligero brillo en lugar de un color sólido para el modo noche
+      background-color: var(--ra-surface-subtle) !important;
     }
+  }
+
+  td {
+    background-color: transparent !important; // LIMPIEZA TOTAL DE CELDAS
+    color: var(--ra-text-main);
+    padding: 1rem;
+    vertical-align: middle;
   }
 }
 
@@ -128,16 +143,16 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #eef2ff;
-  color: $primary;
+  background: rgba(99, 102, 241, 0.1); // Color primario con transparencia para dark mode
+  color: var(--ra-primary); // Adaptativo
   display: grid;
   place-items: center;
   font-size: 1.2rem;
 }
 
 .badge-hours {
-  background: #f1f5f9;
-  color: $text-muted;
+  background: var(--ra-surface-subtle); // Adaptativo
+  color: var(--ra-text-muted); // Adaptativo
   font-weight: 600;
   padding: 0.35rem 0.6rem;
   border-radius: 6px;
@@ -146,51 +161,47 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 /* --- BOTONES --- */
 .btn-glow {
-  background: $primary;
+  background: var(--ra-primary); // Adaptativo
   color: white;
   border: none;
   border-radius: 8px;
   padding: 0.6rem 1.2rem;
-  box-shadow: 0 4px 15px rgba($primary, 0.3);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   font-weight: 600;
   &:hover {
-    background: color.scale($primary, $lightness: -5%);
+    opacity: 0.9;
     transform: translateY(-1px);
   }
 }
 
 .btn-glass {
-  background: white;
-  border: 1px solid $border-light;
-  color: $text-main;
-  border-radius: 8px;
-  padding: 0.4rem 0.8rem;
-  font-weight: 600;
-  font-size: 0.85rem;
+  background: var(--ra-surface-subtle); // Usamos la superficie sutil
+  border: 1px solid var(--ra-border);
+  color: var(--ra-text-main);
+
   &:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--ra-primary);
+    color: white !important;
+    border-color: var(--ra-primary);
   }
 }
 
 .text-primary-dark {
-  color: $primary !important;
+  color: var(--ra-primary) !important;
 }
 
-/* Botón Rojo Pequeño (FIX BLINDADO) */
+/* Botón Rojo Pequeño (FIX BLINDADO ADAPTADO) */
 .btn-action-danger-soft {
-  /* Dimensiones fijas obligatorias */
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
   padding: 0 !important;
 
   border-radius: 8px;
-  background: white;
-  color: #ef4444;
-  border: 1px solid #fca5a5;
+  background: var(--ra-surface); // Adaptativo
+  color: #f87171; // Rojo más suave para dark mode
+  border: 1px solid rgba(239, 68, 68, 0.3);
 
-  /* Flexbox para centrar icono */
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -199,12 +210,11 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   transition: all 0.2s;
 
   &:hover {
-    background: #fef2f2;
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
     border-color: #ef4444;
   }
 
-  /* Asegurar icono visible */
   i {
     display: block;
     line-height: 1;

@@ -1,7 +1,6 @@
 package com.radioacademy.backend.controller;
 
-import java.util.List;
-import java.util.Optional;
+import java.security.Principal;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -12,13 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.radioacademy.backend.dto.exams.OptionDTO;
-import com.radioacademy.backend.dto.exams.QuestionDTO;
 import com.radioacademy.backend.dto.exams.QuizDTO;
 import com.radioacademy.backend.dto.exams.QuizResultDTO;
 import com.radioacademy.backend.dto.exams.QuizSubmissionDTO;
-import com.radioacademy.backend.entity.Quiz;
-import com.radioacademy.backend.repository.exams.QuizRepository;
 import com.radioacademy.backend.service.exams.QuizService;
 
 import jakarta.validation.Valid;
@@ -28,28 +23,46 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/quizzes")
 @RequiredArgsConstructor
 public class QuizController {
+
     private final QuizService quizService;
 
+    // 1. CREAR O EDITAR QUIZ (Solo Admin)
     @PostMapping
-    public ResponseEntity<Quiz> createQuiz(@Valid @RequestBody QuizDTO quizDTO) {
-        Quiz createdQuiz = quizService.createQuiz(quizDTO);
-        return ResponseEntity.ok(createdQuiz);
+    public ResponseEntity<QuizDTO> createQuiz(@Valid @RequestBody QuizDTO quizDTO) {
+        // Devuelve QuizDTO para evitar LazyInitializationException
+        return ResponseEntity.ok(quizService.createQuiz(quizDTO));
     }
 
-    @GetMapping("/lesson/{lessonId}")
-    public ResponseEntity<QuizDTO> getQuizByLesson(@PathVariable UUID lessonId) {
-        return quizService.getQuizByLessonId(lessonId)
+    // 2. OBTENER QUIZ POR MÓDULO (Para Admin/Edición - Muestra TODAS las preguntas
+    // y correctas)
+    @GetMapping("/module/{moduleId}")
+    public ResponseEntity<QuizDTO> getQuizByModule(@PathVariable UUID moduleId) {
+        return quizService.getQuizByModuleId(moduleId)
                 .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build()); // 204 No Content si no hay test
+                .orElse(ResponseEntity.noContent().build());
     }
 
+    // 3. OBTENER QUIZ POR ID (Para Alumno - POOL ALEATORIO DE 50)
     @GetMapping("/{id}")
     public ResponseEntity<QuizDTO> getQuizById(@PathVariable UUID id) {
         return ResponseEntity.ok(quizService.getQuizById(id));
     }
 
+    // 4. CORREGIR EXAMEN (Devuelve nota + Feedback visual)
     @PostMapping("/submit")
-    public ResponseEntity<QuizResultDTO> submitQuiz(@RequestBody QuizSubmissionDTO submission) {
-        return ResponseEntity.ok(quizService.submitQuiz(submission));
+    public ResponseEntity<QuizResultDTO> submitQuiz(
+            @RequestBody QuizSubmissionDTO submission,
+            Principal principal // Obtiene el usuario del Token JWT
+    ) {
+        return ResponseEntity.ok(quizService.submitQuiz(submission, principal.getName()));
+    }
+
+    // 5. 🧠 SMART RETRY (Banco de Fallos)
+    // Devuelve solo las preguntas que el usuario ha fallado y aun no ha corregido
+    @GetMapping("/{id}/smart-retry")
+    public ResponseEntity<QuizDTO> getSmartFailedQuiz(
+            @PathVariable UUID id,
+            Principal principal) {
+        return ResponseEntity.ok(quizService.getSmartFailedQuiz(id, principal.getName()));
     }
 }

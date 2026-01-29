@@ -1,12 +1,5 @@
-/* navbar.scss - TEMA CLARO */
+/* navbar.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-$bg-0: rgba(255, 255, 255, 0.75); /* Cristal blanco */
-$bg-1: rgba(255, 255, 255, 0.98); /* Casi sólido al hacer scroll */
-$line: rgba(0, 0, 0, 0.06); /* Líneas divisorias sutiles */
-$text: #0f172a; /* Texto oscuro (Slate 900) */
-$muted: #64748b; /* Texto secundario (Slate 500) */
-$primary: #6366f1;
-$accent: #ec4899;
 
 :host {
   display: block;
@@ -14,28 +7,26 @@ $accent: #ec4899;
 
 /* NAVBAR */
 .navbar.ra-navbar {
-  background-color: $bg-0 !important;
+  background-color: var(--ra-glass-bg) !important; // Adaptativo (Cristal)
   backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
-  border-bottom: 1px solid $line !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03) !important; /* Sombra suave */
+  border-bottom: 1px solid var(--ra-border) !important; // Adaptativo
+  box-shadow: var(--ra-shadow) !important; // Adaptativo
 
-  /* Transiciones suaves */
   transition:
     transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
     background-color 0.3s ease,
     padding 0.3s ease,
     box-shadow 0.3s ease;
 
-  /* Lógica para esconderse */
   &.ra-navbar--hidden {
     transform: translateY(-100%);
   }
 
   /* Estado Scrolled (más sólido) */
   &.ra-navbar--scrolled {
-    background-color: $bg-1 !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08) !important;
+    background-color: var(--ra-surface) !important; // Adaptativo
+    box-shadow: var(--ra-shadow) !important;
     padding-block: 0.5rem;
   }
 }
@@ -53,14 +44,14 @@ $accent: #ec4899;
     display: grid;
     place-items: center;
     border-radius: 10px;
-    background: linear-gradient(135deg, $primary, $accent); /* Icono colorido */
+    background: linear-gradient(135deg, var(--ra-primary), var(--ra-accent));
     color: white;
     font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba($primary, 0.3);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
   }
 
   .brand-text {
-    color: $text;
+    color: var(--ra-text-main); // Adaptativo
     font-weight: 850;
     letter-spacing: -0.03em;
     font-size: 1.25rem;
@@ -74,26 +65,25 @@ $accent: #ec4899;
     padding: 0.2rem 0.6rem;
     border-radius: 999px;
     font-weight: 700;
-    background: rgba($primary, 0.1);
-    color: $primary;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--ra-primary);
   }
 }
 
 /* LINKS */
 .ra-link {
   position: relative;
-  color: $muted !important;
+  color: var(--ra-text-muted) !important; // Adaptativo
   font-weight: 600;
   padding: 0.65rem 1rem;
   border-radius: 999px;
   transition: all 0.2s ease;
 
   &:hover {
-    color: $primary !important;
-    background: rgba($primary, 0.05);
+    color: var(--ra-primary) !important;
+    background: var(--ra-surface-subtle);
   }
 
-  /* Indicador activo (línea inferior) */
   &::after {
     content: '';
     position: absolute;
@@ -102,7 +92,7 @@ $accent: #ec4899;
     bottom: 0.4rem;
     height: 2px;
     border-radius: 999px;
-    background: $primary;
+    background: var(--ra-primary);
     transform: scaleX(0);
     transform-origin: center;
     transition: transform 0.2s ease;
@@ -110,7 +100,7 @@ $accent: #ec4899;
   }
 
   &.active {
-    color: $text !important;
+    color: var(--ra-text-main) !important;
     font-weight: 700;
   }
   &.active::after {
@@ -135,57 +125,57 @@ $accent: #ec4899;
 
 .ra-btn-ghost {
   background: transparent !important;
-  color: $text !important;
-  border-color: $line !important;
+  color: var(--ra-text-main) !important;
+  border-color: var(--ra-border) !important;
   &:hover {
-    background: rgba(0, 0, 0, 0.04) !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
+    background: var(--ra-surface-subtle) !important;
+    border-color: var(--ra-text-muted) !important;
   }
 }
 
 .ra-btn-gradient {
-  background: $primary !important;
+  background: var(--ra-primary) !important;
   color: white !important;
-  box-shadow: 0 4px 15px rgba($primary, 0.3);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
   &:hover {
     transform: translateY(-1px);
-    background: color.scale($primary, $lightness: -5%) !important;
-    box-shadow: 0 8px 25px rgba($primary, 0.4);
+    opacity: 0.95;
+    box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
   }
 }
 
 .ra-btn-admin {
-  background: #fefce8 !important;
-  color: #d97706 !important;
-  border-color: #fde047 !important;
+  background: rgba(250, 204, 21, 0.1) !important; // Tono amarillento suave
+  color: #fbbf24 !important;
+  border-color: rgba(250, 204, 21, 0.2) !important;
   &:hover {
-    background: #fef9c3 !important;
+    background: rgba(250, 204, 21, 0.2) !important;
   }
 }
 
-/* DROPDOWN MENU (Light Mode) */
+/* DROPDOWN MENU */
 .ra-menu {
   margin-top: 12px;
   padding: 8px;
   min-width: 240px;
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--ra-surface) !important; // Adaptativo
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--ra-border) !important;
   border-radius: 16px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--ra-shadow) !important;
 }
 
 .ra-item {
   border-radius: 10px;
-  color: $muted;
+  color: var(--ra-text-muted);
   padding: 0.7rem 1rem;
   font-weight: 500;
   transition: all 0.15s ease;
 
   &:hover {
-    background: rgba($primary, 0.05);
-    color: $primary;
+    background: var(--ra-surface-subtle);
+    color: var(--ra-primary);
     transform: translateX(4px);
   }
   i {
@@ -195,7 +185,7 @@ $accent: #ec4899;
 }
 
 .dropdown-divider {
-  border-top-color: $line;
+  border-top: 1px solid var(--ra-border-subtle);
   margin: 8px 0;
 }
 
@@ -205,20 +195,17 @@ $accent: #ec4899;
     margin-top: 15px;
     padding: 15px;
     border-radius: 20px;
-    background: white;
-    border: 1px solid $line;
-    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.1);
+    background: var(--ra-surface) !important;
+    border: 1px solid var(--ra-border);
+    box-shadow: var(--ra-shadow);
   }
 
   .navbar-toggler {
     border: none !important;
     padding: 0;
-    /* Icono hamburguesa negro para que se vea en fondo claro */
     .navbar-toggler-icon {
-      filter: invert(1) grayscale(100%);
-    }
-    &:focus {
-      box-shadow: none;
+      // En modo noche invertimos el color para que el icono hamburguesa sea visible (blanco)
+      filter: brightness(0) invert(1);
     }
   }
 }

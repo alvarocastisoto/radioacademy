@@ -1,14 +1,5 @@
-/* my-courses.scss - TEMA CLARO ACADÉMICO */
+/* my-courses.scss - ADAPTADO PARA MODO NOCHE */
 @use 'sass:color';
-/* --- VARIABLES --- */
-$bg-color: #f8fafc;
-$text-main: #0f172a;
-$text-muted: #64748b;
-$primary: #6366f1;
-$accent: #ec4899;
-$success: #10b981;
-$border-light: rgba(0, 0, 0, 0.08);
-$shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 :host {
   display: block;
@@ -22,7 +13,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   min-height: 100vh;
   padding-top: 7rem;
   padding-bottom: 4rem;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   overflow-x: hidden;
 }
 
@@ -42,7 +33,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .aurora-bg {
   position: fixed;
   inset: 0;
-  background-color: $bg-color;
+  background-color: var(--ra-bg); // Adaptativo
   z-index: 0;
   pointer-events: none;
   &::before {
@@ -54,6 +45,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
   }
 }
+
 .blob {
   position: absolute;
   border-radius: 50%;
@@ -62,28 +54,31 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   z-index: -1;
   animation: floatBlob 25s infinite alternate;
 }
+
 .blob-1 {
   top: -10%;
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: color.scale(#06b6d4, $lightness: 10%);
+  background: #06b6d4;
 }
+
 .blob-2 {
   bottom: 5%;
   right: -5%;
   width: 45vw;
   height: 45vw;
-  background: color.scale($accent, $lightness: 15%);
+  background: var(--ra-accent); // Adaptativo
   animation-delay: -5s;
 }
+
 .grid-overlay {
   position: absolute;
   inset: 0;
   opacity: 1;
   background-image:
-    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(var(--ra-border-subtle) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ra-border-subtle) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(circle at top center, black 40%, transparent 100%);
 }
@@ -91,39 +86,39 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 /* --- TYPOGRAPHY --- */
 .page-head {
   h2 {
-    color: $text-main;
+    color: var(--ra-text-main); // Adaptativo
     letter-spacing: -0.02em;
   }
 }
 
 /* --- STATES (Empty/Loading) --- */
 .glass-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--ra-surface) !important; // Adaptativo
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--ra-border) !important;
   border-radius: 24px;
-  box-shadow: $shadow-soft;
+  box-shadow: var(--ra-shadow);
 }
 
 .state-empty {
-  border: 2px dashed $border-light;
-  background: rgba(255, 255, 255, 0.5);
+  border: 2px dashed var(--ra-border);
+  background: var(--ra-surface-subtle);
 }
 
 /* --- CARD --- */
 .course-card {
-  background: white;
-  border: 1px solid $border-light;
+  background: var(--ra-surface); // Adaptativo
+  border: 1px solid var(--ra-border); // Adaptativo
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: $shadow-soft;
+  box-shadow: var(--ra-shadow);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   height: 100%;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.12);
-    border-color: rgba($primary, 0.2);
+    box-shadow: var(--ra-shadow);
+    border-color: var(--ra-primary);
 
     .course-cover img {
       transform: scale(1.05);
@@ -134,7 +129,7 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 .course-cover {
   position: relative;
   height: 180px;
-  background: #f1f5f9;
+  background: var(--ra-input-bg); // Adaptativo
   overflow: hidden;
 
   .course-img {
@@ -150,8 +145,8 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #e2e8f0, #f8fafc);
-    color: $primary;
+    background: linear-gradient(135deg, var(--ra-border-subtle), var(--ra-bg));
+    color: var(--ra-primary);
   }
 }
 
@@ -160,8 +155,8 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
   top: 12px;
   right: 12px;
   .badge-pill {
-    background: rgba(255, 255, 255, 0.9);
-    color: $text-main;
+    background: var(--ra-glass-bg); // Adaptativo
+    color: var(--ra-text-main);
     font-size: 0.7rem;
     font-weight: 700;
     padding: 0.35rem 0.75rem;
@@ -175,33 +170,25 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 
 /* --- CARD BODY --- */
 .course-title {
-  color: $text-main;
+  color: var(--ra-text-main); // Adaptativo
   font-weight: 700;
   line-height: 1.3;
   font-size: 1.1rem;
 }
 
-.text-truncate-2 {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.text-truncate-3 {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+.text-muted {
+  color: var(--ra-text-muted) !important;
 }
 
 /* Progress */
 .progress-thin {
   height: 6px;
-  background: #e2e8f0;
+  background: var(--ra-border-subtle); // Adaptativo
   border-radius: 10px;
   overflow: hidden;
   .progress-bar {
     transition: width 0.6s ease;
+    background-color: var(--ra-primary);
   }
 }
 
@@ -214,24 +201,24 @@ $shadow-soft: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
 }
 
 .btn-glow {
-  background: $primary;
+  background: var(--ra-primary);
   color: white;
   border: none;
-  box-shadow: 0 4px 15px rgba($primary, 0.25);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
   &:hover {
-    background: color.scale($primary, $lightness: -5%);
+    opacity: 0.9;
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba($primary, 0.35);
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35);
   }
 }
 
 .btn-glass {
-  background: white;
-  border: 1px solid $border-light;
-  color: $text-main;
+  background: var(--ra-surface-subtle); // Adaptativo
+  border: 1px solid var(--ra-border);
+  color: var(--ra-text-main);
   &:hover {
-    background: #f8fafc;
-    border-color: #cbd5e1;
+    background: var(--ra-bg);
+    border-color: var(--ra-text-muted);
   }
 }
 

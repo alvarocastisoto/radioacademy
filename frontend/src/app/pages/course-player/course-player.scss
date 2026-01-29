@@ -1,31 +1,7 @@
-/* course-player.component.scss — “premium light” (blanco + vidrio suave) */
+/* course-player.component.scss — ADAPTADO PARA MODO NOCHE */
+@use 'sass:color';
 
-/* ====== TOKENS ====== */
-$canvas: #f4f7fb;
-$surface: rgba(255, 255, 255, 0.86);
-$surface-solid: #ffffff;
-
-$text: #0f172a;
-$text-muted: #64748b;
-
-$border: rgba(15, 23, 42, 0.1);
-$border-strong: rgba(15, 23, 42, 0.14);
-
-$primary: #4f46e5;
-$primary-2: #7c3aed; /* acento secundario */
-$success: #059669;
-
-$radius-lg: 16px;
-$radius-xl: 20px;
-
-$shadow-1:
-  0 1px 0 rgba(15, 23, 42, 0.04),
-  0 12px 30px rgba(15, 23, 42, 0.06);
-$shadow-2:
-  0 1px 0 rgba(15, 23, 42, 0.05),
-  0 18px 50px rgba(15, 23, 42, 0.1);
-$shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-
+/* ====== MIXINS ====== */
 @mixin focus-ring($c) {
   outline: none;
   box-shadow: 0 0 0 4px rgba($c, 0.18);
@@ -40,11 +16,13 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   bottom: 0;
   z-index: 100;
 
-  /* Fondo “premium”: suave, blanco y limpio */
-  background:
-    radial-gradient(1200px 800px at 15% 10%, rgba($primary, 0.12), transparent 55%),
-    radial-gradient(900px 700px at 90% 20%, rgba($primary-2, 0.1), transparent 55%),
-    linear-gradient(180deg, #ffffff 0%, $canvas 60%, $canvas 100%);
+  /* Fondo adaptativo usando los tokens globales */
+  background-color: var(--ra-bg);
+  background-image:
+    radial-gradient(1200px 800px at 15% 10%, rgba(79, 70, 229, 0.12), transparent 55%),
+    radial-gradient(900px 700px at 90% 20%, rgba(124, 58, 237, 0.1), transparent 55%),
+    linear-gradient(180deg, var(--ra-surface) 0%, var(--ra-bg) 60%, var(--ra-bg) 100%);
+  transition: background-color 0.3s ease;
 }
 
 /* ====== LAYOUT ====== */
@@ -67,9 +45,9 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   display: flex;
   flex-direction: column;
 
-  background: $surface;
-  border-right: 1px solid $border;
-  box-shadow: 12px 0 40px rgba(15, 23, 42, 0.06);
+  background: var(--ra-glass-bg);
+  border-right: 1px solid var(--ra-border);
+  box-shadow: var(--ra-shadow);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -81,32 +59,25 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   gap: 12px;
   padding: 0 18px;
 
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.72));
-  border-bottom: 1px solid $border;
-  box-shadow: $shadow-inset;
+  background: var(--ra-surface);
+  border-bottom: 1px solid var(--ra-border);
 }
 
 .btn-back {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid $border;
-  background: rgba(255, 255, 255, 0.9);
-  color: $text;
+  border: 1px solid var(--ra-border);
+  background: var(--ra-surface-subtle);
+  color: var(--ra-text-main);
   display: grid;
   place-items: center;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    background 160ms ease,
-    border-color 160ms ease;
+  transition: all 160ms ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
-    border-color: $border-strong;
-    background: $surface-solid;
+    border-color: var(--ra-primary);
+    background: var(--ra-surface);
   }
 
   &:active {
@@ -114,7 +85,7 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   }
 
   &:focus-visible {
-    @include focus-ring($primary);
+    @include focus-ring(var(--ra-primary));
   }
 }
 
@@ -122,7 +93,7 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   margin: 0;
   font-size: 0.86rem;
   font-weight: 800;
-  color: $text;
+  color: var(--ra-text-main);
   letter-spacing: 0.03em;
   text-transform: uppercase;
 }
@@ -139,8 +110,8 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
 .module-toggle {
   width: 100%;
-  border: 1px solid $border;
-  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--ra-border);
+  background: var(--ra-surface);
   border-radius: 14px;
   padding: 12px 14px;
   text-align: left;
@@ -150,49 +121,42 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   justify-content: space-between;
   gap: 12px;
 
-  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.06);
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
+  box-shadow: var(--ra-shadow);
+  transition: all 160ms ease;
 
   .module-text {
     font-size: 0.78rem;
     font-weight: 900;
-    color: rgba($text, 0.68);
+    color: var(--ra-text-muted);
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
   .toggle-icon {
-    transition:
-      transform 180ms ease,
-      color 180ms ease;
-    color: rgba($text, 0.55);
+    transition: all 180ms ease;
+    color: var(--ra-text-muted);
   }
 
   &:hover {
     transform: translateY(-1px);
-    border-color: $border-strong;
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
+    border-color: var(--ra-primary);
   }
 
   &:focus-visible {
-    @include focus-ring($primary);
+    @include focus-ring(var(--ra-primary));
   }
 
   &.is-open {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba($primary, 0.06));
-    border-color: rgba($primary, 0.22);
+    background: var(--ra-surface-subtle);
+    border-color: rgba(99, 102, 241, 0.22);
 
     .module-text {
-      color: rgba($text, 0.9);
+      color: var(--ra-text-main);
     }
 
     .toggle-icon {
       transform: rotate(180deg);
-      color: rgba($primary, 0.75);
+      color: var(--ra-primary);
     }
   }
 }
@@ -201,14 +165,14 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   margin-top: 10px;
   padding: 10px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(15, 23, 42, 0.07);
+  background: var(--ra-surface-subtle);
+  border: 1px solid var(--ra-border-subtle);
 }
 
 .lesson-item {
   width: 100%;
   border: 1px solid transparent;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--ra-surface);
   border-radius: 14px;
 
   padding: 12px 12px;
@@ -218,13 +182,7 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
   text-align: left;
   cursor: pointer;
-
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.05);
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
+  transition: all 160ms ease;
 
   & + & {
     margin-top: 10px;
@@ -232,27 +190,26 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.09);
-    border-color: rgba($primary, 0.16);
-    background: rgba(255, 255, 255, 0.98);
+    border-color: var(--ra-primary);
+    background: var(--ra-surface-subtle);
   }
 
   &:focus-visible {
-    @include focus-ring($primary);
+    @include focus-ring(var(--ra-primary));
   }
 
   &.active-lesson {
-    border-color: rgba($primary, 0.28);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba($primary, 0.06));
+    border-color: var(--ra-primary);
+    background: var(--ra-surface-subtle);
     box-shadow: 0 18px 44px rgba(79, 70, 229, 0.16);
 
     .lesson-name {
-      color: $text !important; /* pisa .text-primary si hace falta */
+      color: var(--ra-text-main) !important;
       font-weight: 800;
     }
 
     .lesson-type-icon {
-      color: rgba($primary, 0.8);
+      color: var(--ra-primary);
     }
   }
 }
@@ -261,19 +218,13 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   width: 22px;
   height: 22px;
   border-radius: 999px;
-
   display: grid;
   place-items: center;
 
-  border: 1px solid rgba(15, 23, 42, 0.18);
-  background: rgba(255, 255, 255, 0.95);
-  color: rgba(15, 23, 42, 0.28);
-
-  transition:
-    transform 140ms ease,
-    border-color 140ms ease,
-    background 140ms ease,
-    color 140ms ease;
+  border: 1px solid var(--ra-border);
+  background: var(--ra-bg);
+  color: var(--ra-text-muted);
+  transition: all 140ms ease;
 
   i {
     font-size: 1rem;
@@ -282,14 +233,14 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
   &:hover {
     transform: scale(1.06);
-    border-color: rgba($primary, 0.35);
-    color: rgba($primary, 0.65);
+    border-color: var(--ra-primary);
+    color: var(--ra-primary);
   }
 
   &.completed {
-    border-color: rgba($success, 0.45);
-    background: rgba($success, 2);
-    color: rgba($success, 0.95);
+    border-color: #059669;
+    background: #059669;
+    color: white;
   }
 }
 
@@ -301,20 +252,20 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 .lesson-name {
   display: block;
   font-size: 0.92rem;
-  color: rgba($text, 0.92);
+  color: var(--ra-text-main);
   line-height: 1.25;
 }
 
 .lesson-meta {
   margin-top: 4px;
   font-size: 0.78rem;
-  color: $text-muted;
+  color: var(--ra-text-muted);
 
   .playing {
     display: inline-flex;
     gap: 6px;
     align-items: center;
-    color: rgba($primary, 0.85);
+    color: var(--ra-primary);
     font-weight: 700;
   }
 }
@@ -323,13 +274,12 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   width: 34px;
   height: 34px;
   border-radius: 12px;
-
   display: grid;
   place-items: center;
 
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: rgba(255, 255, 255, 0.75);
-  color: rgba(15, 23, 42, 0.55);
+  border: 1px solid var(--ra-border-subtle);
+  background: var(--ra-bg);
+  color: var(--ra-text-muted);
 
   i {
     font-size: 1.05rem;
@@ -340,19 +290,19 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 /* Footer + progreso */
 .sidebar-footer {
   padding: 14px 16px 18px;
-  border-top: 1px solid $border;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.9));
+  border-top: 1px solid var(--ra-border);
+  background: var(--ra-surface);
 
   .progress-thin {
     height: 8px;
     border-radius: 999px;
-    background: rgba(15, 23, 42, 0.06);
+    background: var(--ra-bg);
     overflow: hidden;
   }
 
   .progress-bar {
     border-radius: 999px;
-    background: linear-gradient(90deg, $success, rgba($success, 0.65));
+    background: linear-gradient(90deg, #059669, rgba(5, 150, 105, 0.65));
   }
 }
 
@@ -370,14 +320,13 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   padding-bottom: 48px;
 }
 
-/* Header de lección (tu HTML mete text-white; lo pisamos aquí) */
 .lesson-header {
   margin-bottom: 18px;
 
   .badge {
-    background: rgba($primary, 0.1) !important;
-    color: rgba($primary, 0.95) !important;
-    border: 1px solid rgba($primary, 0.16);
+    background: rgba(79, 70, 229, 0.1) !important;
+    color: var(--ra-primary) !important;
+    border: 1px solid rgba(79, 70, 229, 0.16);
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
@@ -387,71 +336,64 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
   h1,
   .h3 {
-    color: $text !important;
+    color: var(--ra-text-main) !important;
     letter-spacing: -0.02em;
   }
 }
 
-/* Player video / pdf en tarjeta blanca “premium” */
 .lesson-view {
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: $radius-xl;
-  box-shadow: $shadow-2;
+  background: var(--ra-glass-bg);
+  border: 1px solid var(--ra-border);
+  border-radius: 20px;
+  box-shadow: var(--ra-shadow);
   padding: 16px;
 }
 
 .lesson-player {
-  border-radius: $radius-xl;
+  border-radius: 20px;
   overflow: hidden;
-  background: #0b1220;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.18);
+  background: #000; /* Siempre negro para video */
+  border: 1px solid var(--ra-border);
 }
 
 .pdf-container {
-  border-radius: $radius-xl;
+  border-radius: 20px;
   overflow: hidden;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  box-shadow: $shadow-1;
+  border: 1px solid var(--ra-border);
+  box-shadow: var(--ra-shadow);
 }
 
 .pdf-placeholder {
-  background: rgba(255, 255, 255, 0.92);
-  border: 2px dashed rgba(15, 23, 42, 0.16);
-  border-radius: $radius-xl;
-  color: $text-muted !important;
+  background: var(--ra-input-bg);
+  border: 2px dashed var(--ra-border);
+  border-radius: 20px;
+  color: var(--ra-text-muted) !important;
 }
 
-/* Acciones */
 .lesson-actions {
   margin-top: 14px !important;
-  background: rgba(255, 255, 255, 0.82) !important;
-  border: 1px solid rgba(15, 23, 42, 0.1) !important;
-  border-radius: $radius-xl !important;
-  box-shadow: $shadow-1;
+  background: var(--ra-surface) !important;
+  border: 1px solid var(--ra-border) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--ra-shadow);
   padding: 14px !important;
 }
 
-/* Botones (scopeado al componente) */
 :host .btn {
   border-radius: 12px;
   font-weight: 800;
   letter-spacing: 0.01em;
-  transition:
-    transform 160ms ease,
-    box-shadow 160ms ease,
-    border-color 160ms ease,
-    background 160ms ease;
+  transition: all 160ms ease;
 }
 
 :host .btn:focus-visible {
-  @include focus-ring($primary);
+  @include focus-ring(var(--ra-primary));
 }
 
 :host .btn-primary {
   border: 0;
-  background: linear-gradient(90deg, $primary, $primary-2);
+  background: linear-gradient(90deg, var(--ra-primary), #7c3aed);
+  color: white;
   box-shadow: 0 16px 40px rgba(79, 70, 229, 0.22);
 
   &:hover {
@@ -461,65 +403,64 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 :host .btn-outline-light {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  color: $text;
+  background: var(--ra-surface);
+  border: 1px solid var(--ra-border);
+  color: var(--ra-text-main);
 
   &:hover {
     transform: translateY(-1px);
-    border-color: rgba(15, 23, 42, 0.18);
-    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+    border-color: var(--ra-primary);
+    background: var(--ra-surface-subtle);
   }
 }
 
 /* ====== QUIZ ====== */
 .quiz-player-container {
-  border-radius: $radius-xl !important;
-  border: 1px solid rgba(15, 23, 42, 0.1) !important;
-  box-shadow: $shadow-2 !important;
-  background: rgba(255, 255, 255, 0.86) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--ra-border) !important;
+  box-shadow: var(--ra-shadow) !important;
+  background: var(--ra-glass-bg) !important;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
 
 .quiz-header {
-  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-bottom: 1px solid var(--ra-border) !important;
 }
 
-/* cards del quiz */
 .quiz-questions .card {
-  border-radius: $radius-xl !important;
-  border: 1px solid rgba(15, 23, 42, 0.08) !important;
+  border-radius: 20px !important;
+  border: 1px solid var(--ra-border) !important;
+  background: var(--ra-surface) !important;
 }
 
-/* opción seleccionada con borde “premium” */
 .quiz-questions label.btn {
   border-radius: 14px !important;
-  border: 1px solid rgba(15, 23, 42, 0.1) !important;
+  border: 1px solid var(--ra-border) !important;
+  color: var(--ra-text-main) !important;
 
   &:hover {
-    border-color: rgba($primary, 0.22) !important;
-    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.1);
-    transform: translateY(-1px);
+    border-color: var(--ra-primary) !important;
+    background: var(--ra-surface-subtle) !important;
   }
 }
 
 .quiz-questions label.btn.btn-outline-primary {
-  border-color: rgba($primary, 0.3) !important;
-  box-shadow: 0 16px 44px rgba(79, 70, 229, 0.14);
+  border-color: var(--ra-primary) !important;
+  background: var(--ra-surface-subtle) !important;
 }
 
-/* ====== EMPTY STATE (pisar text-white-50) ====== */
+/* ====== EMPTY STATE ====== */
 .empty-state {
-  color: rgba($text, 0.55) !important;
+  color: var(--ra-text-muted) !important;
 
   h3 {
-    color: rgba($text, 0.82) !important;
+    color: var(--ra-text-main) !important;
     font-weight: 900;
   }
 
   p {
-    color: rgba($text, 0.55) !important;
+    color: var(--ra-text-muted) !important;
   }
 }
 
@@ -528,40 +469,33 @@ $shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   &::-webkit-scrollbar {
     width: 8px;
   }
-
   &::-webkit-scrollbar-track {
     background: transparent;
   }
-
   &::-webkit-scrollbar-thumb {
-    background: rgba(15, 23, 42, 0.18);
+    background: var(--ra-border);
     border-radius: 999px;
   }
-
   &::-webkit-scrollbar-thumb:hover {
-    background: rgba(15, 23, 42, 0.28);
+    background: var(--ra-text-muted);
   }
 }
 
-/* ====== MOBILE ====== */
 @media (max-width: 991px) {
   .player-content {
     padding: 16px;
   }
-
   .lesson-actions {
     flex-direction: column;
     gap: 10px;
     align-items: stretch;
   }
-
   :host .btn {
     width: 100%;
     justify-content: center;
   }
 }
 
-/* ====== REDUCE MOTION ====== */
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

@@ -23,9 +23,8 @@ public class Quiz {
 
     // Un examen pertenece a UNA lección
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "lesson_id")
-    @JsonIgnore
-    private Lesson lesson;
+    @JoinColumn(name = "module_id", nullable = false) // Un quiz DEBE pertenecer a un módulo
+    private Module module;
 
     // Un examen tiene MUCHAS preguntas
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)

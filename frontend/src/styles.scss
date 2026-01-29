@@ -1,70 +1,98 @@
 /* styles.scss */
-
-/* 1. CONFIGURACIÓN BASE */
-/* Importar iconos desde node_modules */
 @use 'bootstrap-icons/font/bootstrap-icons.css';
 @use 'bootstrap/scss/bootstrap';
+
+:root {
+  /* MODO CLARO */
+  --ra-bg: #f8fafc;
+  --ra-surface: #ffffff;
+  --ra-surface-subtle: rgba(255, 255, 255, 0.65);
+  --ra-text-main: #0f172a;
+  --ra-text-muted: #475569;
+  --ra-border: rgba(0, 0, 0, 0.08);
+  --ra-border-subtle: rgba(0, 0, 0, 0.04);
+  --ra-primary: #6366f1;
+  --ra-accent: #ec4899;
+  --ra-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  --ra-input-bg: #f8fafc;
+}
+
+body.dark-mode {
+  /* MODO NOCHE */
+  --ra-bg: #020617;
+  --ra-surface: rgba(15, 23, 42, 0.8);
+  --ra-surface-subtle: rgba(255, 255, 255, 0.05);
+  --ra-text-main: #f1f5f9;
+  --ra-text-muted: #94a3b8;
+  --ra-border: rgba(255, 255, 255, 0.1);
+  --ra-border-subtle: rgba(255, 255, 255, 0.05);
+  --ra-primary: #818cf8;
+  --ra-accent: #f472b6;
+  --ra-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+  --ra-input-bg: #0f172a;
+
+  /* Forzado de legibilidad */
+  background-color: var(--ra-bg) !important;
+  color: var(--ra-text-main) !important;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h4,
+  .h5,
+  p,
+  span,
+  li {
+    color: var(--ra-text-main);
+  }
+
+  .text-muted {
+    color: var(--ra-text-muted) !important;
+    opacity: 1;
+  }
+
+  .table {
+    --bs-table-bg: transparent !important;
+    --bs-table-color: var(--ra-text-main) !important;
+  }
+
+  ::placeholder {
+    color: var(--ra-text-muted) !important;
+    opacity: 0.6;
+  }
+}
+
 html,
 body {
   width: 100%;
-  /* CAMBIO VITAL: Usar min-height para permitir que el body crezca y el scroll funcione */
   min-height: 100%;
-  /* height: 100%;  <--- ESTO SE ELIMINA PORQUE BLOQUEA EL SCROLL */
-
-  margin: 0;
-  padding: 0;
-  background-color: #f8fafc; /* Slate 50 (Tema Claro) */
+  background-color: var(--ra-bg);
+  color: var(--ra-text-main);
   font-family: 'Inter', system-ui, sans-serif;
-
-  /* Gestión del scroll */
-  overflow-x: hidden;
-  overflow-y: auto;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
-/* 2. NAVBAR PREMIUM (Fixed para que flote siempre) */
+.glass-card {
+  background: var(--ra-surface) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--ra-border) !important;
+  border-radius: 24px;
+  box-shadow: var(--ra-shadow);
+  overflow: hidden;
+}
+
 .navbar {
-  position: fixed; /* CLAVE: Se queda fija arriba */
-  top: 0;
-  left: 0;
-  right: 0;
   background-color: rgba(15, 23, 42, 0.85) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  z-index: 1050 !important;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ra-border);
 }
 
-/* 3. TEXTOS DEL MENÚ */
-.navbar-brand,
-.nav-link,
-.navbar-text {
-  color: #e2e8f0 !important;
-  transition: color 0.3s ease;
-}
-
-.nav-link:hover,
-.navbar-brand:hover {
-  color: #ffffff !important;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-.nav-link.active {
-  color: #6366f1 !important;
-  font-weight: 600;
-}
-
-/* 4. BOTÓN HAMBURGUESA */
-.navbar-toggler {
-  border-color: rgba(255, 255, 255, 0.2) !important;
-}
-.navbar-toggler-icon {
-  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
-}
-
-/* IMPORTANTE: Aseguramos que Angular ocupe todo */
-app-root {
-  display: block;
-  width: 100%;
-  min-height: 100vh;
+body.dark-mode .navbar {
+  background-color: rgba(2, 6, 23, 0.9) !important;
 }

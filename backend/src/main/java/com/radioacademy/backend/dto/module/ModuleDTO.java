@@ -7,9 +7,11 @@ import com.radioacademy.backend.dto.lesson.LessonDTO;
 import java.util.List;
 
 public record ModuleDTO(
-                UUID id,
-                String title,
-                Integer orderIndex,
-                List<LessonDTO> lessons // 👈 Lista anidada
+        UUID id,
+        String title,
+        Integer orderIndex,
+        UUID quizId,
+        List<LessonDTO> lessons // 👈 Lista anidada
+
 ) {
 }

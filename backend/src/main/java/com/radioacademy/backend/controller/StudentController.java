@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
+import java.security.Principal;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,8 +42,12 @@ public class StudentController {
         }
 
         // 4. ENVIAR RESPUESTAS
-        @PostMapping("/quiz/submit")
-        public ResponseEntity<QuizResultDTO> submitQuiz(@RequestBody QuizSubmissionDTO submission) {
-                return ResponseEntity.ok(studentService.submitQuiz(submission));
+        @PostMapping("/quizzes/submit") // (O la ruta que tengas definida)
+        public ResponseEntity<QuizResultDTO> submitQuiz(
+                        @RequestBody QuizSubmissionDTO submission,
+                        Principal principal // 👈 2. Inyecta el Principal
+        ) {
+                // 3. Pasa el email (principal.getName()) como segundo argumento
+                return ResponseEntity.ok(studentService.submitQuiz(submission, principal.getName()));
         }
 }

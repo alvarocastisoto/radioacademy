@@ -2,7 +2,7 @@ import { Component, HostListener, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../services/auth/auth';
 import { CommonModule } from '@angular/common';
-
+import { ThemeService } from '../../services/theme/theme';
 @Component({
   selector: 'app-navbar',
   standalone: true,
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class Navbar {
   public authService = inject(AuthService);
-
+  public themeService = inject(ThemeService);
   isScrolled = false;
   isHidden = false;
   private lastScrollTop = 0;
