@@ -118,35 +118,6 @@
                                 <small class="text-muted">Lección {{ i + 1 }}.{{ j + 1 }}</small>
                               </div>
                             </div>
-
-                            <div class="d-flex gap-2">
-                              @if (lesson.videoUrl) {
-                                <a
-                                  [href]="lesson.videoUrl"
-                                  target="_blank"
-                                  class="btn btn-sm btn-glass icon-only"
-                                  title="Ver Video"
-                                >
-                                  <i class="bi bi-play-fill"></i>
-                                </a>
-                              }
-                              @if (lesson.pdfUrl) {
-                                <button
-                                  (click)="openLessonPdf(lesson.id)"
-                                  class="btn btn-sm btn-glass icon-only"
-                                  title="Ver PDF"
-                                >
-                                  <i class="bi bi-eye"></i>
-                                </button>
-                                <button
-                                  (click)="downloadLessonPdf(lesson.id, lesson.title)"
-                                  class="btn btn-sm btn-glass icon-only"
-                                  title="Descargar PDF"
-                                >
-                                  <i class="bi bi-download"></i>
-                                </button>
-                              }
-                            </div>
                           </div>
                         }
                       </div>
