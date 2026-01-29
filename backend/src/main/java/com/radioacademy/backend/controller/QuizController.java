@@ -60,9 +60,8 @@ public class QuizController {
     // 5. 🧠 SMART RETRY (Banco de Fallos)
     // Devuelve solo las preguntas que el usuario ha fallado y aun no ha corregido
     @GetMapping("/{id}/smart-retry")
-    public ResponseEntity<QuizDTO> getSmartFailedQuiz(
-            @PathVariable UUID id,
-            Principal principal) {
-        return ResponseEntity.ok(quizService.getSmartFailedQuiz(id, principal.getName()));
+    public ResponseEntity<QuizDTO> getSmartFailedQuiz(@PathVariable UUID id,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(quizService.getSmartFailedQuiz(id, userDetails));
     }
 }

@@ -9,6 +9,8 @@ import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.LessonProgressRepository;
 import com.radioacademy.backend.repository.LessonRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -29,12 +31,7 @@ public class ProgressService {
 
         // 1. MARCAR / DESMARCAR (TOGGLE)
         @Transactional
-        public ToggleProgressResponse toggleProgress(UUID lessonId, String userEmail) {
-
-                // 1. Obtener Usuario
-                User user = userRepository.findByEmail(userEmail)
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                "Usuario no encontrado"));
+        public ToggleProgressResponse toggleProgress(UUID lessonId, CustomUserDetails userDetails) {
 
                 // 2. Obtener Lección (Necesario para saber el curso)
                 Lesson lesson = lessonRepository.findById(lessonId)
@@ -45,18 +42,18 @@ public class ProgressService {
                 // Navegamos Lesson -> Module -> Course -> ID
                 UUID courseId = lesson.getModule().getCourse().getId();
 
-                boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId);
+                boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), courseId);
                 if (!enrolled) {
                         throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                                         "No tienes acceso a este curso (no matriculado).");
                 }
 
                 // 4. Lógica Toggle (Estilo limpio con orElseGet)
-                LessonProgress progress = progressRepository.findByUserIdAndLessonId(user.getId(), lessonId)
+                LessonProgress progress = progressRepository.findByUserIdAndLessonId(userDetails.getId(), lessonId)
                                 .orElseGet(() -> {
                                         // Si no existe, creamos uno nuevo inicializado en false (para invertirlo luego)
                                         LessonProgress newP = new LessonProgress();
-                                        newP.setUser(user);
+                                        newP.setUser(userRepository.getReferenceById(userDetails.getId()));
                                         newP.setLesson(lesson);
                                         newP.setCompleted(false);
                                         return newP;
@@ -75,13 +72,11 @@ public class ProgressService {
 
         // 2. OBTENER PROGRESO CURSO
         @Transactional(readOnly = true)
-        public CourseProgressResponse getCourseProgress(UUID courseId, String userEmail) {
-                User user = userRepository.findByEmail(userEmail)
-                                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                                "Usuario no encontrado"));
+        public CourseProgressResponse getCourseProgress(UUID courseId, CustomUserDetails userDetails) {
 
                 // Query optimizada que devuelve solo IDs
-                Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(user.getId(), courseId);
+                Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(userDetails.getId(),
+                                courseId);
 
                 return new CourseProgressResponse(
                                 courseId,

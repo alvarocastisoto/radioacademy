@@ -51,21 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 UserDetails dbUser = this.userDetailsService.loadUserByUsername(userEmail);
 
                 if (jwtService.isTokenValid(jwt, dbUser)) {
-                    // Tu lógica del "Safe User" (Muy buena práctica, por cierto)
-                    UserDetails safeUser = org.springframework.security.core.userdetails.User.builder()
-                            .username(dbUser.getUsername())
-                            .password(dbUser.getPassword())
-                            .authorities(dbUser.getAuthorities())
-                            .accountExpired(!dbUser.isAccountNonExpired())
-                            .accountLocked(!dbUser.isAccountNonLocked())
-                            .credentialsExpired(!dbUser.isCredentialsNonExpired())
-                            .disabled(!dbUser.isEnabled())
-                            .build();
 
+                    // 💡 Usa directamente dbUser, que ya es tu CustomUserDetails
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            safeUser,
+                            dbUser, // <--- PASAMOS EL OBJETO COMPLETO CON ID Y NOMBRE
                             null,
-                            safeUser.getAuthorities());
+                            dbUser.getAuthorities());
 
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);

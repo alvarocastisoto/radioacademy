@@ -241,12 +241,12 @@ public class QuizService {
     // 4. ALUMNO: SMART RETRY (BANCO DE FALLOS)
     // =========================================================================
     @Transactional(readOnly = true)
-    public QuizDTO getSmartFailedQuiz(UUID quizId, String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+    public QuizDTO getSmartFailedQuiz(UUID quizId, CustomUserDetails userDetails) {
+        UUID userId = userDetails.getId();
         Quiz quiz = quizRepository.findById(quizId).orElseThrow();
 
         // 1. Obtener IDs que el usuario debe (último intento fue fallo)
-        List<UUID> failedIds = attemptRepository.findFailedQuestionIds(user, quizId);
+        List<UUID> failedIds = attemptRepository.findFailedQuestionIds(userRepository.getReferenceById(userId), quizId);
 
         if (failedIds.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No tienes fallos pendientes.");

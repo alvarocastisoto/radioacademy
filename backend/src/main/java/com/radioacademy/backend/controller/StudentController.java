@@ -5,10 +5,12 @@ import com.radioacademy.backend.dto.course.CourseDashboardDTO;
 import com.radioacademy.backend.dto.exams.QuizDTO;
 import com.radioacademy.backend.dto.exams.QuizResultDTO;
 import com.radioacademy.backend.dto.exams.QuizSubmissionDTO;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
@@ -23,16 +25,17 @@ public class StudentController {
 
         // 1. DASHBOARD
         @GetMapping("/dashboard")
-        public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard(Authentication auth) {
-                return ResponseEntity.ok(studentService.getMyDashboard(auth.getName()));
+        public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard(
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                return ResponseEntity.ok(studentService.getMyDashboard(userDetails));
         }
 
         // 2. COURSE PLAYER CONTENT
         @GetMapping("/course/{courseId}/content")
         public ResponseEntity<CourseContentDTO> getCourseContent(
                         @PathVariable UUID courseId,
-                        Authentication auth) {
-                return ResponseEntity.ok(studentService.getCourseContent(courseId, auth.getName()));
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+                return ResponseEntity.ok(studentService.getCourseContent(courseId, userDetails));
         }
 
         // 3. OBTENER EXAMEN
@@ -45,9 +48,8 @@ public class StudentController {
         @PostMapping("/quizzes/submit") // (O la ruta que tengas definida)
         public ResponseEntity<QuizResultDTO> submitQuiz(
                         @RequestBody QuizSubmissionDTO submission,
-                        Principal principal // 👈 2. Inyecta el Principal
-        ) {
+                        @AuthenticationPrincipal CustomUserDetails userDetails) {
                 // 3. Pasa el email (principal.getName()) como segundo argumento
-                return ResponseEntity.ok(studentService.submitQuiz(submission, principal.getName()));
+                return ResponseEntity.ok(studentService.submitQuiz(submission, userDetails));
         }
 }

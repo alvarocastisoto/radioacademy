@@ -1,10 +1,12 @@
 package com.radioacademy.backend.controller;
 
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.student.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Paths;
@@ -21,10 +23,10 @@ public class StudentLessonPdfController {
     public ResponseEntity<Resource> getLessonPdf(
             @PathVariable UUID lessonId,
             @RequestParam(defaultValue = "false") boolean download,
-            Authentication authentication) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // 1. Delegamos al servicio la lógica de seguridad y carga
-        Resource resource = studentService.getLessonPdf(lessonId, authentication.getName());
+        Resource resource = studentService.getLessonPdf(lessonId, userDetails);
 
         // 2. Preparar Headers de Presentación (Responsabilidad del Controller)
         String filename = inferFilename(resource, lessonId);

@@ -4,6 +4,7 @@ import com.radioacademy.backend.dto.course.CourseDTO;
 import com.radioacademy.backend.dto.course.CourseDashboardDTO;
 import com.radioacademy.backend.dto.course.CourseDetailDTO;
 import com.radioacademy.backend.dto.course.CreateCourseRequest;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.content.CourseService;
 
 import jakarta.validation.Valid;
@@ -11,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,10 +35,10 @@ public class CourseController {
     @PostMapping
     public ResponseEntity<CourseDetailDTO> createCourse(
             @Valid @RequestBody CreateCourseRequest request,
-            Authentication authentication) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         return new ResponseEntity<>(
-                courseService.createCourse(request, authentication.getName()),
+                courseService.createCourse(request, userDetails),
                 HttpStatus.CREATED);
     }
 
@@ -58,8 +60,9 @@ public class CourseController {
 
     // 5. OBTENER MIS CURSOS (DASHBOARD ALUMNO)
     @GetMapping("/mine")
-    public ResponseEntity<List<CourseDashboardDTO>> getMyCourses(Authentication authentication) {
-        return ResponseEntity.ok(courseService.getMyCourses(authentication.getName()));
+    public ResponseEntity<List<CourseDashboardDTO>> getMyCourses(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(courseService.getMyCourses(userDetails));
     }
 
     @GetMapping("/{id}")

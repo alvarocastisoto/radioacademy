@@ -10,6 +10,7 @@ import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.CourseRepository;
 import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -61,9 +62,7 @@ public class CourseService {
 
     // 2. CREAR CURSO
     @Transactional
-    public CourseDetailDTO createCourse(CreateCourseRequest request, String teacherEmail) {
-        User teacher = userRepository.findByEmail(teacherEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Profesor no encontrado"));
+    public CourseDetailDTO createCourse(CreateCourseRequest request, CustomUserDetails userDetails) {
 
         Course newCourse = new Course();
         newCourse.setTitle(request.title());
@@ -71,7 +70,7 @@ public class CourseService {
         newCourse.setPrice(request.price());
         newCourse.setHours(request.hours());
         newCourse.setActive(true);
-        newCourse.setTeacher(teacher);
+        newCourse.setTeacher(userRepository.getReferenceById(userDetails.getId()));
         newCourse.setCoverImage(request.coverImage());
 
         Course savedCourse = courseRepository.save(newCourse);
@@ -113,11 +112,8 @@ public class CourseService {
 
     // 5. OBTENER MIS CURSOS (ALUMNO)
     @Transactional(readOnly = true)
-    public List<CourseDashboardDTO> getMyCourses(String userEmail) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-
-        List<Enrollment> enrollments = enrollmentRepository.findByUserId(user.getId());
+    public List<CourseDashboardDTO> getMyCourses(CustomUserDetails userDetails) {
+        List<Enrollment> enrollments = enrollmentRepository.findByUserId(userDetails.getId());
 
         return enrollments.stream().map(enrollment -> {
             Course course = enrollment.getCourse();

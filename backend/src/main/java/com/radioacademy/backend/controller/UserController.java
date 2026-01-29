@@ -3,12 +3,14 @@ package com.radioacademy.backend.controller;
 import com.radioacademy.backend.dto.student.UserProfileDTO;
 import com.radioacademy.backend.dto.student.UserProfileResponseDTO;
 import com.radioacademy.backend.entity.User;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,17 +39,17 @@ public class UserController {
 
     // Obtener mi perfil
     @GetMapping("/profile")
-    public ResponseEntity<UserProfileResponseDTO> getMyProfile(Authentication auth) {
-        return ResponseEntity.ok(userService.getMyProfile(auth.getName()));
+    public ResponseEntity<UserProfileResponseDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.getMyProfile(userDetails));
     }
 
     // Actualizar perfil
     @PutMapping("/profile")
     public ResponseEntity<Map<String, String>> updateProfile(
             @Valid @RequestBody UserProfileDTO profileData,
-            Authentication auth) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         // El servicio maneja toda la lógica (passwords, emails, ficheros)
-        return ResponseEntity.ok(userService.updateProfile(auth.getName(), profileData));
+        return ResponseEntity.ok(userService.updateProfile(userDetails, profileData));
     }
 }

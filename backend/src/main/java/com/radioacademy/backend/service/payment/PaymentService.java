@@ -5,6 +5,7 @@ import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.CourseRepository;
 import com.radioacademy.backend.repository.EnrollmentRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.content.EnrollmentService;
 import com.stripe.Stripe;
 import com.stripe.model.checkout.Session;
@@ -45,15 +46,13 @@ public class PaymentService {
     }
 
     // 1. CREAR SESIÓN DE PAGO
-    public String createCheckoutSession(String userEmail, UUID courseId) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    public String createCheckoutSession(CustomUserDetails userDetails, UUID courseId) {
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
         // Regla de Negocio: No pagar dos veces por lo mismo
-        if (enrollmentRepository.existsByUserIdAndCourseId(user.getId(), courseId)) {
+        if (enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), courseId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya tienes este curso.");
         }
 
@@ -65,7 +64,7 @@ public class PaymentService {
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl(successUrl + "?session_id={CHECKOUT_SESSION_ID}")
                     .setCancelUrl(cancelUrl)
-                    .setClientReferenceId(user.getId().toString())
+                    .setClientReferenceId(userDetails.getId().toString())
                     .putMetadata("course_id", course.getId().toString())
                     .addLineItem(SessionCreateParams.LineItem.builder()
                             .setQuantity(1L)
@@ -91,9 +90,7 @@ public class PaymentService {
     // 2. CONFIRMAR PAGO
     // 2. CONFIRMAR PAGO
     @Transactional
-    public void confirmPayment(String userEmail, String sessionId) {
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
+    public void confirmPayment(CustomUserDetails userDetails, String sessionId) {
 
         try {
             Session session = Session.retrieve(sessionId);
@@ -102,24 +99,18 @@ public class PaymentService {
             // Comprobamos que el usuario que inició el pago es el mismo que lo confirma
             String clientRef = session.getClientReferenceId();
 
-            if (clientRef == null || !clientRef.equals(user.getId().toString())) {
+            if (clientRef == null || !clientRef.equals(userDetails.getId().toString())) {
                 // Logueamos esto como advertencia de seguridad
                 System.err.println(
-                        "🚨 SEGURIDAD: Usuario " + user.getId() + " intentó apropiarse de la sesión " + sessionId);
+                        "🚨 SEGURIDAD: Usuario " + userDetails.getId() + " intentó apropiarse de la sesión "
+                                + sessionId);
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Esta sesión de pago no te pertenece.");
             }
 
             // 🛑 2. VERIFICACIÓN DE ESTADO
             if ("paid".equals(session.getPaymentStatus())) {
-                String courseIdStr = session.getMetadata().get("course_id");
-
-                Course course = courseRepository.findById(UUID.fromString(courseIdStr))
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Curso no encontrado (Metadata corrupta)"));
-
-                // Delegamos la matrícula
-                enrollmentService.enrollUser(user, course, session.getPaymentIntent());
-
+                UUID courseId = UUID.fromString(session.getMetadata().get("course_id"));
+                enrollmentService.enrollUser(userDetails.getId(), courseId, session.getPaymentIntent());
             } else {
                 // Puede ser 'unpaid' o 'no_payment_required'
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago no se ha completado o ha fallado.");

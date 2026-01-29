@@ -4,6 +4,7 @@ import com.radioacademy.backend.dto.student.UserProfileDTO;
 import com.radioacademy.backend.dto.student.UserProfileResponseDTO;
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.StorageService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,8 +44,9 @@ public class UserService {
     // }
 
     // 3. OBTENER MI PERFIL
-    public UserProfileResponseDTO getMyProfile(String email) {
-        User user = getUser(email);
+    public UserProfileResponseDTO getMyProfile(CustomUserDetails userDetails) {
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
         return new UserProfileResponseDTO(
                 user.getId(),
@@ -58,8 +60,9 @@ public class UserService {
 
     // 4. ACTUALIZAR PERFIL (Lógica Compleja)
     @Transactional
-    public Map<String, String> updateProfile(String email, UserProfileDTO profileData) {
-        User user = getUser(email);
+    public Map<String, String> updateProfile(CustomUserDetails userDetails, UserProfileDTO profileData) {
+        User user = userRepository.findById(userDetails.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         boolean emailChanged = false;
 
         // A. CAMBIO DE CONTRASEÑA
@@ -128,11 +131,6 @@ public class UserService {
     }
 
     // --- Helpers Privados ---
-
-    private User getUser(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
-    }
 
     private void deleteOldAvatar(String oldAvatarPathOrUrl) {
         if (oldAvatarPathOrUrl == null || oldAvatarPathOrUrl.isBlank())

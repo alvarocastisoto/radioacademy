@@ -1,9 +1,12 @@
 package com.radioacademy.backend.controller;
 
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.payment.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,12 +26,12 @@ public class PaymentController {
     @PostMapping("/checkout")
     public ResponseEntity<Map<String, String>> createCheckoutSession(
             @RequestBody Map<String, String> request,
-            Authentication auth) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         UUID courseId = UUID.fromString(request.get("courseId"));
 
         // El servicio devuelve la URL directa
-        String url = paymentService.createCheckoutSession(auth.getName(), courseId);
+        String url = paymentService.createCheckoutSession(userDetails, courseId);
 
         return ResponseEntity.ok(Map.of("url", url));
     }
@@ -37,12 +40,12 @@ public class PaymentController {
     @PostMapping("/confirm")
     public ResponseEntity<Map<String, String>> confirmPayment(
             @RequestBody Map<String, String> request,
-            Authentication auth) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         String sessionId = request.get("session_id");
 
         // El servicio valida y matrícula, o lanza excepción si falla
-        paymentService.confirmPayment(auth.getName(), sessionId);
+        paymentService.confirmPayment(userDetails, sessionId);
 
         return ResponseEntity.ok(Map.of("message", "Pago confirmado y curso activado"));
     }
