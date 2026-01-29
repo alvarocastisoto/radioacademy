@@ -36,9 +36,10 @@ public class JwtService {
     }
 
     // Generar token AUTOMÁTICAMENTE inyectando el rol del usuario
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(CustomUserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
-
+        extraClaims.put("userId", userDetails.getId());
+        extraClaims.put("nombre", userDetails.getNombre());
         // 1. Buscamos el rol del usuario (ADMIN, STUDENT, etc.)
         String role = userDetails.getAuthorities().stream()
                 .findFirst()

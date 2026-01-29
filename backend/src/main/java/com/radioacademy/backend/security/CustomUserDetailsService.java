@@ -28,10 +28,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Usamos SimpleGrantedAuthority con el nombre exacto del rol ("ADMIN" o
         // "STUDENT")
         // Sin prefijos "ROLE_" automáticos.
-        return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())
-                .authorities(new SimpleGrantedAuthority(user.getRole().name())) // <--- USO DIRECTO
-                .build();
+        return new CustomUserDetails(user);
     }
 }

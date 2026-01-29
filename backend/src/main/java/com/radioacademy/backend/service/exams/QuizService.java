@@ -7,6 +7,8 @@ import com.radioacademy.backend.repository.ModuleRepository;
 import com.radioacademy.backend.repository.UserRepository;
 import com.radioacademy.backend.repository.exams.QuizAttemptRepository;
 import com.radioacademy.backend.repository.exams.QuizRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -166,12 +168,11 @@ public class QuizService {
     // 3. ALUMNO: CORREGIR (FEEDBACK DETALLADO)
     // =========================================================================
     @Transactional
-    public QuizResultDTO submitQuiz(QuizSubmissionDTO submission, String userEmail) {
-        User user = userRepository.findByEmail(userEmail).orElseThrow();
+    public QuizResultDTO submitQuiz(QuizSubmissionDTO submission, CustomUserDetails userDetails) {
         Quiz quiz = quizRepository.findById(submission.quizId()).orElseThrow();
 
         QuizAttempt attempt = new QuizAttempt();
-        attempt.setUser(user);
+        attempt.setUser(userRepository.getReferenceById(userDetails.getId()));
         attempt.setQuiz(quiz);
         attempt.setCompletedAt(LocalDateTime.now());
 

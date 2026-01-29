@@ -11,6 +11,7 @@ import com.radioacademy.backend.event.PasswordResetEvent;
 import com.radioacademy.backend.event.UserRegistrationEvent;
 import com.radioacademy.backend.repository.PasswordResetTokenRepository;
 import com.radioacademy.backend.repository.UserRepository;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -66,7 +67,7 @@ public class AuthService {
         eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
 
         // 4. Generar Token
-        UserDetails userDetails = userDetailsService.loadUserByUsername(savedUser.getEmail());
+        CustomUserDetails userDetails = new CustomUserDetails(savedUser);
         String token = jwtService.generateToken(userDetails);
 
         return new AuthResponseDTO(token, toUserAuthDTO(savedUser));
@@ -85,7 +86,7 @@ public class AuthService {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+        CustomUserDetails userDetails = new CustomUserDetails(user);
         String token = jwtService.generateToken(userDetails);
 
         return new AuthResponseDTO(token, toUserAuthDTO(user));

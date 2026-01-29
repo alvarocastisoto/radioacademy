@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.radioacademy.backend.dto.exams.QuizDTO;
 import com.radioacademy.backend.dto.exams.QuizResultDTO;
 import com.radioacademy.backend.dto.exams.QuizSubmissionDTO;
+import com.radioacademy.backend.security.CustomUserDetails;
 import com.radioacademy.backend.service.exams.QuizService;
 
 import jakarta.validation.Valid;
@@ -50,11 +52,9 @@ public class QuizController {
 
     // 4. CORREGIR EXAMEN (Devuelve nota + Feedback visual)
     @PostMapping("/submit")
-    public ResponseEntity<QuizResultDTO> submitQuiz(
-            @RequestBody QuizSubmissionDTO submission,
-            Principal principal // Obtiene el usuario del Token JWT
-    ) {
-        return ResponseEntity.ok(quizService.submitQuiz(submission, principal.getName()));
+    public ResponseEntity<QuizResultDTO> submitQuiz(@RequestBody QuizSubmissionDTO submission,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(quizService.submitQuiz(submission, userDetails));
     }
 
     // 5. 🧠 SMART RETRY (Banco de Fallos)
