@@ -61,11 +61,14 @@ El proyecto está construido sobre cimientos sólidos utilizando las últimas te
 - **Persistencia**: Spring Data JPA / Hibernate
 - **Migraciones**: Flyway
 - **Seguridad**: Spring Security + JJWT
-- **Utilidades**: Lombok, MapStruct (si aplica)
+- **Utilidades**: Lombok
+- **Monitorización**: Spring Boot Actuator
 
 ### Frontend (Cliente)
 - **Framework**: Angular 21 (Última generación)
 - **Estilos**: Bootstrap 5.3 (Diseño responsivo)
+- **Estilos**: Bootstrap 5.3 + Bootstrap Icons
+- **Notificaciones**: SweetAlert2
 - **Lenguaje**: TypeScript
 - **Testing**: Vitest
 
