@@ -50,4 +50,21 @@ export class AdminService {
     const params = new HttpParams().set('newRole', newRole);
     return this.http.put(`${this.apiUrl}/users/${userId}/role`, {}, { params });
   }
+
+  // Métricas de la plataforma
+  registeredDaily(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/metrics/registered-daily`);
+  }
+
+  enrollmentsDaily(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/metrics/enrollments-daily`);
+  }
+
+  revenueDaily(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/metrics/revenue-daily`);
+  }
+
+  topCourses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/metrics/top-courses`);
+  }
 }

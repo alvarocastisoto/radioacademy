@@ -20,6 +20,8 @@ import { PaymentSuccessComponent } from './pages/payment/payment-success/payment
 import { PaymentCancel } from './pages/payment/payment-cancel/payment-cancel';
 import { QuizEditorComponent } from './pages/admin/quiz-editor/quiz-editor';
 import { EditCourseComponent } from './pages/admin/course-editor/course-editor';
+import { AdminMetricsComponent } from './pages/admin/admin-metrics/admin-metrics';
+
 // GUARDS
 import { authGuard } from './guards/auth-guard';
 import { adminGuard } from './guards/admin-guard';
@@ -67,6 +69,9 @@ export const routes: Routes = [
     component: QuizEditorComponent,
     canActivate: [adminGuard],
   },
+
+  // Métricas Admin
+  { path: 'admin/metrics', component: AdminMetricsComponent, canActivate: [adminGuard] },
 
   // --- ⚠️ COMODÍN (Siempre al final) ---
   { path: '**', redirectTo: '' },

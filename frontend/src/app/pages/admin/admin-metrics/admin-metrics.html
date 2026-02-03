@@ -1,0 +1,94 @@
+<div class="metrics-wrapper p-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-main mb-0">Panel de Métricas Administrativas</h2>
+    <div class="text-muted small">Datos actualizados en tiempo real</div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-5 glass-card">
+      <div class="spinner-border text-primary mb-3" role="status"></div>
+      <p class="text-muted">Analizando datos del servidor...</p>
+    </div>
+  } @else {
+    <div class="row g-4 mb-5">
+      <div class="col-12 col-xl-4">
+        <div class="glass-card p-3 h-100">
+          <h5 class="fw-bold text-main mb-3 h6">
+            <i class="bi bi-people me-2"></i>Usuarios Registrados
+          </h5>
+          <div class="chart-container" style="position: relative; height: 250px">
+            <canvas id="registeredChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="glass-card p-3 h-100">
+          <h5 class="fw-bold text-main mb-3 h6">
+            <i class="bi bi-cart-check me-2"></i>Nuevas Matrículas
+          </h5>
+          <div class="chart-container" style="position: relative; height: 250px">
+            <canvas id="enrollmentsChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-xl-4">
+        <div class="glass-card p-3 h-100 border-primary-subtle">
+          <h5 class="fw-bold text-main mb-3 h6">
+            <i class="bi bi-currency-euro me-2"></i>Ingresos Diarios
+          </h5>
+          <div class="chart-container" style="position: relative; height: 250px">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="glass-card p-4 overflow-hidden">
+          <div class="d-flex align-items-center gap-2 mb-4">
+            <i class="bi bi-trophy text-warning fs-4"></i>
+            <h3 class="fw-bold h5 text-main mb-0">Top Cursos (Rendimiento)</h3>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="border-0 rounded-start">ID del Curso</th>
+                  <th class="border-0">Matrículas Totales</th>
+                  <th class="border-0 rounded-end">Ingresos Totales</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (course of topCoursesData; track course.courseId) {
+                  <tr>
+                    <td class="fw-bold text-primary">#{{ course.courseId }}</td>
+                    <td>
+                      <span
+                        class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-3"
+                      >
+                        {{ course.enrollments }} alumnos
+                      </span>
+                    </td>
+                    <td class="fw-bold text-success">
+                      {{ formatEuro(course.revenue) }}
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="3" class="text-center py-4 text-muted small">
+                      No hay datos suficientes para mostrar el ranking aún.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
