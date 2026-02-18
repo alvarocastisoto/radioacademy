@@ -23,33 +23,33 @@ public class UserController {
 
     private final UserService userService;
 
-    // Obtener todos (GET /api/users)
+    
 
     @GetMapping
     public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
-    // // Crear usuario (POST /api/users)
-    // @PostMapping
-    // public ResponseEntity<User> createUser(@RequestBody User user) {
-    // return new ResponseEntity<>(userService.createUser(user),
-    // HttpStatus.CREATED);
-    // }
+    
+    
+    
+    
+    
+    
 
-    // Obtener mi perfil
+    
     @GetMapping("/profile")
     public ResponseEntity<UserProfileResponseDTO> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getMyProfile(userDetails));
     }
 
-    // Actualizar perfil
+    
     @PutMapping("/profile")
     public ResponseEntity<Map<String, String>> updateProfile(
             @Valid @RequestBody UserProfileDTO profileData,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // El servicio maneja toda la lógica (passwords, emails, ficheros)
+        
         return ResponseEntity.ok(userService.updateProfile(userDetails, profileData));
     }
 }

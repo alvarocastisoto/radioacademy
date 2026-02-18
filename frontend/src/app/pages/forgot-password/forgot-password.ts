@@ -7,21 +7,21 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink, CommonModule], // Importamos lo necesario
+  imports: [ReactiveFormsModule, RouterLink, CommonModule], 
   templateUrl: './forgot-password.html',
-  styleUrls: ['../login/login.scss'], // 👈 REUTILIZAMOS los estilos del Login
+  styleUrls: ['../login/login.scss'], 
 })
 export class ForgotPasswordComponent {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
 
-  // Formulario con un solo campo: email
+  
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
   });
 
-  message = ''; // Para mensaje de éxito
-  error = ''; // Para mensaje de error
+  message = ''; 
+  error = ''; 
   isLoading = false;
 
   onSubmit() {
@@ -31,7 +31,7 @@ export class ForgotPasswordComponent {
     this.message = '';
     this.error = '';
 
-    // 👇 EL CAMBIO ESTÁ AQUÍ: Añadimos "|| ''"
+    
     const email = this.form.get('email')?.value || '';
 
     this.authService.requestPasswordReset(email).subscribe({
@@ -42,7 +42,7 @@ export class ForgotPasswordComponent {
       },
       error: () => {
         this.isLoading = false;
-        // Para desarrollo puedes dejar esto para ver si falla algo en el back:
+        
         this.error = 'Hubo un error al procesar la solicitud.';
       },
     });

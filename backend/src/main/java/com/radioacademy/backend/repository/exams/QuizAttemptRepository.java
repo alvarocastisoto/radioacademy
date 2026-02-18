@@ -14,11 +14,11 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, UUID> 
 
     Optional<QuizAttempt> findTopByUserAndQuizIdOrderByCompletedAtDesc(User user, UUID quizId);
 
-    // 🧠 LA CONSULTA MAESTRA:
-    // Busca las respuestas (QuizAnswer) del usuario.
-    // Agrupa por pregunta.
-    // Filtra aquellas donde la respuesta MÁS RECIENTE (por fecha del intento) sea
-    // INCORRECTA.
+    
+    
+    
+    
+    
     @Query("""
                 SELECT qa.question.id
                 FROM QuizAnswer qa
@@ -35,6 +35,6 @@ public interface QuizAttemptRepository extends JpaRepository<QuizAttempt, UUID> 
                    ) = false
             """)
     List<UUID> findFailedQuestionIds(@Param("user") User user, @Param("quizId") UUID quizId);
-    // Nota: La lógica simplificada arriba asume que si la última es false, sigue en
-    // el banco de fallos.
+    
+    
 }

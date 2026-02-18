@@ -17,7 +17,6 @@ public class DataSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // Inyectamos los valores del properties
     @Value("${app.admin.email}")
     private String adminEmail;
 
@@ -31,21 +30,21 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Verificamos si el usuario admin ya existe
+        
         if (!userRepository.existsByEmail(adminEmail)) {
-            // 2. Si NO existe, lo creamos
+            
             User admin = new User();
             admin.setName("Super");
             admin.setSurname("Admin");
             admin.setEmail(adminEmail);
-            admin.setDni("00000000X"); // DNI dummy para admin
+            admin.setDni("00000000X"); 
             admin.setRegion("CyberSpace");
             admin.setPhone("000000000");
             admin.setTermsAccepted(true);
             admin.setCreatedAt(LocalDateTime.now());
 
             admin.setRole(Role.ADMIN);
-            // Encriptamos la contraseña antes de guardarla
+            
             admin.setPassword(passwordEncoder.encode(adminPassword));
             userRepository.save(admin);
             System.out.println("Admin user created with email: " + adminEmail);

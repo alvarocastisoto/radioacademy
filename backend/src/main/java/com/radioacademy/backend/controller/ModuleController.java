@@ -14,24 +14,24 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/modules")
-@RequiredArgsConstructor // Inyección por constructor automática
+@RequiredArgsConstructor 
 public class ModuleController {
 
     private final ModuleService moduleService;
 
-    // GET: Obtener todos los módulos
+    
     @GetMapping("/course/{courseId}")
     public ResponseEntity<List<ModuleRequest>> getModulesByCourse(@PathVariable UUID courseId) {
         return ResponseEntity.ok(moduleService.getModulesByCourse(courseId));
     }
 
-    // POST: Crear un módulo nuevo
+    
     @PostMapping
     public ResponseEntity<ModuleRequest> createModule(@Valid @RequestBody CreateModuleRequest request) {
         return new ResponseEntity<>(moduleService.createModule(request), HttpStatus.CREATED);
     }
 
-    // DELETE: Eliminar un módulo
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteModule(@PathVariable UUID id) {
         moduleService.deleteModule(id);

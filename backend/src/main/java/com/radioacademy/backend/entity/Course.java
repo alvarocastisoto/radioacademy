@@ -60,8 +60,8 @@ public class Course {
     @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Enrollment> enrollments = new HashSet<>();
 
-    // ✅ Lombok ya genera getCoverImage y setCoverImage.
-    // Borramos los manuales.
+    
+    
     @Column(name = "cover_image")
     private String coverImage;
 

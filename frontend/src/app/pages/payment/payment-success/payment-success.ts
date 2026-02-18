@@ -1,6 +1,6 @@
-import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core'; // 👈 1. Importa ChangeDetectorRef
+import { Component, inject, OnInit, ChangeDetectorRef } from '@angular/core'; 
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { PaymentService } from '../../../services/payment/payment'; // Asegúrate de que la ruta sea correcta
+import { PaymentService } from '../../../services/payment/payment'; 
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 export class PaymentSuccessComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private paymentService = inject(PaymentService);
-  private cdr = inject(ChangeDetectorRef); // 👈 2. Inyectamos el detector de cambios
+  private cdr = inject(ChangeDetectorRef); 
 
   status = 'Verificando pago...';
   isConfirmed = false;
@@ -20,18 +20,18 @@ export class PaymentSuccessComponent implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       const sessionId = params['session_id'];
-      console.log('🔎 Session ID recibido:', sessionId); // Chivato 1
+      console.log('🔎 Session ID recibido:', sessionId); 
 
       if (sessionId) {
         this.paymentService.confirmPayment(sessionId).subscribe({
           next: (res) => {
-            console.log('✅ Respuesta 200 del Backend:', res); // Chivato 2
+            console.log('✅ Respuesta 200 del Backend:', res); 
 
-            // Actualizamos variables
+            
             this.status = '¡Matrícula confirmada!';
             this.isConfirmed = true;
 
-            // 👇 3. FORZAMOS LA ACTUALIZACIÓN VISUAL
+            
             this.cdr.detectChanges();
           },
           error: (err) => {

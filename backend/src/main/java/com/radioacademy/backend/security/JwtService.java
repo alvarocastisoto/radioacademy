@@ -17,55 +17,55 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    // Debe ser una cadena larga y aleatoria (al menos 256 bits para HS256)
+    
     @org.springframework.beans.factory.annotation.Value("${security.jwt.secret-key}")
     private String secretKey;
 
     @org.springframework.beans.factory.annotation.Value("${security.jwt.expiration-time}")
     private long jwtExpiration;
 
-    // Extraer el nombre de usuario (email) del token
+    
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
-    // Extraer cualquier dato (claim) genérico
+    
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
-    // Generar token AUTOMÁTICAMENTE inyectando el rol del usuario
+    
     public String generateToken(CustomUserDetails userDetails) {
         Map<String, Object> extraClaims = new HashMap<>();
         extraClaims.put("userId", userDetails.getId());
         extraClaims.put("nombre", userDetails.getNombre());
-        // 1. Buscamos el rol del usuario (ADMIN, STUDENT, etc.)
+        
         String role = userDetails.getAuthorities().stream()
                 .findFirst()
                 .map(item -> item.getAuthority())
-                .orElse("STUDENT"); // Por si acaso no tuviera, ponemos uno por defecto
+                .orElse("STUDENT"); 
 
-        // 2. Lo metemos en el mapa
+        
         extraClaims.put("role", role);
 
-        // 3. Generamos el token con ese dato extra
+        
         return generateToken(extraClaims, userDetails);
     }
 
-    // Generar token con datos extra (claims) y el usuario
+    
     public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
-                .setSubject(userDetails.getUsername()) // El "Subject" es el email
+                .setSubject(userDetails.getUsername()) 
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration)) // 24 horas de validez
-                .signWith(getSignInKey(), SignatureAlgorithm.HS256) // Firmamos digitalmente
+                .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration)) 
+                .signWith(getSignInKey(), SignatureAlgorithm.HS256) 
                 .compact();
     }
 
-    // Validar si el token pertenece a este usuario y no ha caducado
+    
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);

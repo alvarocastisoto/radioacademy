@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
         if (!uploadsUri.endsWith("/"))
             uploadsUri += "/";
 
-        // Solo imágenes
+        
         registry.addResourceHandler("/uploads/images/**")
                 .addResourceLocations(uploadsUri + "images/");
     }

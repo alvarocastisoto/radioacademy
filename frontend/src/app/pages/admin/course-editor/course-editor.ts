@@ -54,7 +54,7 @@ export class EditCourseComponent implements OnInit {
         console.log('📦 Datos recibidos del Backend:', course);
 
         try {
-          // 1. Rellenamos el formulario (Usamos patchValue para ser tolerantes a faltas de campos)
+          
           this.editForm.patchValue({
             title: course.title,
             description: course.description,
@@ -63,9 +63,9 @@ export class EditCourseComponent implements OnInit {
             coverImage: course.coverImage,
           });
 
-          // 2. Previsualización de imagen (Protegemos contra nulos)
+          
           if (course.coverImage) {
-            // Si falla toPublicUrl, que no rompa toda la página
+            
             try {
               this.previewImage = this.mediaService.toPublicUrl(course.coverImage);
             } catch (imgError) {
@@ -77,7 +77,7 @@ export class EditCourseComponent implements OnInit {
         } catch (e) {
           console.error('🔥 Error CRÍTICO procesando datos en Angular:', e);
         } finally {
-          // 3. ESTO ES LO IMPORTANTE: Quitar el loading pase lo que pase
+          
           this.loading = false;
           this.cdr.detectChanges();
         }
@@ -85,7 +85,7 @@ export class EditCourseComponent implements OnInit {
       error: (err) => {
         console.error('❌ Error de red/servidor:', err);
         alert('Error al cargar el curso. Mira la consola.');
-        this.loading = false; // Quitar loading también si hay error
+        this.loading = false; 
         this.router.navigate(['/admin/courses']);
       },
     });
@@ -108,12 +108,12 @@ export class EditCourseComponent implements OnInit {
     if (this.editForm.invalid) return;
     this.submitting = true;
 
-    // A. ¿Hay nueva imagen? -> Subirla primero
+    
     if (this.selectedFile) {
-      // ✅ CORRECCIÓN 2: Pasamos el File directo (no FormData)
+      
       this.mediaService.uploadFile(this.selectedFile).subscribe({
         next: (relativePath) => {
-          // El servicio devuelve un string limpio (ej: "uploads/images/xxx.jpg")
+          
           this.editForm.patchValue({ coverImage: relativePath });
           this.saveCourseChanges();
         },
@@ -124,7 +124,7 @@ export class EditCourseComponent implements OnInit {
         },
       });
     } else {
-      // B. No hay imagen nueva -> Guardamos directamente
+      
       this.saveCourseChanges();
     }
   }
@@ -132,8 +132,8 @@ export class EditCourseComponent implements OnInit {
   saveCourseChanges() {
     const request = this.editForm.value;
 
-    // Convertir a DTO si es necesario (ej: price a número si viene como string)
-    // Angular suele manejarlo bien si el input es type="number"
+    
+    
 
     this.courseService.updateCourse(this.courseId, request).subscribe({
       next: () => {

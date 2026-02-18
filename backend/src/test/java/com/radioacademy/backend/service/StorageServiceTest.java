@@ -25,18 +25,18 @@ class StorageServiceTest {
     @BeforeEach
     void setUp() throws IOException {
         storageService = new StorageService();
-        // Redirect uploads to the temporary directory, deeper nesting to simulate
-        // "uploads" relative to project root
-        // effectively making tempDir act as the project root equivalent for this test's
-        // "uploadsRoot" logic
-        // But wait, the service does: relativePath =
-        // uploadsRoot.getParent().relativize(destinationFile)
-        // So if uploadsRoot is tempDir/uploads, parent is tempDir.
-        // dest is tempDir/uploads/images/file.
-        // relativize -> uploads/images/file. CORRECT.
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
         Path simulatedUploadsRoot = tempDir.resolve("uploads");
-        Files.createDirectories(simulatedUploadsRoot); // Create 'uploads' dir
+        Files.createDirectories(simulatedUploadsRoot); 
 
         ReflectionTestUtils.setField(storageService, "uploadsRoot", simulatedUploadsRoot);
         storageService.init();
@@ -53,16 +53,16 @@ class StorageServiceTest {
         assertTrue(path.startsWith("uploads/images/"));
         assertTrue(path.endsWith(".jpg"));
 
-        // Verify file exists in tempDir (path returned is relative "uploads/...", we
-        // mapped uploadsRoot to tempDir)
-        // Note: The service logic appends "uploads/images/..." to the path returned.
-        // But internally it resolves against uploadsRoot + "images".
+        
+        
+        
+        
 
-        // Let's check internal file system
+        
         Path imagesDir = tempDir.resolve("uploads/images");
         assertTrue(Files.exists(imagesDir));
 
-        // Find the file
+        
         String filename = path.substring(path.lastIndexOf("/") + 1);
         Path savedFile = imagesDir.resolve(filename);
         assertTrue(Files.exists(savedFile));
@@ -99,17 +99,17 @@ class StorageServiceTest {
 
     @Test
     void loadAsResource_ShouldReturnResource_WhenExists() throws IOException {
-        // Arrange: create a file manually in tempDir
+        
         Path imageDir = tempDir.resolve("uploads/images");
         Files.createDirectories(imageDir);
         Path file = imageDir.resolve("test.jpg");
         Files.writeString(file, "content");
 
-        // Act
-        // Service expects relative path like "uploads/images/test.jpg"
+        
+        
         Resource resource = storageService.loadAsResource("uploads/images/test.jpg");
 
-        // Assert
+        
         assertTrue(resource.exists());
         assertTrue(resource.isReadable());
     }
@@ -122,14 +122,14 @@ class StorageServiceTest {
 
     @Test
     void loadAsResource_ShouldThrow_WhenPathTraversal() {
-        // Attempt to go up
+        
         assertThrows(ResponseStatusException.class,
                 () -> storageService.loadAsResource("uploads/../../windows/system32/calc.exe"));
     }
 
     @Test
     void delete_ShouldRemoveFile() throws IOException {
-        // Arrange
+        
         Path imageDir = tempDir.resolve("uploads/images");
         Files.createDirectories(imageDir);
         Path file = imageDir.resolve("delete-me.jpg");
@@ -137,10 +137,10 @@ class StorageServiceTest {
 
         assertTrue(Files.exists(file));
 
-        // Act
+        
         storageService.delete("uploads/images/delete-me.jpg");
 
-        // Assert
+        
         assertFalse(Files.exists(file));
     }
 }

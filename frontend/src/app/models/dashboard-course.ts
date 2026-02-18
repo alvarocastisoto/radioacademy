@@ -2,7 +2,7 @@ export interface DashboardCourse {
   id: string;
   title: string;
   description: string;
-  coverImage: string | null; // La URL absoluta que viene del backend
+  coverImage: string | null; 
   pdfUrl: string | null;
   progress: number;
 }

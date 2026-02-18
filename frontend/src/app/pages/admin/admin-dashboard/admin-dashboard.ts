@@ -12,7 +12,7 @@ import { Router, RouterLink } from '@angular/router';
 export class AdminDashboard implements OnInit {
   private courseService = inject(CourseService);
 
-  // Usamos una señal para la lista, igual que en el course-list
+  
   courses = signal<any[]>([]);
 
   ngOnInit() {
@@ -30,7 +30,7 @@ export class AdminDashboard implements OnInit {
     if (confirm('¿Estás seguro de que quieres eliminar este curso? No hay vuelta atrás.')) {
       this.courseService.deleteCourse(id).subscribe({
         next: () => {
-          // Si se borra bien, recargamos la lista para que desaparezca
+          
           this.loadCourses();
           alert('Curso eliminado correctamente');
         },

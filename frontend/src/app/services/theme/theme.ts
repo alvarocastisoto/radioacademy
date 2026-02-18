@@ -1,4 +1,4 @@
-// src/app/services/theme/theme.ts
+
 import { Injectable, signal } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
@@ -7,7 +7,7 @@ export class ThemeService {
 
   constructor() {
     const savedTheme = localStorage.getItem('theme');
-    // Si no hay nada guardado, podemos chequear la preferencia del sistema
+    
     const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
     if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {

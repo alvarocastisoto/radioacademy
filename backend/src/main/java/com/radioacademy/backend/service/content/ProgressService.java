@@ -29,17 +29,17 @@ public class ProgressService {
         private final LessonRepository lessonRepository;
         private final EnrollmentRepository enrollmentRepository;
 
-        // 1. MARCAR / DESMARCAR (TOGGLE)
+        
         @Transactional
         public ToggleProgressResponse toggleProgress(UUID lessonId, CustomUserDetails userDetails) {
 
-                // 2. Obtener Lección (Necesario para saber el curso)
+                
                 Lesson lesson = lessonRepository.findById(lessonId)
                                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
                                                 "Lección no encontrada"));
 
-                // 3. SEGURIDAD: Validar matrícula
-                // Navegamos Lesson -> Module -> Course -> ID
+                
+                
                 UUID courseId = lesson.getModule().getCourse().getId();
 
                 boolean enrolled = enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), courseId);
@@ -48,10 +48,10 @@ public class ProgressService {
                                         "No tienes acceso a este curso (no matriculado).");
                 }
 
-                // 4. Lógica Toggle (Estilo limpio con orElseGet)
+                
                 LessonProgress progress = progressRepository.findByUserIdAndLessonId(userDetails.getId(), lessonId)
                                 .orElseGet(() -> {
-                                        // Si no existe, creamos uno nuevo inicializado en false (para invertirlo luego)
+                                        
                                         LessonProgress newP = new LessonProgress();
                                         newP.setUser(userRepository.getReferenceById(userDetails.getId()));
                                         newP.setLesson(lesson);
@@ -59,22 +59,22 @@ public class ProgressService {
                                         return newP;
                                 });
 
-                // 5. Invertir estado y Guardar
+                
                 boolean newState = !progress.isCompleted();
                 progress.setCompleted(newState);
 
                 progressRepository.save(progress);
 
-                // 6. Respuesta
+                
                 String msg = newState ? "Lección completada" : "Lección pendiente";
                 return new ToggleProgressResponse(lessonId, newState, msg);
         }
 
-        // 2. OBTENER PROGRESO CURSO
+        
         @Transactional(readOnly = true)
         public CourseProgressResponse getCourseProgress(UUID courseId, CustomUserDetails userDetails) {
 
-                // Query optimizada que devuelve solo IDs
+                
                 Set<UUID> completedIds = progressRepository.findCompletedLessonIdsByCourse(userDetails.getId(),
                                 courseId);
 

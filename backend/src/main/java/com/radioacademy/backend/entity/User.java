@@ -22,8 +22,8 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-@Getter // 👈 USA ESTO
-@Setter // 👈 Y ESTO
+@Getter 
+@Setter 
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
@@ -71,12 +71,12 @@ public class User implements UserDetails {
     @JsonIgnore
     private List<Enrollment> enrollments;
 
-    // =================================================================
-    // 👇 SOLUCIÓN AL BUCLE INFINITO DE MEMORIA 👇
-    // =================================================================
+    
+    
+    
 
-    // Sobrescribimos equals y hashCode para que SOLO miren el ID.
-    // Así rompemos el bucle al comparar objetos.
+    
+    
 
     @Override
     public boolean equals(Object o) {
@@ -93,15 +93,15 @@ public class User implements UserDetails {
         return Objects.hash(id);
     }
 
-    // =================================================================
-    // USER DETAILS IMPLEMENTATION
-    // =================================================================
+    
+    
+    
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         if (role == null)
             return List.of();
-        return List.of(new SimpleGrantedAuthority(role.name())); // Ojo: Si en BD es ROLE_ADMIN, aquí llegará bien
+        return List.of(new SimpleGrantedAuthority(role.name())); 
     }
 
     @Override
@@ -138,7 +138,7 @@ public class User implements UserDetails {
     @Column(name = "avatar")
     private String avatar;
 
-    // 👇 Y SUS GETTERS Y SETTERS
+    
     public String getAvatar() {
         return avatar;
     }
@@ -147,7 +147,7 @@ public class User implements UserDetails {
         this.avatar = avatar;
     }
 
-    // Helpers manuales si Lombok falla en algo específico
+    
     public void setPhone(String phone) {
         if (phone != null) {
             this.phone = phone.trim().replaceAll("\\s+", "");

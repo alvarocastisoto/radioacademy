@@ -45,7 +45,7 @@ class ProgressControllerTest {
 
         @BeforeEach
         void setUp() throws Exception {
-                // Make the JwtAuthenticationFilter pass through without doing anything
+                
                 doAnswer(invocation -> {
                         FilterChain chain = invocation.getArgument(2);
                         ServletRequest request = invocation.getArgument(0);
@@ -58,14 +58,14 @@ class ProgressControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void toggleProgress_ShouldMarkLessonCompleted() throws Exception {
-                // Arrange
+                
                 UUID lessonId = UUID.randomUUID();
                 ToggleProgressResponse response = new ToggleProgressResponse(
                                 lessonId, true, "Lección marcada como completada");
 
                 when(progressService.toggleProgress(any(), any())).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(post("/api/progress/{lessonId}/toggle", lessonId)
                                 .with(csrf()))
                                 .andExpect(status().isOk())
@@ -76,14 +76,14 @@ class ProgressControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void toggleProgress_ShouldUnmarkLessonCompleted() throws Exception {
-                // Arrange
+                
                 UUID lessonId = UUID.randomUUID();
                 ToggleProgressResponse response = new ToggleProgressResponse(
                                 lessonId, false, "Lección desmarcada");
 
                 when(progressService.toggleProgress(any(), any())).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(post("/api/progress/{lessonId}/toggle", lessonId)
                                 .with(csrf()))
                                 .andExpect(status().isOk())
@@ -94,7 +94,7 @@ class ProgressControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void getCourseProgress_ShouldReturnProgress() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 UUID lessonId1 = UUID.randomUUID();
                 UUID lessonId2 = UUID.randomUUID();
@@ -104,7 +104,7 @@ class ProgressControllerTest {
 
                 when(progressService.getCourseProgress(any(), any())).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/progress/course/{courseId}", courseId))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.completedCount").value(2));
@@ -113,14 +113,14 @@ class ProgressControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void getCourseProgress_ShouldReturnZeroProgress_WhenNoLessonsCompleted() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CourseProgressResponse response = new CourseProgressResponse(
                                 courseId, 0, Collections.emptySet());
 
                 when(progressService.getCourseProgress(any(), any())).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/progress/course/{courseId}", courseId))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.completedCount").value(0));

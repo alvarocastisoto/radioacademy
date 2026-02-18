@@ -28,22 +28,22 @@ public class UserService {
 
     private static final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{8,}$";
 
-    // // 1. OBTENER TODOS (ADMIN)
+    
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    // // 2. CREAR USUARIO (ADMIN/REGISTRO MANUAL)
-    // @Transactional
-    // public User createUser(User user) {
-    // // Encriptamos pass si viene en plano
-    // if (user.getPassword() != null) {
-    // user.setPassword(passwordEncoder.encode(user.getPassword()));
-    // }
-    // return userRepository.save(user);
-    // }
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
-    // 3. OBTENER MI PERFIL
+    
     public UserProfileResponseDTO getMyProfile(CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
@@ -58,38 +58,38 @@ public class UserService {
                 user.getRole() != null ? user.getRole().name() : null);
     }
 
-    // 4. ACTUALIZAR PERFIL (Lógica Compleja)
+    
     @Transactional
     public Map<String, String> updateProfile(CustomUserDetails userDetails, UserProfileDTO profileData) {
         User user = userRepository.findById(userDetails.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Usuario no encontrado"));
         boolean emailChanged = false;
 
-        // A. CAMBIO DE CONTRASEÑA
+        
         if (profileData.newPassword() != null && !profileData.newPassword().isBlank()) {
 
-            // 1. VALIDACIÓN MANUAL DE FORTALEZA (Lo que antes hacía el DTO)
+            
             if (!profileData.newPassword().matches(PASSWORD_PATTERN)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "La nueva contraseña debe ser fuerte: Min 8 caracteres, Mayúscula, Minúscula, Número y Especial.");
             }
 
-            // 2. Validar que envió la pass actual
+            
             if (profileData.currentPassword() == null || profileData.currentPassword().isBlank()) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                         "Debes introducir tu contraseña actual para confirmar el cambio.");
             }
 
-            // 3. Validar coincidencia
+            
             if (!passwordEncoder.matches(profileData.currentPassword(), user.getPassword())) {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "La contraseña actual es incorrecta.");
             }
 
-            // 4. Aplicar cambio
+            
             user.setPassword(passwordEncoder.encode(profileData.newPassword()));
         }
 
-        // B. CAMBIO DE EMAIL
+        
         if (profileData.email() != null && !profileData.email().isBlank()
                 && !profileData.email().equals(user.getEmail())) {
 
@@ -100,7 +100,7 @@ public class UserService {
             emailChanged = true;
         }
 
-        // C. DATOS BÁSICOS
+        
         if (profileData.name() != null)
             user.setName(profileData.name());
         if (profileData.surname() != null)
@@ -108,19 +108,19 @@ public class UserService {
         if (profileData.phone() != null)
             user.setPhone(profileData.phone());
 
-        // D. GESTIÓN DE AVATAR (Garbage Collection)
+        
         if (profileData.avatar() != null && !profileData.avatar().equals(user.getAvatar())) {
             String oldAvatarUrl = user.getAvatar();
             user.setAvatar(profileData.avatar());
 
-            // Borrado físico del antiguo
+            
             deleteOldAvatar(oldAvatarUrl);
         }
 
         userRepository.save(user);
         log.info("✅ Perfil actualizado: {}", user.getEmail());
 
-        // E. RESPUESTA INTELIGENTE
+        
         if (emailChanged) {
             return Map.of(
                     "message", "Perfil actualizado. Email cambiado, inicia sesión de nuevo.",
@@ -130,7 +130,7 @@ public class UserService {
         return Map.of("message", "Perfil actualizado correctamente");
     }
 
-    // --- Helpers Privados ---
+    
 
     private void deleteOldAvatar(String oldAvatarPathOrUrl) {
         if (oldAvatarPathOrUrl == null || oldAvatarPathOrUrl.isBlank())

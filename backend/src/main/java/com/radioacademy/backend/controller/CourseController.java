@@ -20,18 +20,18 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/courses")
-@RequiredArgsConstructor // 👈 Lombok hace la magia del constructor
+@RequiredArgsConstructor 
 public class CourseController {
 
     private final CourseService courseService;
 
-    // 1. OBTENER CURSOS (CATÁLOGO PÚBLICO)
+    
     @GetMapping
     public ResponseEntity<List<CourseDTO>> getAllCourses(Authentication authentication) {
         return ResponseEntity.ok(courseService.getAllCourses(authentication));
     }
 
-    // 2. CREAR CURSO (POST) - ADMIN
+    
     @PostMapping
     public ResponseEntity<CourseDetailDTO> createCourse(
             @Valid @RequestBody CreateCourseRequest request,
@@ -42,7 +42,7 @@ public class CourseController {
                 HttpStatus.CREATED);
     }
 
-    // 3. ACTUALIZAR CURSO (PUT) - ADMIN
+    
     @PutMapping("/{id}")
     public ResponseEntity<CourseDetailDTO> updateCourse(
             @PathVariable UUID id,
@@ -51,14 +51,14 @@ public class CourseController {
         return ResponseEntity.ok(courseService.updateCourse(id, request));
     }
 
-    // 4. BORRAR CURSO (DELETE) - ADMIN
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCourse(@PathVariable UUID id) {
         courseService.deleteCourse(id);
         return ResponseEntity.noContent().build();
     }
 
-    // 5. OBTENER MIS CURSOS (DASHBOARD ALUMNO)
+    
     @GetMapping("/mine")
     public ResponseEntity<List<CourseDashboardDTO>> getMyCourses(
             @AuthenticationPrincipal CustomUserDetails userDetails) {

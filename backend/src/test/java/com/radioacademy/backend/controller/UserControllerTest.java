@@ -63,7 +63,7 @@ class UserControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void getAllUsers_ShouldReturnUserList() throws Exception {
-                // Arrange
+                
                 User user = new User();
                 user.setId(UUID.randomUUID());
                 user.setEmail("test@test.com");
@@ -73,7 +73,7 @@ class UserControllerTest {
 
                 when(userService.getAllUsers()).thenReturn(users);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/users"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].email").value("test@test.com"));
@@ -82,14 +82,14 @@ class UserControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void getMyProfile_ShouldReturnProfile() throws Exception {
-                // Arrange
+                
                 UUID userId = UUID.randomUUID();
                 UserProfileResponseDTO profile = new UserProfileResponseDTO(
                                 userId, "John", "Doe", "test@test.com", "612345678", "avatar.jpg", "STUDENT");
 
                 when(userService.getMyProfile(any())).thenReturn(profile);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/users/profile"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.email").value("test@test.com"))
@@ -99,7 +99,7 @@ class UserControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void updateProfile_ShouldReturnSuccess() throws Exception {
-                // Arrange
+                
                 UUID userId = UUID.randomUUID();
                 UserProfileDTO profileData = new UserProfileDTO(
                                 userId, "John", "Doe", "test@test.com", "612345678", null, null, null);
@@ -107,7 +107,7 @@ class UserControllerTest {
 
                 when(userService.updateProfile(any(), any(UserProfileDTO.class))).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(put("/api/users/profile")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)

@@ -57,14 +57,14 @@ class MediaControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "ADMIN" })
     void uploadFile_ShouldReturnPath() throws Exception {
-        // Arrange
+        
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.pdf", "application/pdf", "test content".getBytes());
         String storedPath = "uploads/images/test.pdf";
 
         when(mediaService.uploadMedia(any(), any())).thenReturn(storedPath);
 
-        // Act & Assert
+        
         mockMvc.perform(multipart("/api/media/upload").file(file).with(csrf()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.path").value(storedPath));
@@ -73,7 +73,7 @@ class MediaControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com")
     void download_ShouldReturnResource() throws Exception {
-        // Arrange
+        
         String path = "uploads/images/test.jpg";
         byte[] content = "image content".getBytes();
         Resource resource = new ByteArrayResource(content) {
@@ -86,7 +86,7 @@ class MediaControllerTest {
         when(mediaService.loadMediaResource(path)).thenReturn(resource);
         when(mediaService.determineMediaType("test.jpg")).thenReturn(MediaType.APPLICATION_OCTET_STREAM);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/media/download")
                 .param("path", path)
                 .param("download", "true"))
@@ -97,7 +97,7 @@ class MediaControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com")
     void download_ShouldReturnInlineResource() throws Exception {
-        // Arrange
+        
         String path = "uploads/images/test.jpg";
         byte[] content = "image content".getBytes();
         Resource resource = new ByteArrayResource(content) {
@@ -110,7 +110,7 @@ class MediaControllerTest {
         when(mediaService.loadMediaResource(path)).thenReturn(resource);
         when(mediaService.determineMediaType("test.jpg")).thenReturn(MediaType.APPLICATION_OCTET_STREAM);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/media/download")
                 .param("path", path)
                 .param("download", "false"))

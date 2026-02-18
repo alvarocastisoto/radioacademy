@@ -8,6 +8,6 @@ public record LessonResponse(
                 String videoUrl,
                 String pdfUrl,
                 Integer orderIndex,
-                UUID moduleId // 👈 Solo devolvemos el ID del padre, no el objeto entero
+                UUID moduleId 
 ) {
 }

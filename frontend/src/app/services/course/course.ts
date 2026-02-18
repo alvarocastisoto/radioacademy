@@ -8,10 +8,10 @@ import { environment } from '../../../environments/environment';
 export class CourseService {
   private http = inject(HttpClient);
 
-  // 1. Definimos la raíz de la API para evitar errores de escritura
+  
   private readonly API_BASE = environment.apiUrl;
 
-  // --- CURSOS ---
+  
   getCourses(): Observable<any[]> {
     return this.http.get<any[]>(`${this.API_BASE}/courses`);
   }
@@ -23,17 +23,17 @@ export class CourseService {
   deleteCourse(courseId: string): Observable<any> {
     return this.http.delete<any>(`${this.API_BASE}/courses/${courseId}`);
   }
-  // OBTENER POR ID (Para rellenar el formulario)
+  
   getCourseById(id: string): Observable<any> {
     return this.http.get<any>(`${this.API_BASE}/courses/${id}`);
   }
 
-  // ACTUALIZAR (PUT)
+  
   updateCourse(id: string, courseData: any): Observable<any> {
     return this.http.put<any>(`${this.API_BASE}/courses/${id}`, courseData);
   }
 
-  // --- MÓDULOS ---
+  
   createModule(moduleData: any): Observable<any> {
     return this.http.post<any>(`${this.API_BASE}/modules`, moduleData);
   }
@@ -46,9 +46,9 @@ export class CourseService {
     return this.http.delete<any>(`${this.API_BASE}/modules/${moduleId}`);
   }
 
-  // --- LECCIONES ---
+  
 
-  // CORREGIDO: Ahora apunta a /api/lessons, no a /api/courses/lessons
+  
   createLesson(lessonData: FormData): Observable<any> {
     return this.http.post(`${this.API_BASE}/lessons`, lessonData);
   }
@@ -61,12 +61,12 @@ export class CourseService {
     return this.http.delete<any>(`${this.API_BASE}/lessons/${lessonId}`);
   }
 
-  // CORREGIDO: Ahora apunta bien
+  
   getLessonById(lessonId: string): Observable<any> {
     return this.http.get(`${this.API_BASE}/lessons/${lessonId}`);
   }
 
-  // CORREGIDO: Ahora apunta bien
+  
   updateLesson(lessonId: string, lessonData: FormData): Observable<any> {
     return this.http.put(`${this.API_BASE}/lessons/${lessonId}`, lessonData);
   }

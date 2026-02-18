@@ -1,49 +1,86 @@
+/* admin-metrics.scss */
+
 .metrics-wrapper {
-  padding: 16px;
-}
+  min-height: 100vh;
+  // Usamos las variables globales para que cambie solo al activar .dark-mode
+  background-color: var(--ra-bg);
+  transition: background-color 0.3s ease;
 
-.loading {
-  padding: 12px;
-  opacity: 0.8;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
-
-.card {
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 14px;
-}
-
-.card.full {
-  grid-column: 1 / -1;
-}
-
-.chart-box {
-  height: 260px; // clave para que el canvas tenga altura
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-
-  th,
-  td {
-    padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    text-align: left;
+  .text-main {
+    color: var(--ra-text-main) !important;
   }
 }
 
-.mono {
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
-  font-size: 12px;
+.glass-card {
+  // Ya tienes la lógica en styles.scss, aquí solo reforzamos
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    background 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--ra-shadow);
+  }
+}
+
+.chart-container {
+  // Asegura que el canvas respete el modo noche
+  canvas {
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.05));
+  }
+}
+
+/* Ajustes específicos para Tablas en Modo Noche */
+body.dark-mode {
+  .table {
+    --bs-table-hover-bg: rgba(255, 255, 255, 0.03);
+    border-color: var(--ra-border);
+
+    thead th {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+      color: var(--ra-text-main) !important;
+    }
+
+    tbody td {
+      color: var(--ra-text-muted);
+    }
+  }
+
+  // Las badges suelen brillar demasiado, les bajamos la opacidad
+  .badge.bg-info-subtle {
+    background-color: rgba(13, 202, 240, 0.15) !important;
+    color: #67e8f9 !important;
+  }
+}
+
+/* Estilo para los números de la tabla */
+.text-primary {
+  color: var(--ra-primary) !important;
+}
+
+.text-success {
+  color: #10b981 !important; // Un verde esmeralda que destaca en ambos modos
+}
+
+/* Animación de entrada para las cards */
+.row > div {
+  animation: fadeInUp 0.5s ease backwards;
+
+  @for $i from 1 through 4 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.1}s;
+    }
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

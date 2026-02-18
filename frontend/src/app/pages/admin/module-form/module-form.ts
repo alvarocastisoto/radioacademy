@@ -12,8 +12,8 @@ import { CourseService } from '../../../services/course/course';
 })
 export class ModuleForm implements OnInit {
   private fb = inject(FormBuilder);
-  private route = inject(ActivatedRoute); // Para leer la URL
-  private router = inject(Router); // Para navegar al terminar
+  private route = inject(ActivatedRoute); 
+  private router = inject(Router); 
   private courseService = inject(CourseService);
 
   courseId: string = '';
@@ -24,7 +24,7 @@ export class ModuleForm implements OnInit {
   });
 
   ngOnInit() {
-    // Capturamos el ID del curso de la URL
+    
     this.courseId = this.route.snapshot.paramMap.get('courseId') || '';
   }
 
@@ -32,11 +32,11 @@ export class ModuleForm implements OnInit {
     if (this.form.valid && this.courseId) {
       const moduleData = {
         ...this.form.value,
-        courseId: this.courseId, // Añadimos el ID del padre
+        courseId: this.courseId, 
       };
 
       this.courseService.createModule(moduleData).subscribe(() => {
-        // Al terminar, volvemos a la lista de contenidos
+        
         this.router.navigate(['/admin/courses', this.courseId, 'content']);
       });
     }

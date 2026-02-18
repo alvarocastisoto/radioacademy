@@ -8,12 +8,12 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   const user = authService.currentUser();
 
-  // ✅ SOLO miramos si hay usuario (sea alumno o admin)
+  
   if (user) {
     return true;
   }
 
-  // Si no está logueado, al login
-  router.navigate(['/login']); // Ojo: verifica si tu ruta es /login o /auth/login
+  
+  router.navigate(['/login']); 
   return false;
 };

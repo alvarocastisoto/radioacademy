@@ -52,7 +52,7 @@ class LessonControllerTest {
 
     @Test
     void getLessonsByModule_ShouldReturnLessonList() throws Exception {
-        // Arrange
+        
         UUID moduleId = UUID.randomUUID();
         UUID lessonId = UUID.randomUUID();
         LessonResponse lesson = new LessonResponse(
@@ -61,7 +61,7 @@ class LessonControllerTest {
 
         when(lessonService.getLessonsByModule(moduleId)).thenReturn(lessons);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/lessons/module/{moduleId}", moduleId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Lesson 1"))
@@ -70,7 +70,7 @@ class LessonControllerTest {
 
     @Test
     void getLessonById_ShouldReturnLesson() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         UUID moduleId = UUID.randomUUID();
         LessonResponse lesson = new LessonResponse(
@@ -78,7 +78,7 @@ class LessonControllerTest {
 
         when(lessonService.getLessonById(lessonId)).thenReturn(lesson);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/lessons/{id}", lessonId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Single Lesson"));
@@ -86,7 +86,7 @@ class LessonControllerTest {
 
     @Test
     void createLesson_ShouldReturnCreatedLesson() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         UUID moduleId = UUID.randomUUID();
         LessonResponse response = new LessonResponse(
@@ -97,7 +97,7 @@ class LessonControllerTest {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.pdf", "application/pdf", "test content".getBytes());
 
-        // Act & Assert
+        
         mockMvc.perform(multipart("/api/lessons")
                 .file(file)
                 .param("title", "New Lesson")
@@ -110,7 +110,7 @@ class LessonControllerTest {
 
     @Test
     void createLesson_WithoutFile_ShouldReturnCreatedLesson() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         UUID moduleId = UUID.randomUUID();
         LessonResponse response = new LessonResponse(
@@ -118,7 +118,7 @@ class LessonControllerTest {
 
         when(lessonService.createLesson(any(), any(), any(), any(), any())).thenReturn(response);
 
-        // Act & Assert
+        
         mockMvc.perform(multipart("/api/lessons")
                 .param("title", "New Lesson")
                 .param("videoUrl", "https://video.url")
@@ -130,11 +130,11 @@ class LessonControllerTest {
 
     @Test
     void deleteLesson_ShouldReturnNoContent() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         doNothing().when(lessonService).deleteLesson(lessonId);
 
-        // Act & Assert
+        
         mockMvc.perform(delete("/api/lessons/{id}", lessonId))
                 .andExpect(status().isNoContent());
 

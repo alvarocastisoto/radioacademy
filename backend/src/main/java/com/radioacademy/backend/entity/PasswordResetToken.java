@@ -16,13 +16,13 @@ public class PasswordResetToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false) // en BD ahora es nullable; esto lo endurece a nivel JPA
+    @Column(nullable = false) 
     private String token;
 
     @Column(name = "expiry_date", nullable = false)
     private LocalDateTime expiryDate;
 
     @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false, unique = true) // alinea con UNIQUE(user_id)
+    @JoinColumn(name = "user_id", nullable = false, unique = true) 
     private User user;
 }

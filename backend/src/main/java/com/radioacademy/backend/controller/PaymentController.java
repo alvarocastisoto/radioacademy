@@ -22,7 +22,7 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    // 1. CHECKOUT
+    
     @PostMapping("/checkout")
     public ResponseEntity<Map<String, String>> createCheckoutSession(
             @RequestBody Map<String, String> request,
@@ -30,13 +30,13 @@ public class PaymentController {
 
         UUID courseId = UUID.fromString(request.get("courseId"));
 
-        // El servicio devuelve la URL directa
+        
         String url = paymentService.createCheckoutSession(userDetails, courseId);
 
         return ResponseEntity.ok(Map.of("url", url));
     }
 
-    // 2. CONFIRMAR PAGO
+    
     @PostMapping("/confirm")
     public ResponseEntity<Map<String, String>> confirmPayment(
             @RequestBody Map<String, String> request,
@@ -44,7 +44,7 @@ public class PaymentController {
 
         String sessionId = request.get("session_id");
 
-        // El servicio valida y matrícula, o lanza excepción si falla
+        
         paymentService.confirmPayment(userDetails, sessionId);
 
         return ResponseEntity.ok(Map.of("message", "Pago confirmado y curso activado"));

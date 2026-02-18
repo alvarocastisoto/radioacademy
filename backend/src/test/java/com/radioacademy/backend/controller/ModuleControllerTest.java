@@ -51,7 +51,7 @@ class ModuleControllerTest {
 
     @Test
     void getModulesByCourse_ShouldReturnModuleList() throws Exception {
-        // Arrange
+        
         UUID courseId = UUID.randomUUID();
         UUID moduleId = UUID.randomUUID();
         ModuleRequest module = new ModuleRequest(moduleId, "Module 1", 1);
@@ -59,7 +59,7 @@ class ModuleControllerTest {
 
         when(moduleService.getModulesByCourse(courseId)).thenReturn(modules);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/modules/course/{courseId}", courseId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Module 1"))
@@ -68,7 +68,7 @@ class ModuleControllerTest {
 
     @Test
     void createModule_ShouldReturnCreatedModule() throws Exception {
-        // Arrange
+        
         UUID courseId = UUID.randomUUID();
         UUID moduleId = UUID.randomUUID();
         CreateModuleRequest request = new CreateModuleRequest("New Module", 1, courseId);
@@ -76,7 +76,7 @@ class ModuleControllerTest {
 
         when(moduleService.createModule(any(CreateModuleRequest.class))).thenReturn(response);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/modules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -86,11 +86,11 @@ class ModuleControllerTest {
 
     @Test
     void createModule_ShouldReturnBadRequest_WhenTitleMissing() throws Exception {
-        // Arrange - Missing title (validation should fail)
+        
         UUID courseId = UUID.randomUUID();
         String invalidJson = "{\"orderIndex\": 1, \"courseId\": \"" + courseId + "\"}";
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/modules")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(invalidJson))
@@ -99,11 +99,11 @@ class ModuleControllerTest {
 
     @Test
     void deleteModule_ShouldReturnNoContent() throws Exception {
-        // Arrange
+        
         UUID moduleId = UUID.randomUUID();
         doNothing().when(moduleService).deleteModule(moduleId);
 
-        // Act & Assert
+        
         mockMvc.perform(delete("/api/modules/{id}", moduleId))
                 .andExpect(status().isNoContent());
 

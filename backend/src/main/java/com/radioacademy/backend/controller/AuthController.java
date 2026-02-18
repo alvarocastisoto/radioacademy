@@ -13,16 +13,16 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor // Inyección por constructor automática
+@RequiredArgsConstructor 
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> register(@Valid @RequestBody RegisterRequest request) {
-        // El servicio lanzará ResponseStatusException si algo falla (ej: 409 Conflict)
-        // Spring captura esa excepción y devuelve el código HTTP correcto
-        // automáticamente.
+        
+        
+        
         return ResponseEntity.ok(authService.register(request));
     }
 
@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         authService.forgotPassword(request.get("email"));
-        // Siempre devolvemos OK por seguridad
+        
         return ResponseEntity.ok(Map.of("message", "Si el email existe, recibirás un correo."));
     }
 

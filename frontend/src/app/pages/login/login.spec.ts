@@ -7,7 +7,7 @@ import { of, throwError } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 describe('Login', () => {
-  let component: any; // Using any because of the name ambiguity
+  let component: any; 
   let fixture: ComponentFixture<any>;
   let authServiceSpy: any;
   let router: Router;
@@ -24,7 +24,7 @@ describe('Login', () => {
     })
       .compileComponents();
 
-    // Re-importing Login because it is standalone
+    
     TestBed.overrideComponent(Login, {
       add: { imports: [ReactiveFormsModule] }
     });

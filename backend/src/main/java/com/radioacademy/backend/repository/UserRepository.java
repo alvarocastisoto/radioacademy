@@ -13,20 +13,20 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
 
-    // Métodos personalizados
+    
     Optional<User> findByEmail(String email);
 
     boolean existsByEmail(String email);
 
     boolean existsByDni(String dni);
 
-    @Modifying // Indica que vamos a cambiar datos
-    @Transactional // Necesario para updates directos
+    @Modifying 
+    @Transactional 
     @Query("UPDATE User u SET u.name = :name, u.surname = :surname, u.phone = :phone, u.email = :email, u.password = :password WHERE u.id = :id")
     void updateProfileDirectly(UUID id, String name, String surname, String phone, String email, String password);
 
     @Modifying
-    @Transactional // Importante para que no dé error de transacción
+    @Transactional 
     @Query("UPDATE User u SET u.name = :name, u.surname = :surname, u.phone = :phone, u.email = :email, u.password = :password, u.avatar = :avatar WHERE u.id = :id")
     void updateProfileDirectly(
             @Param("id") UUID id,
@@ -35,7 +35,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
             @Param("phone") String phone,
             @Param("email") String email,
             @Param("password") String password,
-            @Param("avatar") String avatar // 👈 ¡ESTO ES LO QUE TE FALTA!
+            @Param("avatar") String avatar 
     );
 
 }

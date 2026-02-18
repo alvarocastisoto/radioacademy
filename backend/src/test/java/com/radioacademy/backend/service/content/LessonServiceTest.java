@@ -107,7 +107,7 @@ class LessonServiceTest {
         Lesson existing = new Lesson();
         existing.setId(lessonId);
         existing.setPdfUrl("uploads/pdfs/old.pdf");
-        existing.setModule(new Module()); // Avoid null pointer in mapToDTO
+        existing.setModule(new Module()); 
 
         MockMultipartFile newFile = new MockMultipartFile("file", "new.pdf", MediaType.APPLICATION_PDF_VALUE,
                 "new content".getBytes());

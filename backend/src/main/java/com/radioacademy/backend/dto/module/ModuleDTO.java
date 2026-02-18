@@ -11,7 +11,7 @@ public record ModuleDTO(
         String title,
         Integer orderIndex,
         UUID quizId,
-        List<LessonDTO> lessons // 👈 Lista anidada
+        List<LessonDTO> lessons 
 
 ) {
 }

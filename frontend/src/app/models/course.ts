@@ -5,5 +5,5 @@ export interface Course {
   coverImage: string;
   price: number;
   hours: number;
-  isPurchased: boolean; // 👈 CRÍTICO: Debe llamarse igual que en Java
+  isPurchased: boolean; 
 }

@@ -1,4 +1,4 @@
-// src/app/pages/course-details/course-details.ts
+
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule, CurrencyPipe } from '@angular/common';
@@ -15,9 +15,9 @@ import { MediaService } from '../../services/media/media';
 export class CourseDetails implements OnInit {
   private route = inject(ActivatedRoute);
   private courseService = inject(CourseService);
-  public mediaService = inject(MediaService); // Público para usarlo en el HTML si quieres
+  public mediaService = inject(MediaService); 
 
-  // Signals para reactividad
+  
   course = signal<any>(null);
   modules = signal<any[]>([]);
   loading = signal<boolean>(true);
@@ -33,7 +33,7 @@ export class CourseDetails implements OnInit {
     }
   }
 
-  // 1. Cargar metadatos del curso (Título, Precio, Imagen)
+  
   loadCourseData() {
     this.loading.set(true);
     this.courseService.getCourseById(this.courseId).subscribe({
@@ -48,38 +48,38 @@ export class CourseDetails implements OnInit {
     });
   }
 
-  // 2. Cargar Temario (Módulos y Lecciones)
+  
   loadSyllabus() {
     this.courseService.getCourseModules(this.courseId).subscribe((modulesData) => {
-      // Cargamos los módulos primero
+      
       this.modules.set(modulesData);
 
-      // Iteramos para cargar las lecciones de cada módulo
+      
       modulesData.forEach((modulo) => {
         this.courseService.getModuleLessons(modulo.id).subscribe((lessonsData) => {
           modulo.lessons = lessonsData;
-          // Forzamos actualización del signal creando un nuevo array reference
+          
           this.modules.update((current) => [...current]); 
         });
       });
     });
   }
 
-  // 3. Helper para la imagen de portada (Usa tu nuevo MediaService)
+  
   getCoverImageUrl(): string {
     const c = this.course();
-    if (!c || !c.coverImage) return 'assets/img/placeholder-course.jpg'; // Fallback
+    if (!c || !c.coverImage) return 'assets/img/placeholder-course.jpg'; 
     return this.mediaService.toPublicUrl(c.coverImage);
   }
 
-  // --- LÓGICA DE PDFS (Se mantiene igual, funciona bien) ---
+  
 
   openLessonPdf(lessonId: string) {
     this.mediaService.getLessonPdfBlob(lessonId, false).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         window.open(url, '_blank', 'noopener');
-        // Revocar URL tras 1 min para liberar memoria
+        
         setTimeout(() => URL.revokeObjectURL(url), 60_000);
       },
       error: (err) => {

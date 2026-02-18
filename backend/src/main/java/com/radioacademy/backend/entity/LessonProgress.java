@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
-import java.util.Objects; // 👈 Importa esto
+import java.util.Objects; 
 import java.util.UUID;
 
 @Entity
@@ -40,7 +40,7 @@ public class LessonProgress {
     @CreationTimestamp
     private LocalDateTime completedAt;
 
-    // 👇 AÑADE ESTO
+    
     @Override
     public boolean equals(Object o) {
         if (this == o)

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.Objects; // 👈 Importa esto
+import java.util.Objects; 
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Lesson {
     @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LessonProgress> progressList = new ArrayList<>();
 
-    // 👇 AÑADE ESTO
+    
     @Override
     public boolean equals(Object o) {
         if (this == o)

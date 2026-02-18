@@ -14,12 +14,12 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/progress")
-@RequiredArgsConstructor // Inyección automática del servicio
+@RequiredArgsConstructor 
 public class ProgressController {
 
     private final ProgressService progressService;
 
-    // 1. MARCAR / DESMARCAR LECCIÓN
+    
     @PostMapping("/{lessonId}/toggle")
     public ResponseEntity<ToggleProgressResponse> toggleProgress(
             @PathVariable UUID lessonId,
@@ -28,7 +28,7 @@ public class ProgressController {
         return ResponseEntity.ok(progressService.toggleProgress(lessonId, userDetails));
     }
 
-    // 2. OBTENER PROGRESO DE UN CURSO
+    
     @GetMapping("/course/{courseId}")
     public ResponseEntity<CourseProgressResponse> getCourseProgress(
             @PathVariable UUID courseId,

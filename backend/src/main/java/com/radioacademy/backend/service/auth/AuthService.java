@@ -41,15 +41,15 @@ public class AuthService {
     private final ApplicationEventPublisher eventPublisher;
     private final PasswordResetTokenRepository tokenRepository;
 
-    // ✅ REGISTRO
+    
     @Transactional
     public AuthResponseDTO register(RegisterRequest request) {
-        // 1. Validación: Si existe, lanzamos 409 CONFLICT
+        
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "El email ya está registrado.");
         }
 
-        // 2. Crear Entidad
+        
         User user = new User();
         user.setName(request.getName());
         user.setSurname(request.getSurname());
@@ -62,24 +62,24 @@ public class AuthService {
         user.setRole(Role.STUDENT);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // 3. Guardar y Eventos
+        
         User savedUser = userRepository.save(user);
         eventPublisher.publishEvent(new UserRegistrationEvent(this, savedUser));
 
-        // 4. Generar Token
+        
         CustomUserDetails userDetails = new CustomUserDetails(savedUser);
         String token = jwtService.generateToken(userDetails);
 
         return new AuthResponseDTO(token, toUserAuthDTO(savedUser));
     }
 
-    // ✅ LOGIN
+    
     public AuthResponseDTO login(LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.email(), request.password()));
         } catch (BadCredentialsException e) {
-            // Convertimos el error genérico en un 401 UNAUTHORIZED claro
+            
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
         }
 
@@ -97,7 +97,7 @@ public class AuthService {
         userRepository.findByEmail(email).ifPresent(user -> {
             String token = UUID.randomUUID().toString();
 
-            // 1 token activo por usuario: si existe, lo actualizamos; si no, lo creamos
+            
             PasswordResetToken reset = tokenRepository.findByUser_Id(user.getId())
                     .orElseGet(() -> new PasswordResetToken());
 
@@ -111,7 +111,7 @@ public class AuthService {
         });
     }
 
-    // ✅ RESET PASSWORD
+    
     @Transactional
     public void resetPassword(String token, String newPassword) {
         PasswordResetToken resetToken = tokenRepository.findByToken(token)
@@ -131,7 +131,7 @@ public class AuthService {
         tokenRepository.delete(resetToken);
     }
 
-    // --- Helpers Privados ---
+    
     private UserAuthDTO toUserAuthDTO(User user) {
         return new UserAuthDTO(
                 user.getId(), user.getName(), user.getSurname(), user.getEmail(),
@@ -139,7 +139,7 @@ public class AuthService {
     }
 
     private boolean isPasswordStrong(String password) {
-        // Regex simple: 8 chars, 1 numero, 1 mayus, 1 minus, 1 especial
+        
         return password.matches("^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[\\W_])(?=\\S+$).{8,}$");
     }
 }

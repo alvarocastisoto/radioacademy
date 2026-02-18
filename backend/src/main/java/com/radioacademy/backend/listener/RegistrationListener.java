@@ -1,6 +1,6 @@
 package com.radioacademy.backend.listener;
 
-import com.fasterxml.jackson.databind.ObjectMapper; // 👈 Ya lo tienes en Spring
+import com.fasterxml.jackson.databind.ObjectMapper; 
 import com.radioacademy.backend.entity.User;
 import com.radioacademy.backend.event.PasswordResetEvent;
 import com.radioacademy.backend.event.UserRegistrationEvent;
@@ -30,14 +30,14 @@ public class RegistrationListener {
     private String frontendBaseUrl;
 
     @Autowired
-    private ObjectMapper objectMapper; // 👈 Inyectamos la magia de Jackson
+    private ObjectMapper objectMapper; 
 
-    // Cliente HTTP reutilizable (mejor rendimiento)
+    
     private final HttpClient client = HttpClient.newHttpClient();
 
-    // ==========================================
-    // 1. EVENTO DE REGISTRO
-    // ==========================================
+    
+    
+    
     @Async
     @EventListener
     public void handleUserRegistration(UserRegistrationEvent event) {
@@ -50,9 +50,9 @@ public class RegistrationListener {
         sendEmail(user.getEmail(), "Bienvenido a RadioAcademy 🎙️", htmlContent);
     }
 
-    // ==========================================
-    // 2. EVENTO DE RECUPERACIÓN DE CONTRASEÑA
-    // ==========================================
+    
+    
+    
     @Async
     @EventListener
     public void handlePasswordReset(PasswordResetEvent event) {
@@ -72,15 +72,15 @@ public class RegistrationListener {
         sendEmail(user.getEmail(), "Recuperación de Contraseña 🔐", htmlContent);
     }
 
-    // ==========================================
-    // 🛠️ MÉTODO PRIVADO (DRY - Don't Repeat Yourself)
-    // ==========================================
+    
+    
+    
     private void sendEmail(String to, String subject, String html) {
         try {
-            // Creamos el Map y dejamos que Jackson lo convierta a JSON perfecto
+            
             Map<String, Object> emailData = Map.of(
                     "from", "onboarding@resend.dev",
-                    "to", new String[] { to }, // Resend espera un array
+                    "to", new String[] { to }, 
                     "subject", subject,
                     "html", html);
 

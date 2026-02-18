@@ -96,3 +96,18 @@ body {
 body.dark-mode .navbar {
   background-color: rgba(2, 6, 23, 0.9) !important;
 }
+
+.has-icon {
+  position: relative;
+  .icon-left {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ra-text-muted);
+    z-index: 5;
+  }
+  .form-control {
+    padding-left: 45px; // Deja espacio para el icono
+  }
+}

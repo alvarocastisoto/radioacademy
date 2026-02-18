@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
         org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration.class
 })
-@AutoConfigureMockMvc(addFilters = false) // Disable security filters for simple controller testing
+@AutoConfigureMockMvc(addFilters = false) 
 class AuthControllerTest {
 
     @Autowired
@@ -50,10 +50,10 @@ class AuthControllerTest {
 
     @Test
     void register_ShouldReturnToken_WhenSuccess() throws Exception {
-        // Arrange
+        
         RegisterRequest request = new RegisterRequest();
         request.setEmail("newuser@test.com");
-        request.setPassword("Password123!"); // Valid: uppercase, lowercase, number, special char
+        request.setPassword("Password123!"); 
         request.setName("New");
         request.setSurname("User");
         request.setDni("12345678Z");
@@ -65,7 +65,7 @@ class AuthControllerTest {
 
         when(authService.register(any(RegisterRequest.class))).thenReturn(response);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -75,14 +75,14 @@ class AuthControllerTest {
 
     @Test
     void login_ShouldReturnToken_WhenCredentialsValid() throws Exception {
-        // Arrange
+        
         LoginRequest request = new LoginRequest("user@test.com", "password");
 
         AuthResponseDTO response = new AuthResponseDTO("login-token", null);
 
         when(authService.login(any(LoginRequest.class))).thenReturn(response);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -92,12 +92,12 @@ class AuthControllerTest {
 
     @Test
     void register_ShouldReturnBadRequest_WhenEmailInvalid() throws Exception {
-        // Arrange
+        
         RegisterRequest request = new RegisterRequest();
-        request.setEmail("invalid-email"); // Invalid format
+        request.setEmail("invalid-email"); 
         request.setPassword("pass");
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))

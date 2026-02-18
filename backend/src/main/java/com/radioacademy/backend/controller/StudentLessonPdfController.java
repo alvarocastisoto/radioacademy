@@ -25,40 +25,40 @@ public class StudentLessonPdfController {
             @RequestParam(defaultValue = "false") boolean download,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
-        // 1. Delegamos al servicio la lógica de seguridad y carga
+        
         Resource resource = studentService.getLessonPdf(lessonId, userDetails);
 
-        // 2. Preparar Headers de Presentación (Responsabilidad del Controller)
+        
         String filename = inferFilename(resource, lessonId);
         String disposition = (download ? "attachment" : "inline") + "; filename=\"" + safeFilename(filename) + "\"";
 
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
-                .cacheControl(CacheControl.noStore()) // Seguridad: No cachear en navegador
+                .cacheControl(CacheControl.noStore()) 
                 .body(resource);
     }
 
-    // --- Helpers de Presentación HTTP ---
+    
 
     private String inferFilename(Resource resource, UUID lessonId) {
         try {
-            // Intentamos sacar el nombre real del fichero físico
+            
             if (resource.getFilename() != null && !resource.getFilename().isBlank()) {
                 return resource.getFilename();
             }
-            // Si el path es complejo, intentamos parsearlo (aunque resource.getFilename
-            // suele bastar)
-            // Aquí simplificamos respecto a tu versión anterior porque 'Resource' suele
-            // tener el nombre.
+            
+            
+            
+            
         } catch (Exception ignored) {
         }
 
-        return "lesson-" + lessonId + ".pdf"; // Fallback
+        return "lesson-" + lessonId + ".pdf"; 
     }
 
     private String safeFilename(String name) {
-        // Evita caracteres raros en la cabecera HTTP
+        
         return name.replaceAll("[^a-zA-Z0-9._-]", "_");
     }
 }

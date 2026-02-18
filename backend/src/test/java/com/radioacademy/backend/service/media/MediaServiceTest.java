@@ -32,10 +32,10 @@ class MediaServiceTest {
 
     @Test
     void uploadMedia_ShouldThrow_WhenFileTooLarge() {
-        // Enforce size check mock or rely on logic inside?
-        // The service checks file.getSize().
+        
+        
         MockMultipartFile file = spy(new MockMultipartFile("file", "large.png", "image/png", new byte[10]));
-        when(file.getSize()).thenReturn(21L * 1024 * 1024); // 21 MB
+        when(file.getSize()).thenReturn(21L * 1024 * 1024); 
 
         ResponseStatusException ex = assertThrows(ResponseStatusException.class,
                 () -> mediaService.uploadMedia(file));
@@ -63,7 +63,7 @@ class MediaServiceTest {
 
     @Test
     void loadMediaResource_ShouldThrow_WhenPathRestricted() {
-        // Direct access to PDFs is forbidden
+        
         assertThrows(ResponseStatusException.class,
                 () -> mediaService.loadMediaResource("uploads/pdfs/secret.pdf"));
     }

@@ -42,46 +42,46 @@ public class StorageService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tipo de archivo desconocido.");
             }
 
-            // 1. Determinar directorio base y construir ruta destino
-            String baseCategory = resolveBaseCategory(contentType); // "images" o "pdfs"
+            
+            String baseCategory = resolveBaseCategory(contentType); 
             Path targetDir;
 
             if (baseCategory.equals("images") && subFolder != null && !subFolder.isBlank()) {
-                // Validación de seguridad para el nombre de la carpeta
+                
                 if (subFolder.contains("..") || subFolder.contains("/") || subFolder.contains("\\")) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Nombre de carpeta inválido.");
                 }
-                // uploads/images/courses
+                
                 targetDir = uploadsRoot.resolve("images").resolve(subFolder);
             } else {
-                // uploads/images o uploads/pdfs (sin subcarpeta extra)
+                
                 targetDir = uploadsRoot.resolve(baseCategory);
             }
 
-            // Crear directorios si no existen
+            
             if (!Files.exists(targetDir)) {
                 Files.createDirectories(targetDir);
             }
 
-            // 2. Generar nombre único
+            
             String extension = detectExtension(file.getOriginalFilename(), contentType);
             String filename = UUID.randomUUID() + extension;
 
-            // 3. Validar ruta final (Anti Path Traversal)
+            
             Path destinationFile = targetDir.resolve(filename).normalize().toAbsolutePath();
             if (!destinationFile.startsWith(uploadsRoot)) {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ruta inválida.");
             }
 
-            // 4. Copiar archivo
+            
             try (InputStream inputStream = file.getInputStream()) {
                 Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
 
-            // 5. Retornar ruta relativa para BBDD
-            // Ejemplo: uploads/images/courses/uuid.jpg
-            // Calculamos la ruta relativa respecto al root del proyecto para que sea
-            // portable
+            
+            
+            
+            
             Path relativePath = uploadsRoot.getParent().relativize(destinationFile);
             return relativePath.toString().replace("\\", "/");
 
@@ -91,7 +91,7 @@ public class StorageService {
         }
     }
 
-    // Sobrecarga para mantener compatibilidad si alguien llama sin carpeta
+    
     public String store(MultipartFile file) {
         return store(file, null);
     }
@@ -107,7 +107,7 @@ public class StorageService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Path inválido.");
             }
 
-            // Quitamos "uploads/" para resolverlo contra uploadsRoot
+            
             String withoutPrefix = normalized.substring("uploads/".length());
             Path file = uploadsRoot.resolve(withoutPrefix).normalize().toAbsolutePath();
 

@@ -21,19 +21,19 @@ export class Navbar {
   onScroll() {
     const currentScroll = window.scrollY || document.documentElement.scrollTop;
 
-    // 1. Estilo visual (glass vs solido)
+    
     this.isScrolled = currentScroll > 20;
 
-    // 2. Lógica de esconder (Navbar inteligente)
+    
     if (currentScroll > this.lastScrollTop && currentScroll > 100) {
-      // Si bajamos Y hemos pasado 100px, escondemos
+      
       this.isHidden = true;
     } else {
-      // Si subimos, mostramos
+      
       this.isHidden = false;
     }
 
-    // Actualizamos la última posición (evitando números negativos en Safari mobile)
+    
     this.lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
   }
 

@@ -42,7 +42,7 @@ public class Option {
         return id != null && Objects.equals(id, option.id);
     }
 
-    // 👇 CAMBIO 2: HashCode constante
+    
     @Override
     public int hashCode() {
         return getClass().hashCode();

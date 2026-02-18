@@ -60,14 +60,14 @@ class PaymentControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
     void createCheckoutSession_ShouldReturnUrl() throws Exception {
-        // Arrange
+        
         UUID courseId = UUID.randomUUID();
         Map<String, String> request = Map.of("courseId", courseId.toString());
         String checkoutUrl = "https://stripe.com/checkout/session123";
 
         when(paymentService.createCheckoutSession(any(), any())).thenReturn(checkoutUrl);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/payment/checkout")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -79,11 +79,11 @@ class PaymentControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
     void confirmPayment_ShouldReturnSuccess() throws Exception {
-        // Arrange
+        
         Map<String, String> request = Map.of("session_id", "session_123abc");
         doNothing().when(paymentService).confirmPayment(any(), any());
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/payment/confirm")
                 .with(csrf())
                 .contentType(MediaType.APPLICATION_JSON)

@@ -7,6 +7,6 @@ public record CreateLessonRequest(
                 String videoUrl,
                 String pdfUrl,
                 Integer orderIndex,
-                UUID moduleId // A que módulo pertenece
+                UUID moduleId 
 ) {
 }

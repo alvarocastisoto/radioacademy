@@ -37,21 +37,21 @@ public class PaymentService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final EnrollmentService enrollmentService; // 👈 Conectamos con el servicio de matrículas
+    private final EnrollmentService enrollmentService; 
 
-    // ✅ Inicializa Stripe una sola vez al arrancar la app
+    
     @PostConstruct
     public void init() {
         Stripe.apiKey = stripeApiKey;
     }
 
-    // 1. CREAR SESIÓN DE PAGO
+    
     public String createCheckoutSession(CustomUserDetails userDetails, UUID courseId) {
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
-        // Regla de Negocio: No pagar dos veces por lo mismo
+        
         if (enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), courseId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ya tienes este curso.");
         }
@@ -82,42 +82,42 @@ public class PaymentService {
             return session.getUrl();
 
         } catch (Exception e) {
-            // Convertimos errores de Stripe en errores HTTP manejables
+            
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Error con Stripe: " + e.getMessage());
         }
     }
 
-    // 2. CONFIRMAR PAGO
-    // 2. CONFIRMAR PAGO
+    
+    
     @Transactional
     public void confirmPayment(CustomUserDetails userDetails, String sessionId) {
 
         try {
             Session session = Session.retrieve(sessionId);
 
-            // 🛑 1. VERIFICACIÓN DE PROPIEDAD (SEGURIDAD CRÍTICA)
-            // Comprobamos que el usuario que inició el pago es el mismo que lo confirma
+            
+            
             String clientRef = session.getClientReferenceId();
 
             if (clientRef == null || !clientRef.equals(userDetails.getId().toString())) {
-                // Logueamos esto como advertencia de seguridad
+                
                 System.err.println(
                         "🚨 SEGURIDAD: Usuario " + userDetails.getId() + " intentó apropiarse de la sesión "
                                 + sessionId);
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Esta sesión de pago no te pertenece.");
             }
 
-            // 🛑 2. VERIFICACIÓN DE ESTADO
+            
             if ("paid".equals(session.getPaymentStatus())) {
                 UUID courseId = UUID.fromString(session.getMetadata().get("course_id"));
                 enrollmentService.enrollUser(userDetails.getId(), courseId, session.getPaymentIntent());
             } else {
-                // Puede ser 'unpaid' o 'no_payment_required'
+                
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El pago no se ha completado o ha fallado.");
             }
 
         } catch (ResponseStatusException e) {
-            throw e; // Relanzamos nuestras propias excepciones
+            throw e; 
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "Error verificando pago: " + e.getMessage());

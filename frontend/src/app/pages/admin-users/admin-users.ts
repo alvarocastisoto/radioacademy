@@ -12,26 +12,26 @@ import Swal from 'sweetalert2';
   styleUrl: './admin-users.scss',
 })
 export class AdminUsersComponent implements OnInit {
-  // Inyecciones de dependencias
+  
   private adminService = inject(AdminService);
   private cdr = inject(ChangeDetectorRef);
 
-  // Datos principales
-  users: any[] = []; // Lista completa original
-  filteredUsers: any[] = []; // Lista filtrada (la que se ve en la tabla)
-  courses: any[] = []; // Lista de todos los cursos (para el desplegable)
-  userCourses: any[] = []; // Cursos del usuario seleccionado (panel lateral)
+  
+  users: any[] = []; 
+  filteredUsers: any[] = []; 
+  courses: any[] = []; 
+  userCourses: any[] = []; 
 
-  // Estado de la interfaz
+  
   selectedUser: any = null;
-  searchTerm: string = ''; // Texto del buscador
-  selectedCourseIdToAdd: any = null; // ID del curso a añadir (UUID es string)
+  searchTerm: string = ''; 
+  selectedCourseIdToAdd: any = null; 
 
-  // Configuración de Roles
+  
   availableRoles = ['STUDENT', 'ADMIN', 'TEACHER'];
   roleLabels: any = {
     STUDENT: 'Alumno',
-    USER: 'Alumno', // Por si acaso
+    USER: 'Alumno', 
     ADMIN: 'Administrador',
     TEACHER: 'Profesor',
   };
@@ -40,22 +40,22 @@ export class AdminUsersComponent implements OnInit {
     this.loadData();
   }
 
-  // ==========================================
-  // 1. CARGA DE DATOS INICIAL
-  // ==========================================
+  
+  
+  
   loadData() {
-    // A. Cargar Usuarios
+    
     this.adminService.getUsers().subscribe({
       next: (data) => {
         console.log('✅ Usuarios cargados:', data);
         this.users = data;
-        this.filteredUsers = data; // Al inicio, mostramos todos
-        this.cdr.detectChanges(); // Forzar repintado
+        this.filteredUsers = data; 
+        this.cdr.detectChanges(); 
       },
       error: (e) => console.error('Error cargando usuarios:', e),
     });
 
-    // B. Cargar Cursos (versión ligera para el select)
+    
     this.adminService.getCoursesLight().subscribe({
       next: (data) => {
         this.courses = data;
@@ -64,17 +64,17 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  // ==========================================
-  // 2. LÓGICA DEL BUSCADOR
-  // ==========================================
+  
+  
+  
   filterUsers() {
     const term = this.searchTerm.toLowerCase().trim();
 
-    // Si no hay texto, mostramos todos
+    
     if (!term) {
       this.filteredUsers = this.users;
     } else {
-      // Filtramos por Nombre, Email o DNI
+      
       this.filteredUsers = this.users.filter(
         (user) =>
           (user.fullName && user.fullName.toLowerCase().includes(term)) ||
@@ -84,13 +84,13 @@ export class AdminUsersComponent implements OnInit {
     }
   }
 
-  // ==========================================
-  // 3. SELECCIÓN DE USUARIO
-  // ==========================================
+  
+  
+  
   selectUser(user: any) {
     this.selectedUser = user;
-    this.selectedCourseIdToAdd = null; // Limpiar selector de curso
-    this.loadUserCourses(user.id); // Cargar sus cursos específicos
+    this.selectedCourseIdToAdd = null; 
+    this.loadUserCourses(user.id); 
   }
 
   loadUserCourses(userId: string) {
@@ -100,14 +100,14 @@ export class AdminUsersComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        this.userCourses = []; // Si falla, lista vacía
+        this.userCourses = []; 
       },
     });
   }
 
-  // ==========================================
-  // 4. GESTIÓN DE MATRÍCULAS
-  // ==========================================
+  
+  
+  
   addCourse() {
     if (!this.selectedUser || !this.selectedCourseIdToAdd) return;
 
@@ -128,12 +128,12 @@ export class AdminUsersComponent implements OnInit {
       error: (err) => {
         console.error('Error matriculando:', err);
 
-        // 👇 AQUÍ ESTÁ LA CLAVE: Leemos el mensaje del backend
+        
         const msg = err.error?.message || 'Error desconocido al matricular.';
 
         Swal.fire({
           title: 'No se pudo matricular',
-          text: msg, // 👈 Mostramos "Este usuario YA está matriculado..."
+          text: msg, 
           icon: 'error',
           confirmButtonColor: '#4f46e5',
         });
@@ -167,7 +167,7 @@ export class AdminUsersComponent implements OnInit {
             Toast.fire({ icon: 'success', title: 'Acceso eliminado correctamente' });
           },
           error: (err) => {
-            // 👇 También aquí leemos el error real
+            
             const msg = err.error?.message || 'No se pudo eliminar el curso.';
             Swal.fire('Error', msg, 'error');
           },
@@ -176,15 +176,15 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  // ==========================================
-  // 5. GESTIÓN DE ROLES
-  // ==========================================
+  
+  
+  
   updateRole(newRole: string) {
     if (!this.selectedUser) return;
 
     const roleName = this.roleLabels[newRole] || newRole;
 
-    // 🔥 CONFIRMACIÓN DE CAMBIO DE ROL
+    
     Swal.fire({
       title: '¿Cambiar Rol?',
       html: `Vas a cambiar el rol de <b>${this.selectedUser.fullName}</b> a <br><span class="badge bg-primary fs-5 mt-2">${roleName}</span>`,
@@ -212,8 +212,8 @@ export class AdminUsersComponent implements OnInit {
           error: () => Swal.fire('Error', 'No se pudo cambiar el rol', 'error'),
         });
       } else {
-        // Si cancela, forzamos un repintado para que el Select vuelva a su sitio visualmente
-        // (truco sucio pero efectivo para que no parezca que cambió)
+        
+        
         const oldRole = this.selectedUser.role;
         this.selectedUser.role = null;
         this.cdr.detectChanges();
@@ -222,9 +222,9 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  // ==========================================
-  // 6. UTILIDADES VISUALES (AVATAR)
-  // ==========================================
+  
+  
+  
   getInitials(fullName: string): string {
     if (!fullName) return '';
     const parts = fullName.trim().split(' ');

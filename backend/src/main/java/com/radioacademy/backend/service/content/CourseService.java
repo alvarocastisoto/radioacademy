@@ -31,15 +31,15 @@ public class CourseService {
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
     private final EnrollmentRepository enrollmentRepository;
-    private final StorageService storageService; // Inyectamos servicio de ficheros
+    private final StorageService storageService; 
 
-    // 1. OBTENER CURSOS (CATÁLOGO PÚBLICO)
+    
     @Transactional(readOnly = true)
     public List<CourseDTO> getAllCourses(Authentication authentication) {
         List<Course> courses = courseRepository.findAll();
         Set<UUID> purchasedCourseIds = new HashSet<>();
 
-        // Lógica: Si está logueado, buscamos qué ha comprado
+        
         if (authentication != null && authentication.isAuthenticated() &&
                 !authentication.getName().equals("anonymousUser")) {
 
@@ -56,11 +56,11 @@ public class CourseService {
                 course.getCoverImage(),
                 course.getPrice(),
                 course.getHours(),
-                purchasedCourseIds.contains(course.getId()) // true/false
+                purchasedCourseIds.contains(course.getId()) 
         )).toList();
     }
 
-    // 2. CREAR CURSO
+    
     @Transactional
     public CourseDetailDTO createCourse(CreateCourseRequest request, CustomUserDetails userDetails) {
 
@@ -77,13 +77,13 @@ public class CourseService {
         return mapToDetailDTO(savedCourse);
     }
 
-    // 3. ACTUALIZAR CURSO
+    
     @Transactional
     public CourseDetailDTO updateCourse(UUID id, CreateCourseRequest request) {
         Course existingCourse = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
-        // Lógica de borrado de imagen antigua (Clean Code)
+        
         if (request.coverImage() != null && !request.coverImage().equals(existingCourse.getCoverImage())) {
             deleteImageFile(existingCourse.getCoverImage());
             existingCourse.setCoverImage(request.coverImage());
@@ -98,26 +98,26 @@ public class CourseService {
         return mapToDetailDTO(updatedCourse);
     }
 
-    // 4. BORRAR CURSO
+    
     @Transactional
     public void deleteCourse(UUID id) {
         Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Curso no encontrado"));
 
-        // Borrar imagen física
+        
         deleteImageFile(course.getCoverImage());
 
         courseRepository.delete(course);
     }
 
-    // 5. OBTENER MIS CURSOS (ALUMNO)
+    
     @Transactional(readOnly = true)
     public List<CourseDashboardDTO> getMyCourses(CustomUserDetails userDetails) {
         List<Enrollment> enrollments = enrollmentRepository.findByUserId(userDetails.getId());
 
         return enrollments.stream().map(enrollment -> {
             Course course = enrollment.getCourse();
-            // TODO: Conectar con ProgressRepository real cuando lo tengas aquí inyectado
+            
             int progress = 0;
 
             return new CourseDashboardDTO(
@@ -136,7 +136,7 @@ public class CourseService {
 
         return mapToDetailDTO(course);
     }
-    // --- Helpers Privados (Limpian el código principal) ---
+    
 
     private CourseDetailDTO mapToDetailDTO(Course course) {
         return new CourseDetailDTO(

@@ -20,12 +20,12 @@ export class LessonForm implements OnInit {
   moduleId: string = '';
   lessonId: string = '';
   isEditMode: boolean = false;
-  selectedFile: File | null = null; // 📂 AQUÍ GUARDAMOS EL ARCHIVO
+  selectedFile: File | null = null; 
 
   form: FormGroup = this.fb.group({
     title: ['', [Validators.required]],
     videoUrl: [''],
-    pdfUrl: [''], // Este campo guardará la URL antigua si estamos editando
+    pdfUrl: [''], 
     orderIndex: [1, [Validators.required]],
   });
 
@@ -46,7 +46,7 @@ export class LessonForm implements OnInit {
         this.form.patchValue({
           title: lesson.title,
           videoUrl: lesson.videoUrl,
-          pdfUrl: lesson.pdfUrl, // Guardamos la referencia visual
+          pdfUrl: lesson.pdfUrl, 
           orderIndex: lesson.orderIndex,
         });
       },
@@ -54,12 +54,12 @@ export class LessonForm implements OnInit {
     });
   }
 
-  // 📂 DETECTAR CUANDO EL USUARIO ELIGE UN ARCHIVO
+  
   onFileSelected(event: any) {
     const file = event.target.files[0];
     if (file) {
-      // 🔥 ESTA ES LA LÍNEA QUE TE FALTABA:
-      this.selectedFile = file; // Esto es solo cosmético para validaciones, pero no guarda el binario
+      
+      this.selectedFile = file; 
 
       this.form.patchValue({
         pdfUrl: file.name,
@@ -81,12 +81,12 @@ export class LessonForm implements OnInit {
     }
 
     if (this.selectedFile) {
-      // 👇 CHIVATO: Para confirmar en consola que el archivo va dentro
+      
       console.log('📎 Adjuntando archivo:', this.selectedFile.name);
       formData.append('file', this.selectedFile);
     } else {
       console.log('⚠️ No hay archivo seleccionado para subir.');
-    } // ENVIAR AL SERVICIO CON MANEJO DE ERRORES
+    } 
 
     const request$ = this.isEditMode
       ? this.courseService.updateLesson(this.lessonId, formData)

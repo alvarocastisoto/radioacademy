@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
-// Backend nuevo: { path: "uploads/images/courses/uuid.jpg" }
-// Backend viejo: { url: "http://..." }
+
+
 interface UploadResponse {
   path?: string;
   url?: string;
@@ -25,7 +25,7 @@ export class MediaService {
     const formData = new FormData();
     formData.append('file', file);
 
-    // 👇 AÑADIDO: Enviamos el parámetro 'folder' al backend
+    
     if (folder) {
       formData.append('folder', folder);
     }
@@ -34,7 +34,7 @@ export class MediaService {
       map((res) => {
         const p = res.path ?? res.url;
         if (!p) throw new Error('Respuesta inválida del backend (no viene path/url)');
-        // Si viene URL completa (legacy), te la devuelvo tal cual.
+        
         return p;
       }),
     );
@@ -45,13 +45,13 @@ export class MediaService {
    * Para PDFs NO lo uses (se sirven por endpoint autenticado).
    */
   toPublicUrl(pathOrUrl: string | null | undefined): string {
-    if (!pathOrUrl) return ''; // Manejo de nulos seguro
+    if (!pathOrUrl) return ''; 
     if (pathOrUrl.startsWith('http')) return pathOrUrl;
 
-    // environment.apiUrl suele ser "...:8080/api" -> quitamos /api
+    
     const base = this.apiUrl.replace(/\/api\/?$/, '');
 
-    // Quitamos barras duplicadas al principio del path
+    
     const clean = pathOrUrl.replace(/^\/+/, '');
 
     return `${base}/${clean}`;

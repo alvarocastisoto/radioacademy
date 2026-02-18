@@ -49,14 +49,14 @@ class AdminControllerTest {
 
     @Test
     void getAllUsers_ShouldReturnUserList() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UserListDTO user = new UserListDTO(userId, "John Doe", "john@test.com", "12345678Z", "STUDENT", true);
         List<UserListDTO> users = Arrays.asList(user);
 
         when(adminService.getAllUsers()).thenReturn(users);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/admin/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].fullName").value("John Doe"))
@@ -65,14 +65,14 @@ class AdminControllerTest {
 
     @Test
     void getCoursesForDropdown_ShouldReturnCourseList() throws Exception {
-        // Arrange
+        
         UUID courseId = UUID.randomUUID();
         CourseDropdownDTO course = new CourseDropdownDTO(courseId, "Course 1");
         List<CourseDropdownDTO> courses = Arrays.asList(course);
 
         when(adminService.getCoursesForDropdown()).thenReturn(courses);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/admin/courses-dropdown"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("Course 1"));
@@ -80,12 +80,12 @@ class AdminControllerTest {
 
     @Test
     void enrollUser_ShouldReturnSuccess() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         doNothing().when(adminService).enrollUser(userId, courseId);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/admin/enroll")
                 .param("userId", userId.toString())
                 .param("courseId", courseId.toString()))
@@ -97,13 +97,13 @@ class AdminControllerTest {
 
     @Test
     void enrollUser_ShouldReturnNotFound_WhenUserNotExists() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         doThrow(new EntityNotFoundException("Usuario no encontrado"))
                 .when(adminService).enrollUser(userId, courseId);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/admin/enroll")
                 .param("userId", userId.toString())
                 .param("courseId", courseId.toString()))
@@ -113,13 +113,13 @@ class AdminControllerTest {
 
     @Test
     void enrollUser_ShouldReturnConflict_WhenAlreadyEnrolled() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         doThrow(new IllegalArgumentException("Usuario ya matriculado"))
                 .when(adminService).enrollUser(userId, courseId);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/admin/enroll")
                 .param("userId", userId.toString())
                 .param("courseId", courseId.toString()))
@@ -129,12 +129,12 @@ class AdminControllerTest {
 
     @Test
     void unenrollUser_ShouldReturnSuccess() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         doNothing().when(adminService).unenrollUser(userId, courseId);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/admin/unenroll")
                 .param("userId", userId.toString())
                 .param("courseId", courseId.toString()))
@@ -146,13 +146,13 @@ class AdminControllerTest {
 
     @Test
     void unenrollUser_ShouldReturnNotFound_WhenUserNotExists() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         doThrow(new EntityNotFoundException("Usuario no encontrado"))
                 .when(adminService).unenrollUser(userId, courseId);
 
-        // Act & Assert
+        
         mockMvc.perform(post("/api/admin/unenroll")
                 .param("userId", userId.toString())
                 .param("courseId", courseId.toString()))
@@ -162,7 +162,7 @@ class AdminControllerTest {
 
     @Test
     void getUserCourses_ShouldReturnCourseList() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         UUID courseId = UUID.randomUUID();
         CourseDropdownDTO course = new CourseDropdownDTO(courseId, "User Course");
@@ -170,7 +170,7 @@ class AdminControllerTest {
 
         when(adminService.getUserCourses(userId)).thenReturn(courses);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/admin/users/{userId}/courses", userId))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].title").value("User Course"));
@@ -178,11 +178,11 @@ class AdminControllerTest {
 
     @Test
     void changeUserRole_ShouldReturnSuccess() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         doNothing().when(adminService).changeUserRole(userId, "ADMIN");
 
-        // Act & Assert
+        
         mockMvc.perform(put("/api/admin/users/{userId}/role", userId)
                 .param("newRole", "ADMIN"))
                 .andExpect(status().isOk())
@@ -193,12 +193,12 @@ class AdminControllerTest {
 
     @Test
     void changeUserRole_ShouldReturnNotFound_WhenUserNotExists() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         doThrow(new EntityNotFoundException("Usuario no encontrado"))
                 .when(adminService).changeUserRole(userId, "ADMIN");
 
-        // Act & Assert
+        
         mockMvc.perform(put("/api/admin/users/{userId}/role", userId)
                 .param("newRole", "ADMIN"))
                 .andExpect(status().isNotFound())
@@ -207,12 +207,12 @@ class AdminControllerTest {
 
     @Test
     void changeUserRole_ShouldReturnBadRequest_WhenRoleInvalid() throws Exception {
-        // Arrange
+        
         UUID userId = UUID.randomUUID();
         doThrow(new IllegalArgumentException("Rol inválido"))
                 .when(adminService).changeUserRole(userId, "INVALID_ROLE");
 
-        // Act & Assert
+        
         mockMvc.perform(put("/api/admin/users/{userId}/role", userId)
                 .param("newRole", "INVALID_ROLE"))
                 .andExpect(status().isBadRequest())

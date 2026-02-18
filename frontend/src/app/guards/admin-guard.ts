@@ -8,12 +8,12 @@ export const adminGuard: CanActivateFn = (route, state) => {
 
   const user = authService.currentUser();
 
-  //  Aquí SÍ exigimos ser ADMIN
+  
   if (user && (user.role === 'ADMIN' || user.role === 'ROLE_ADMIN')) {
     return true;
   }
 
-  // Si intenta entrar pero no es admin, lo mandamos al inicio
+  
   router.navigate(['/']);
   return false;
 };

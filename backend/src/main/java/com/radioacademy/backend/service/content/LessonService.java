@@ -22,9 +22,9 @@ public class LessonService {
 
     private final LessonRepository lessonRepository;
     private final ModuleRepository moduleRepository;
-    private final StorageService storageService; // Inyección para manejar ficheros
+    private final StorageService storageService; 
 
-    // 1. OBTENER POR MÓDULO
+    
     public List<LessonResponse> getLessonsByModule(UUID moduleId) {
         return lessonRepository.findByModuleIdOrderByOrderIndexAsc(moduleId)
                 .stream()
@@ -32,14 +32,14 @@ public class LessonService {
                 .toList();
     }
 
-    // 2. OBTENER UNA
+    
     public LessonResponse getLessonById(UUID id) {
         return lessonRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lección no encontrada"));
     }
 
-    // 3. CREAR LECCIÓN
+    
     @Transactional
     public LessonResponse createLesson(String title, String videoUrl, UUID moduleId, Integer orderIndex,
             MultipartFile file) {
@@ -62,7 +62,7 @@ public class LessonService {
         return mapToDTO(saved);
     }
 
-    // 4. ACTUALIZAR LECCIÓN
+    
     @Transactional
     public LessonResponse updateLesson(UUID id, String title, String videoUrl, Integer orderIndex, MultipartFile file) {
         Lesson lesson = lessonRepository.findById(id)
@@ -75,7 +75,7 @@ public class LessonService {
         if (file != null && !file.isEmpty()) {
             validatePdf(file);
 
-            // Borrado inteligente del PDF antiguo
+            
             if (lesson.getPdfUrl() != null && !lesson.getPdfUrl().isBlank()) {
                 storageService.delete(lesson.getPdfUrl());
             }
@@ -88,7 +88,7 @@ public class LessonService {
         return mapToDTO(saved);
     }
 
-    // 5. BORRAR LECCIÓN
+    
     @Transactional
     public void deleteLesson(UUID id) {
         Lesson lesson = lessonRepository.findById(id)
@@ -101,7 +101,7 @@ public class LessonService {
         lessonRepository.delete(lesson);
     }
 
-    // --- Helpers Privados ---
+    
 
     private LessonResponse mapToDTO(Lesson lesson) {
         return new LessonResponse(

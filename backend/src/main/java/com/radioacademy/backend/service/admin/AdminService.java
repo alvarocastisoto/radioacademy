@@ -28,7 +28,7 @@ public class AdminService {
     @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    // 1. Obtener todos los usuarios mapeados
+    
     public List<UserListDTO> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(u -> new UserListDTO(
@@ -41,17 +41,17 @@ public class AdminService {
                 .toList();
     }
 
-    // 2. Dropdown de cursos
+    
     public List<CourseDropdownDTO> getCoursesForDropdown() {
         return courseRepository.findAll().stream()
                 .map(c -> new CourseDropdownDTO(c.getId(), c.getTitle()))
                 .toList();
     }
 
-    // 3. Matricular (Lógica pura)
+    
     @Transactional
     public void enrollUser(UUID userId, UUID courseId) {
-        // Validaciones
+        
         if (enrollmentRepository.existsByUserIdAndCourseId(userId, courseId)) {
             throw new IllegalArgumentException("Este usuario YA está matriculado.");
         }
@@ -61,7 +61,7 @@ public class AdminService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("Curso no encontrado"));
 
-        // Crear matrícula
+        
         Enrollment enrollment = new Enrollment();
         enrollment.setUser(user);
         enrollment.setCourse(course);
@@ -72,7 +72,7 @@ public class AdminService {
         enrollmentRepository.save(enrollment);
     }
 
-    // 4. Desmatricular
+    
     @Transactional
     public void unenrollUser(UUID userId, UUID courseId) {
         Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
@@ -81,14 +81,14 @@ public class AdminService {
         enrollmentRepository.delete(enrollment);
     }
 
-    // 5. Cursos de un usuario
+    
     public List<CourseDropdownDTO> getUserCourses(UUID userId) {
         return enrollmentRepository.findByUserId(userId).stream()
                 .map(e -> new CourseDropdownDTO(e.getCourse().getId(), e.getCourse().getTitle()))
                 .toList();
     }
 
-    // 6. Cambiar Rol
+    
     @Transactional
     public void changeUserRole(UUID userId, String newRole) {
         User user = userRepository.findById(userId)

@@ -3,7 +3,7 @@ import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CourseService } from '../../services/course/course';
 import { PaymentService } from '../../services/payment/payment';
-import { MediaService } from '../../services/media/media'; // 👈 Importamos
+import { MediaService } from '../../services/media/media'; 
 import { Course } from '../../models/course';
 
 @Component({
@@ -16,11 +16,11 @@ import { Course } from '../../models/course';
 export class CourseList implements OnInit {
   private courseService = inject(CourseService);
   private paymentService = inject(PaymentService);
-  private mediaService = inject(MediaService); // 👈 Inyectamos
+  private mediaService = inject(MediaService); 
 
   courses = signal<Course[]>([]);
   isLoading = signal<boolean>(false);
-  loadingData = signal<boolean>(true); // Nuevo signal para el esqueleto de carga inicial
+  loadingData = signal<boolean>(true); 
 
   ngOnInit() {
     this.loadCourses();
@@ -40,7 +40,7 @@ export class CourseList implements OnInit {
     });
   }
 
-  // ✅ Helper para imágenes
+  
   getCourseImage(path: string | undefined): string {
     if (!path) return 'assets/img/placeholder-course.jpg';
     return this.mediaService.toPublicUrl(path);

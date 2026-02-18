@@ -38,7 +38,7 @@ public class Module {
     @JsonIgnore
     private List<Lesson> lessons;
 
-    // 👇 AÑADE ESTO (Obligatorio al quitar @Data)
+    
     @Override
     public boolean equals(Object o) {
         if (this == o)

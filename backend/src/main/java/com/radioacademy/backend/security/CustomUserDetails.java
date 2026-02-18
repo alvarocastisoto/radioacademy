@@ -26,7 +26,7 @@ public class CustomUserDetails implements UserDetails {
                 new SimpleGrantedAuthority(user.getRole().name()));
     }
 
-    // Getters personalizados
+    
     public UUID getId() {
         return id;
     }
@@ -35,7 +35,7 @@ public class CustomUserDetails implements UserDetails {
         return nombre;
     }
 
-    // Métodos obligatorios de UserDetails
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -51,24 +51,24 @@ public class CustomUserDetails implements UserDetails {
         return email;
     }
 
-    // Lógica de estado del usuario (Cambiamos UnsupportedOperation por true)
+    
     @Override
     public boolean isAccountNonExpired() {
-        return true; // La cuenta nunca expira
+        return true; 
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // La cuenta no se bloquea
+        return true; 
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // Las credenciales no caducan
+        return true; 
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // El usuario está habilitado
+        return true; 
     }
 }

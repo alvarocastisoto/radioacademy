@@ -10,6 +10,6 @@ public record CourseDetailDTO(
                 String coverImage,
                 BigDecimal price,
                 Integer hours,
-                boolean isActive // Para que el admin sepa si está visible
+                boolean isActive 
 ) {
 }

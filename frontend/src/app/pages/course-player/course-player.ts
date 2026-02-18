@@ -4,13 +4,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-// Servicios
+
 import { StudentService } from '../../services/student/student';
 import { ProgressService } from '../../services/progress';
 import { MediaService } from '../../services/media/media';
 import { QuizService, QuizDTO, QuizResultDTO } from '../../services/quiz/quiz';
 
-// Interfaces Locales
+
 export interface Lesson {
   id: string;
   title: string;
@@ -41,17 +41,17 @@ export interface CourseData {
   styleUrls: ['./course-player.scss'],
 })
 export class CoursePlayerComponent implements OnInit, OnDestroy {
-  // Inyecciones
+  
   private route = inject(ActivatedRoute);
   private sanitizer = inject(DomSanitizer);
 
-  // Servicios
+  
   private studentService = inject(StudentService);
   private progressService = inject(ProgressService);
   private mediaService = inject(MediaService);
   private quizService = inject(QuizService);
 
-  // --- ESTADO CON SIGNALS ---
+  
   courseId = signal<string>('');
   course = signal<CourseData | null>(null);
   loading = signal<boolean>(true);
@@ -62,7 +62,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
   viewMode = signal<'VIDEO' | 'PDF' | 'QUIZ' | 'EMPTY'>('EMPTY');
   openModules = signal<Set<string>>(new Set());
 
-  // Progreso
+  
   completedLessonIds = signal<Set<string>>(new Set());
   totalLessons = computed(() => {
     const c = this.course();
@@ -76,7 +76,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
     return Math.min(100, Math.round((count / this.totalLessons()) * 100));
   });
 
-  // Media & PDF
+  
   safeVideoUrl = signal<SafeResourceUrl | null>(null);
   isYouTube = signal<boolean>(false);
   pdfState = signal({
@@ -86,7 +86,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
     objectUrl: null as string | null,
   });
 
-  // Quiz State
+  
   quizState = signal({
     loading: false,
     activeQuiz: null as QuizDTO | null,
@@ -208,9 +208,9 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Busca y reemplaza loadSmartRetry en tu .ts
+  
   loadSmartRetry(quizId?: string) {
-    // Si viene un ID (desde sidebar), lo usamos. Si no, usamos el guardado (desde resultados).
+    
     const finalId = quizId || this.currentModuleQuizId();
 
     if (!finalId) return;
@@ -225,7 +225,7 @@ export class CoursePlayerComponent implements OnInit, OnDestroy {
 
     this.quizService.getSmartFailedQuiz(finalId).subscribe({
       next: (smartQuiz) => {
-        // Si el backend devuelve 204 o cuerpo vacío
+        
         if (!smartQuiz || !smartQuiz.questions || smartQuiz.questions.length === 0) {
           this.handleEmptyRetry();
         } else {

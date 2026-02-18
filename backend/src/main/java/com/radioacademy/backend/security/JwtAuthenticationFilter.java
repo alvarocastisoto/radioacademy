@@ -35,13 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
-        // 1. Si no hay token, pasa la pelota (Correcto)
+        
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // 2. Intentamos procesar el token de forma SEGURA
+        
         try {
             jwt = authHeader.substring(7);
             userEmail = jwtService.extractUsername(jwt);
@@ -52,9 +52,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 if (jwtService.isTokenValid(jwt, dbUser)) {
 
-                    // 💡 Usa directamente dbUser, que ya es tu CustomUserDetails
+                    
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                            dbUser, // <--- PASAMOS EL OBJETO COMPLETO CON ID Y NOMBRE
+                            dbUser, 
                             null,
                             dbUser.getAuthorities());
 
@@ -63,11 +63,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // 🔥 AQUÍ ESTÁ EL ARREGLO 🔥
-            // Si el token está caducado o mal formado, NO lanzamos error.
-            // Simplemente no autenticamos y dejamos que la petición siga.
-            // Si va a /register (público), pasará. Si va a /admin (privado), rebotará
-            // después.
+            
+            
+            
+            
+            
             System.out.println("⚠️ Token inválido ignorado: " + e.getMessage());
         }
 

@@ -18,19 +18,19 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/student")
-@RequiredArgsConstructor // Inyección automática
+@RequiredArgsConstructor 
 public class StudentController {
 
         private final StudentService studentService;
 
-        // 1. DASHBOARD
+        
         @GetMapping("/dashboard")
         public ResponseEntity<List<CourseDashboardDTO>> getMyDashboard(
                         @AuthenticationPrincipal CustomUserDetails userDetails) {
                 return ResponseEntity.ok(studentService.getMyDashboard(userDetails));
         }
 
-        // 2. COURSE PLAYER CONTENT
+        
         @GetMapping("/course/{courseId}/content")
         public ResponseEntity<CourseContentDTO> getCourseContent(
                         @PathVariable UUID courseId,
@@ -38,18 +38,18 @@ public class StudentController {
                 return ResponseEntity.ok(studentService.getCourseContent(courseId, userDetails));
         }
 
-        // 3. OBTENER EXAMEN
+        
         @GetMapping("/quiz/{quizId}")
         public ResponseEntity<QuizDTO> getQuizForStudent(@PathVariable UUID quizId) {
                 return ResponseEntity.ok(studentService.getQuizForStudent(quizId));
         }
 
-        // 4. ENVIAR RESPUESTAS
-        @PostMapping("/quizzes/submit") // (O la ruta que tengas definida)
+        
+        @PostMapping("/quizzes/submit") 
         public ResponseEntity<QuizResultDTO> submitQuiz(
                         @RequestBody QuizSubmissionDTO submission,
                         @AuthenticationPrincipal CustomUserDetails userDetails) {
-                // 3. Pasa el email (principal.getName()) como segundo argumento
+                
                 return ResponseEntity.ok(studentService.submitQuiz(submission, userDetails));
         }
 }

@@ -37,11 +37,11 @@ public class Question {
     @JsonIgnore
     private Quiz quiz;
 
-    // 👇 CAMBIO 1: orphanRemoval = false (OBLIGATORIO)
+    
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = false)
     private List<Option> options = new ArrayList<>();
 
-    // ✅ Identidad basada en ID
+    
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -52,7 +52,7 @@ public class Question {
         return id != null && Objects.equals(id, question.id);
     }
 
-    // 👇 CAMBIO 2: HashCode constante (OBLIGATORIO para JPA)
+    
     @Override
     public int hashCode() {
         return getClass().hashCode();

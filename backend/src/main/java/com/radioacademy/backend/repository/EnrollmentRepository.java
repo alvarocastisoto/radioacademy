@@ -12,14 +12,14 @@ import java.util.Optional;
 import java.util.List;
 
 public interface EnrollmentRepository extends JpaRepository<Enrollment, UUID> {
-    // 👇 AÑADE ESTO: Busca matrículas por el ID del usuario directamente en BD
+    
     List<Enrollment> findByUserId(UUID userId);
 
-    // Opcional: Para evitar duplicados en el momento de la compra
+    
     boolean existsByUserIdAndCourseId(UUID userId, UUID courseId);
 
-    // Devuelve un Optional directamente si existe la matrícula de X usuario en Y
-    // curso
+    
+    
     Optional<Enrollment> findByUserIdAndCourseId(UUID userId, UUID courseId);
 
     void deleteByUser_IdAndCourse_Id(UUID userId, UUID courseId);

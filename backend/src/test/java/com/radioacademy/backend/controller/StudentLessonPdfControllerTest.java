@@ -56,7 +56,7 @@ class StudentLessonPdfControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
     void getLessonPdf_ShouldReturnPdfInline() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         byte[] pdfContent = "%PDF-1.4 test content".getBytes();
         Resource resource = new ByteArrayResource(pdfContent) {
@@ -68,7 +68,7 @@ class StudentLessonPdfControllerTest {
 
         when(studentService.getLessonPdf(any(), any())).thenReturn(resource);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/student/lessons/{lessonId}/pdf", lessonId)
                 .param("download", "false"))
                 .andExpect(status().isOk())
@@ -79,7 +79,7 @@ class StudentLessonPdfControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
     void getLessonPdf_ShouldReturnPdfAsAttachment() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         byte[] pdfContent = "%PDF-1.4 test content".getBytes();
         Resource resource = new ByteArrayResource(pdfContent) {
@@ -91,7 +91,7 @@ class StudentLessonPdfControllerTest {
 
         when(studentService.getLessonPdf(any(), any())).thenReturn(resource);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/student/lessons/{lessonId}/pdf", lessonId)
                 .param("download", "true"))
                 .andExpect(status().isOk())
@@ -102,19 +102,19 @@ class StudentLessonPdfControllerTest {
     @Test
     @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
     void getLessonPdf_ShouldUseFallbackFilename_WhenResourceFilenameIsNull() throws Exception {
-        // Arrange
+        
         UUID lessonId = UUID.randomUUID();
         byte[] pdfContent = "%PDF-1.4 test content".getBytes();
         Resource resource = new ByteArrayResource(pdfContent) {
             @Override
             public String getFilename() {
-                return null; // Simulate no filename
+                return null; 
             }
         };
 
         when(studentService.getLessonPdf(any(), any())).thenReturn(resource);
 
-        // Act & Assert
+        
         mockMvc.perform(get("/api/student/lessons/{lessonId}/pdf", lessonId))
                 .andExpect(status().isOk())
                 .andExpect(header().string("Content-Type", "application/pdf"));

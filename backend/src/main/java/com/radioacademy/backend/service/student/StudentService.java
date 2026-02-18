@@ -46,7 +46,7 @@ public class StudentService {
     private final QuizAttemptRepository attemptRepository;
     private final StorageService storageService;
 
-    // ✅ 1. DASHBOARD: Cursos del alumno con su progreso real
+    
     @Transactional(readOnly = true)
     public List<CourseDashboardDTO> getMyDashboard(CustomUserDetails userDetails) {
         List<Enrollment> enrollments = enrollmentRepository.findByUserId(userDetails.getId());
@@ -65,10 +65,10 @@ public class StudentService {
         }).toList();
     }
 
-    // ✅ 2. CONTENIDO DEL CURSO (Video Player & Estructura)
+    
     @Transactional(readOnly = true)
     public CourseContentDTO getCourseContent(UUID courseId, CustomUserDetails userDetails) {
-        // Seguridad: ¿Está matriculado?
+        
         if (!enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), courseId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No tienes acceso a este curso.");
         }
@@ -113,7 +113,7 @@ public class StudentService {
                 calculatePercentage(completedInThisCourse, totalLessons));
     }
 
-    // ✅ 3. OBTENER EXAMEN (Sin respuestas correctas para el alumno)
+    
     @Transactional(readOnly = true)
     public QuizDTO getQuizForStudent(UUID quizId) {
         Quiz quiz = quizRepository.findById(quizId)
@@ -126,7 +126,7 @@ public class StudentService {
                         q.getContent(),
                         q.getOptions().stream()
                                 .filter(Option::isActive)
-                                .map(o -> new OptionDTO(o.getId(), o.getText(), false)) // No chivamos la correcta
+                                .map(o -> new OptionDTO(o.getId(), o.getText(), false)) 
                                 .toList(),
                         q.getPoints()))
                 .toList();
@@ -134,14 +134,14 @@ public class StudentService {
         return new QuizDTO(quiz.getId(), quiz.getTitle(), quiz.getModule().getId(), questions);
     }
 
-    // ✅ 4. CORREGIR EXAMEN (Optimizado con Proxy de Usuario)
+    
     @Transactional
     public QuizResultDTO submitQuiz(QuizSubmissionDTO submission, CustomUserDetails userDetails) {
         Quiz quiz = quizRepository.findById(submission.quizId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Examen no encontrado"));
 
         QuizAttempt attempt = new QuizAttempt();
-        // OPTIMIZACIÓN: getReferenceById evita cargar el usuario entero de la DB
+        
         attempt.setUser(userRepository.getReferenceById(userDetails.getId()));
         attempt.setQuiz(quiz);
         attempt.setCompletedAt(LocalDateTime.now());
@@ -174,7 +174,7 @@ public class StudentService {
             if (isCorrect)
                 correctCount++;
 
-            // Feedback para el DTO
+            
             questionResults.put(question.getId(), isCorrect);
             question.getOptions().stream()
                     .filter(Option::isCorrect)
@@ -191,7 +191,7 @@ public class StudentService {
         return new QuizResultDTO(score, attempt.isPassed(), questionResults, correctOptions);
     }
 
-    // ✅ 5. DESCARGAR PDF SEGURO (Validando matrícula desde el Token)
+    
     @Transactional(readOnly = true)
     public Resource getLessonPdf(UUID lessonId, CustomUserDetails userDetails) {
         LessonPdfInfo info = lessonRepository.findPdfInfo(lessonId)
@@ -201,7 +201,7 @@ public class StudentService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Esta lección no tiene PDF");
         }
 
-        // El ID del token decide si tienes permiso
+        
         if (!enrollmentRepository.existsByUserIdAndCourseId(userDetails.getId(), info.courseId())) {
             log.warn("⛔ Intento de acceso no autorizado al PDF {} por usuario {}", lessonId, userDetails.getId());
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No estás matriculado en este curso.");
@@ -215,7 +215,7 @@ public class StudentService {
         return resource;
     }
 
-    // --- Helpers Privados ---
+    
     private int calculatePercentage(long completed, long total) {
         if (total <= 0)
             return 0;

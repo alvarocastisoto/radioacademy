@@ -25,7 +25,7 @@ export class AdminMetricsComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     console.log('Iniciando petición de métricas al backend...');
 
-    // Cargamos todo en paralelo
+    
     this.sub = forkJoin({
       registered: this.metrics.registeredDaily(),
       enrollments: this.metrics.enrollmentsDaily(),
@@ -37,8 +37,8 @@ export class AdminMetricsComponent implements AfterViewInit, OnDestroy {
         this.loading = false;
         this.cdr.detectChanges();
 
-        // Importante: Esperamos al siguiente ciclo de detección de cambios
-        // para que Angular pinte los <canvas> del HTML tras quitar el loading
+        
+        
         setTimeout(() => {
           this.processAndRender(res);
         }, 50);
@@ -47,32 +47,32 @@ export class AdminMetricsComponent implements AfterViewInit, OnDestroy {
         this.loading = false;
         this.cdr.detectChanges();
         console.error('Error en la comunicación con el backend:', err);
-        // Si sale 403 o 401 aquí, es un problema de JWT o CORS en Render
+        
       },
     });
   }
 
 private processAndRender(res: any): void {
   try {
-    // 1. Mapeo de Registros (Cambiamos d.value por d.count)
+    
     const registered: ScatterDataPoint[] = (res.registered || []).map((d: any) => ({
       x: new Date(d.day).getTime(),
-      y: Number(d.count ?? 0), // 👈 Cambiado a .count
+      y: Number(d.count ?? 0), 
     }));
 
-    // 2. Mapeo de Matrículas (Ajustamos también por si acaso)
+    
     const enrollments: ScatterDataPoint[] = (res.enrollments || []).map((d: any) => ({
       x: new Date(d.day).getTime(),
       y: Number(d.count ?? d.value ?? 0),
     }));
 
-    // 3. Mapeo de Ingresos
+    
     const revenue: ScatterDataPoint[] = (res.revenue || []).map((d: any) => ({
       x: new Date(d.day).getTime(),
       y: Number(d.revenue ?? d.value ?? d.count ?? 0),
     }));
 
-    // ... el resto de la función (topCourses y renderLineChart) sigue igual
+    
     
     this.renderLineChart('registeredChart', 'Usuarios registrados / día', registered, '#3b82f6');
     this.renderLineChart('enrollmentsChart', 'Matrículas / día', enrollments, '#f59e0b');
@@ -109,7 +109,7 @@ private processAndRender(res: any): void {
             parsing: false,
             tension: 0.3,
             borderColor: color,
-            backgroundColor: color + '33', // 20% transparencia
+            backgroundColor: color + '33', 
             fill: true,
             pointRadius: 4,
             pointHoverRadius: 6,

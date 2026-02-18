@@ -14,24 +14,24 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/lessons")
-@RequiredArgsConstructor // Inyección automática
+@RequiredArgsConstructor 
 public class LessonController {
 
     private final LessonService lessonService;
 
-    // 1. GET: Lecciones por módulo
+    
     @GetMapping("/module/{moduleId}")
     public ResponseEntity<List<LessonResponse>> getLessonsByModule(@PathVariable UUID moduleId) {
         return ResponseEntity.ok(lessonService.getLessonsByModule(moduleId));
     }
 
-    // 2. GET: Una lección
+    
     @GetMapping("/{id}")
     public ResponseEntity<LessonResponse> getLessonById(@PathVariable UUID id) {
         return ResponseEntity.ok(lessonService.getLessonById(id));
     }
 
-    // 3. POST: Crear lección (Recibe parámetros sueltos por ser Multipart)
+    
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonResponse> createLesson(
             @RequestParam("title") String title,
@@ -45,7 +45,7 @@ public class LessonController {
                 HttpStatus.CREATED);
     }
 
-    // 4. PUT: Actualizar lección
+    
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<LessonResponse> updateLesson(
             @PathVariable UUID id,
@@ -57,7 +57,7 @@ public class LessonController {
         return ResponseEntity.ok(lessonService.updateLesson(id, title, videoUrl, orderIndex, file));
     }
 
-    // 5. DELETE: Borrar lección
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteLesson(@PathVariable UUID id) {
         lessonService.deleteLesson(id);

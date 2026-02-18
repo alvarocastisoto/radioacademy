@@ -1,5 +1,5 @@
 <div class="auth-wrapper">
-  <div class="aurora-bg">
+  <div class="aurora-bg" aria-hidden="true">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
@@ -7,70 +7,103 @@
   </div>
 
   <div class="auth-container">
-    <div class="card glass-card auth-card">
+    <div class="card glass-card auth-card animate-fade-in">
       <div class="card-body p-4 p-md-5">
-        <div class="text-center mb-4">
-          <div class="brand-icon mb-3">☢️</div>
-          <h2 class="fw-bold mb-1">Bienvenido</h2>
-          <p class="text-muted mb-0">Inicia sesión en tu cuenta</p>
+        <div class="text-center mb-5">
+          <div class="brand-logo-wrapper mb-3">
+            <div class="brand-icon">☢️</div>
+            <div class="icon-pulse"></div>
+          </div>
+          <h1 class="fw-bold h2 text-main mb-1">RadioAcademy</h1>
+          <p class="text-muted">Tu portal especializado en Radiología</p>
         </div>
 
+        @if (errorMessage()) {
+          <div class="error-banner animate-shake mb-4">
+            <i class="bi bi-exclamation-circle me-2"></i>
+            {{ errorMessage() }}
+          </div>
+        }
+
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
-          <div class="mb-3">
-            <label class="form-label" for="email">Email</label>
-            <div class="input-group-clean">
+          <div class="mb-4">
+            <label class="form-label fw-semibold" for="email">Correo Electrónico</label>
+            <div class="input-group-clean has-icon">
+              <i class="bi bi-envelope icon-left"></i>
               <input
                 id="email"
                 type="email"
-                class="form-control"
+                class="form-control h-large"
                 formControlName="email"
                 autocomplete="email"
-                placeholder="nombre@email.com"
+                placeholder="ejemplo@radio.com"
                 [class.is-invalid]="
                   loginForm.get('email')?.invalid && loginForm.get('email')?.touched
                 "
               />
             </div>
+            @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+              <div class="invalid-feedback animate-shake">Introduce un email válido</div>
+            }
           </div>
 
           <div class="mb-4">
-            <div class="d-flex justify-content-between align-items-center mb-1">
-              <label class="form-label mb-0" for="password">Contraseña</label>
-              <a
-                routerLink="/forgot-password"
-                class="small text-primary text-decoration-none fw-semibold"
-              >
-                ¿Olvidaste la contraseña?
-              </a>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="form-label fw-semibold mb-0" for="password">Contraseña</label>
+              <a routerLink="/forgot-password" class="small-link">¿Olvidaste la clave?</a>
             </div>
-            <div class="input-group-clean">
+            <div class="input-group-clean has-icon has-password-toggle">
+              <i class="bi bi-lock icon-left"></i>
               <input
                 id="password"
-                type="password"
-                class="form-control"
+                [type]="showPassword() ? 'text' : 'password'"
+                class="form-control h-large"
                 formControlName="password"
                 autocomplete="current-password"
                 placeholder="••••••••"
+                [class.is-invalid]="
+                  loginForm.get('password')?.invalid && loginForm.get('password')?.touched
+                "
               />
+              <button
+                type="button"
+                class="btn-password-toggle"
+                (click)="togglePassword()"
+                [attr.aria-label]="showPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              >
+                <i
+                  class="bi"
+                  [class.bi-eye]="!showPassword()"
+                  [class.bi-eye-slash]="showPassword()"
+                ></i>
+              </button>
             </div>
           </div>
 
-          <div class="d-grid">
+          <div class="d-grid gap-2">
             <button
               type="submit"
               class="btn btn-primary btn-glow btn-lg"
-              [disabled]="loginForm.invalid"
+              [disabled]="loginForm.invalid || loading()"
             >
-              Entrar
+              @if (loading()) {
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Iniciando sesión...
+              } @else {
+                Acceder a la Academia
+              }
             </button>
           </div>
 
-          <div class="text-center mt-4">
-            <p class="small text-muted mb-0">
-              ¿No tienes cuenta?
-              <a routerLink="/register" class="text-primary fw-bold text-decoration-none ms-1"
-                >Regístrate gratis</a
+          <div class="text-center mt-5">
+            <p class="mb-0 text-muted">
+              ¿Eres nuevo aquí?
+              <a
+                routerLink="/register"
+                class="text-primary fw-bold text-decoration-none hover-underline ms-1"
               >
+                Crea tu cuenta profesional
+              </a>
             </p>
           </div>
         </form>

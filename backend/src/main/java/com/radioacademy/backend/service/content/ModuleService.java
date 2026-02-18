@@ -22,7 +22,7 @@ public class ModuleService {
     private final ModuleRepository moduleRepository;
     private final CourseRepository courseRepository;
 
-    // 1. OBTENER MÓDULOS POR CURSO
+    
     public List<ModuleRequest> getModulesByCourse(UUID courseId) {
         return moduleRepository.findByCourseIdOrderByOrderIndexAsc(courseId)
                 .stream()
@@ -30,10 +30,10 @@ public class ModuleService {
                 .toList();
     }
 
-    // 2. CREAR MÓDULO
+    
     @Transactional
     public ModuleRequest createModule(CreateModuleRequest request) {
-        // Buscamos el curso padre
+        
         Course course = courseRepository.findById(request.courseId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "El curso no existe"));
 
@@ -47,7 +47,7 @@ public class ModuleService {
         return mapToDTO(savedModule);
     }
 
-    // 3. ELIMINAR MÓDULO
+    
     @Transactional
     public void deleteModule(UUID id) {
         if (!moduleRepository.existsById(id)) {
@@ -56,7 +56,7 @@ public class ModuleService {
         moduleRepository.deleteById(id);
     }
 
-    // --- Helper Privado ---
+    
     private ModuleRequest mapToDTO(Module module) {
         return new ModuleRequest(
                 module.getId(),

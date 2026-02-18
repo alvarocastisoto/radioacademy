@@ -17,7 +17,7 @@ export class ResetPasswordComponent implements OnInit {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  // 👇 El mismo Regex de seguridad que en registro
+  
   private readonly passwordPattern =
     /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=!._*-])(?=\S+$).{8,}$/;
 
@@ -31,7 +31,7 @@ export class ResetPasswordComponent implements OnInit {
       [
         Validators.required,
         Validators.minLength(8),
-        Validators.pattern(this.passwordPattern), // Validamos que sea fuerte
+        Validators.pattern(this.passwordPattern), 
       ],
     ],
   });
@@ -46,13 +46,13 @@ export class ResetPasswordComponent implements OnInit {
     });
   }
 
-  // 👇 Helper visual igual que en registro
+  
   isFieldInvalid(fieldName: string): boolean {
     const field = this.form.get(fieldName);
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
-  // 👇 Getter para simplificar el HTML
+  
   get password() {
     return this.form.get('password');
   }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router'; // <--- 1. IMPORTANTE
+import { RouterLink } from '@angular/router'; 
 
 @Component({
   selector: 'app-home',
@@ -10,5 +10,5 @@ import { RouterLink } from '@angular/router'; // <--- 1. IMPORTANTE
   styleUrls: ['./home.scss'],
 })
 export class Home {
-  // ...
+  
 }

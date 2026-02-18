@@ -68,7 +68,7 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com")
         void getAllCourses_ShouldReturnCourseList() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CourseDTO course = new CourseDTO(
                                 courseId, "Test Course", "Description", "cover.jpg",
@@ -77,7 +77,7 @@ class CourseControllerTest {
 
                 when(courseService.getAllCourses(any())).thenReturn(courses);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/courses"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].title").value("Test Course"))
@@ -87,7 +87,7 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "ADMIN" })
         void createCourse_ShouldReturnCreatedCourse() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CreateCourseRequest request = new CreateCourseRequest(
                                 "New Course", "New Description", new BigDecimal("49.99"),
@@ -98,7 +98,7 @@ class CourseControllerTest {
 
                 when(courseService.createCourse(any(CreateCourseRequest.class), any())).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(post("/api/courses")
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "ADMIN" })
         void updateCourse_ShouldReturnUpdatedCourse() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CreateCourseRequest request = new CreateCourseRequest(
                                 "Updated Course", "Updated Description", new BigDecimal("59.99"),
@@ -121,7 +121,7 @@ class CourseControllerTest {
 
                 when(courseService.updateCourse(eq(courseId), any(CreateCourseRequest.class))).thenReturn(response);
 
-                // Act & Assert
+                
                 mockMvc.perform(put("/api/courses/{id}", courseId)
                                 .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -133,11 +133,11 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "ADMIN" })
         void deleteCourse_ShouldReturnNoContent() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 doNothing().when(courseService).deleteCourse(courseId);
 
-                // Act & Assert
+                
                 mockMvc.perform(delete("/api/courses/{id}", courseId)
                                 .with(csrf()))
                                 .andExpect(status().isNoContent());
@@ -148,7 +148,7 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com", authorities = { "STUDENT" })
         void getMyCourses_ShouldReturnDashboardCourses() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CourseDashboardDTO dashboard = new CourseDashboardDTO(
                                 courseId, "My Course", "Course description", "cover.jpg", 75);
@@ -156,7 +156,7 @@ class CourseControllerTest {
 
                 when(courseService.getMyCourses(any())).thenReturn(courses);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/courses/mine"))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$[0].title").value("My Course"))
@@ -166,7 +166,7 @@ class CourseControllerTest {
         @Test
         @WithMockUser(username = "testuser@test.com")
         void getCourseById_ShouldReturnCourseDetail() throws Exception {
-                // Arrange
+                
                 UUID courseId = UUID.randomUUID();
                 CourseDetailDTO course = new CourseDetailDTO(
                                 courseId, "Single Course", "Description", "cover.jpg",
@@ -174,7 +174,7 @@ class CourseControllerTest {
 
                 when(courseService.getCourseById(courseId)).thenReturn(course);
 
-                // Act & Assert
+                
                 mockMvc.perform(get("/api/courses/{id}", courseId))
                                 .andExpect(status().isOk())
                                 .andExpect(jsonPath("$.title").value("Single Course"))

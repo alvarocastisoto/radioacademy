@@ -44,44 +44,44 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
 
-                        // 1) AUTH PÚBLICO
+                        
                         .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/api/auth/forgot-password", "/api/auth/reset-password").permitAll()
                         .requestMatchers("/error").permitAll()
 
-                        // 2) ESTÁTICOS
+                        
                         .requestMatchers(HttpMethod.GET, "/uploads/images/**").permitAll()
                         .requestMatchers("/uploads/pdfs/**").denyAll()
 
-                        // 3) ENDPOINTS STUDENT: SOLO SI ESTÁ LOGUEADO Y CON ROL
-                        // (Aquí vive el acceso real al contenido + PDF seguro)
+                        
+                        
                         .requestMatchers("/api/student/**")
                         .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
 
-                        // 4) “MINE” DE COURSES NO PUEDE SER PÚBLICO (PONLO ANTES DEL CATÁLOGO)
+                        
                         .requestMatchers(HttpMethod.GET, "/api/courses/mine")
                         .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
 
-                        // 5) CATÁLOGO PÚBLICO
+                        
                         .requestMatchers(HttpMethod.GET, "/api/courses/**").permitAll()
 
-                        // 6) MÓDULOS/LECCIONES “GENÉRICOS”: SOLO ADMIN
-                        // Los alumnos consumen contenido por /api/student/course/{courseId}/content
+                        
+                        
                         .requestMatchers(HttpMethod.GET, "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 7) MEDIA (subidas/descargas genéricas): autenticado
+                        
                         .requestMatchers("/api/media/**").authenticated()
 
-                        // 8) PAGOS
+                        
                         .requestMatchers("/api/payment/**")
                         .hasAnyAuthority("STUDENT", "ROLE_STUDENT", "ADMIN", "ROLE_ADMIN")
 
-                        // 9) ADMIN
+                        
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers("/api/quizzes/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // CRUD ADMIN sobre cursos/módulos/lecciones
+                        
                         .requestMatchers(HttpMethod.POST, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
@@ -89,7 +89,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/courses/**", "/api/modules/**", "/api/lessons/**")
                         .hasAnyAuthority("ADMIN", "ROLE_ADMIN")
 
-                        // 10) RESTO
+                        
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

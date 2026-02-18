@@ -15,7 +15,7 @@ public record CourseContentDTO(
 
         @NotBlank(message = "La descripción es obligatoria") String description,
 
-        @NotNull(message = "Las secciones no pueden ser nulas") // 👈 @NotNull para Listas
+        @NotNull(message = "Las secciones no pueden ser nulas") 
         List<ModuleDTO> sections,
 
         @NotBlank(message = "La imagen de portada es obligatoria") String coverImage,

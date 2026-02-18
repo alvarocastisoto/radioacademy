@@ -29,13 +29,13 @@ public class MediaController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, String>> uploadFile(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "folder", required = false) String folder // 👈 NUEVO PARÁMETRO
+            @RequestParam(value = "folder", required = false) String folder 
     ) {
 
-        // Delegamos validación y guardado pasando la carpeta destino
+        
         String storedPath = mediaService.uploadMedia(file, folder);
 
-        // Devolvemos la ruta relativa (ej: "uploads/images/courses/foto.jpg")
+        
         return ResponseEntity.ok(Map.of("path", storedPath));
     }
 
@@ -48,10 +48,10 @@ public class MediaController {
             @RequestParam("path") String path,
             @RequestParam(defaultValue = "true") boolean download) {
 
-        // 1. Obtener el recurso validado
+        
         Resource resource = mediaService.loadMediaResource(path);
 
-        // 2. Preparar Headers HTTP
+        
         String filename = resource.getFilename() != null ? resource.getFilename() : "file";
         String disposition = (download ? "attachment" : "inline") + "; filename=\"" + filename + "\"";
         MediaType mediaType = mediaService.determineMediaType(filename);

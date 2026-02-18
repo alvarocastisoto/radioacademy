@@ -40,7 +40,7 @@ class CustomUserDetailsServiceTest {
         assertEquals("test@test.com", userDetails.getUsername());
         assertEquals("password", userDetails.getPassword());
 
-        // Verify Role Mapping
+        
         assertTrue(userDetails.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("STUDENT")));
     }

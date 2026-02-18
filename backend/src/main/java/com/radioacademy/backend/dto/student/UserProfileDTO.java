@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public record UserProfileDTO(
 
-                UUID id, // Opcional, ya que lo sacamos del Token
+                UUID id, 
 
                 @NotBlank(message = "El nombre no puede estar vacío") String name,
 
@@ -18,10 +18,10 @@ public record UserProfileDTO(
 
                 @NotBlank(message = "El teléfono es obligatorio") @Size(min = 9, max = 9, message = "El teléfono debe tener 9 caracteres") String phone,
 
-                // Contraseña actual: Opcional (solo si quiere cambiar la pass)
+                
                 String currentPassword,
 
-                // Nueva contraseña: Opcional, PERO si la envía, validamos el patrón
+                
                 String newPassword,
 
                 String avatar) {

@@ -18,7 +18,7 @@ import java.util.UUID;
 public class AdminController {
 
         @Autowired
-        private AdminService adminService; // 👈 Única inyección necesaria
+        private AdminService adminService;
 
         @GetMapping("/users")
         public ResponseEntity<List<UserListDTO>> getAllUsers() {

@@ -28,9 +28,9 @@ public class QuizService {
     private final QuizAttemptRepository attemptRepository;
     private final UserRepository userRepository;
 
-    // =========================================================================
-    // 1. GESTIÓN (ADMIN): CREAR / EDITAR CON SOFT DELETE
-    // =========================================================================
+    
+    
+    
     @Transactional
     public QuizDTO createQuiz(QuizDTO request) {
         Module module = moduleRepository.findById(request.moduleId())
@@ -51,47 +51,47 @@ public class QuizService {
             for (QuestionDTO qDto : request.questions()) {
                 Question question;
 
-                // 1. Buscar si existe en la lista actual
+                
                 Optional<Question> existingQ = currentQuestions.stream()
                         .filter(q -> q.getId() != null && q.getId().equals(qDto.id()))
                         .findFirst();
 
                 if (existingQ.isPresent()) {
-                    // EDITAR EXISTENTE
+                    
                     question = existingQ.get();
                     question.setActive(true);
                     incomingQuestionIds.add(question.getId());
                 } else {
-                    // CREAR NUEVA
+                    
                     question = new Question();
                     question.setActive(true);
-                    question.setQuiz(quiz); // Enlazar al padre
-                    // IMPORTANTE: Añadir a la lista INMEDIATAMENTE para que Hibernate sepa que
-                    // pertenece al grafo
+                    question.setQuiz(quiz); 
+                    
+                    
                     currentQuestions.add(question);
                 }
 
-                // Actualizar datos
+                
                 question.setContent(qDto.content());
                 question.setPoints(qDto.points());
 
-                // 2. Gestionar Opciones (Delegar)
+                
                 mergeOptions(question, qDto.options());
             }
         }
 
-        // 3. Soft Delete de preguntas no enviadas
+        
         currentQuestions.forEach(q -> {
             if (q.getId() != null && !incomingQuestionIds.contains(q.getId())) {
                 q.setActive(false);
             }
         });
 
-        // Guardamos el Quiz completo (Cascada guardará preguntas y opciones)
+        
         Quiz savedQuiz = quizRepository.save(quiz);
 
-        // Convertimos a DTO dentro de la transacción para evitar
-        // LazyInitializationException
+        
+        
         return mapQuizToDTO(savedQuiz);
     }
 
@@ -116,8 +116,8 @@ public class QuizService {
             } else {
                 option = new Option();
                 option.setActive(true);
-                option.setQuestion(question); // Enlazar al padre
-                currentOptions.add(option); // Añadir a la lista
+                option.setQuestion(question); 
+                currentOptions.add(option); 
             }
 
             option.setText(oDto.text());
@@ -131,42 +131,42 @@ public class QuizService {
         });
     }
 
-    // =========================================================================
-    // 2. ALUMNO: OBTENER EXAMEN (ALEATORIO 50 PREGUNTAS)
-    // =========================================================================
+    
+    
+    
     @Transactional(readOnly = true)
     public QuizDTO getQuizById(UUID quizId) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        // 1. Obtener TODAS las activas
+        
         List<Question> allQuestions = quiz.getQuestions().stream()
                 .filter(Question::isActive)
-                .collect(Collectors.toList()); // Lista mutable para shuffle
+                .collect(Collectors.toList()); 
 
-        // 2. Barajar
+        
         Collections.shuffle(allQuestions);
 
-        // 3. Recortar a 50 (o el máximo disponible)
+        
         int limit = Math.min(allQuestions.size(), 50);
         List<Question> randomQuestions = allQuestions.subList(0, limit);
 
-        // 4. Mapear a DTO (Ocultando respuestas correctas)
+        
         List<QuestionDTO> questionDTOs = randomQuestions.stream().map(q -> new QuestionDTO(
                 q.getId(),
                 q.getContent(),
                 q.getOptions().stream()
                         .filter(Option::isActive)
-                        .map(o -> new OptionDTO(o.getId(), o.getText(), false)) // false para ocultar respuesta
+                        .map(o -> new OptionDTO(o.getId(), o.getText(), false)) 
                         .toList(),
                 q.getPoints())).toList();
 
         return new QuizDTO(quiz.getId(), quiz.getTitle(), quiz.getModule().getId(), questionDTOs);
     }
 
-    // =========================================================================
-    // 3. ALUMNO: CORREGIR (FEEDBACK DETALLADO)
-    // =========================================================================
+    
+    
+    
     @Transactional
     public QuizResultDTO submitQuiz(QuizSubmissionDTO submission, CustomUserDetails userDetails) {
         Quiz quiz = quizRepository.findById(submission.quizId()).orElseThrow();
@@ -176,27 +176,27 @@ public class QuizService {
         attempt.setQuiz(quiz);
         attempt.setCompletedAt(LocalDateTime.now());
 
-        // Mapas para el feedback visual
+        
         Map<UUID, Boolean> questionResults = new HashMap<>();
         Map<UUID, UUID> correctOptions = new HashMap<>();
 
         int correctCount = 0;
         int totalQuestions = 0;
 
-        // Iteramos sobre las respuestas enviadas por el usuario
+        
         for (Map.Entry<UUID, UUID> entry : submission.answers().entrySet()) {
             UUID questionId = entry.getKey();
             UUID optionId = entry.getValue();
 
-            // Buscamos la pregunta en el grafo del Quiz (más eficiente que ir a BD una por
-            // una)
+            
+            
             Question question = quiz.getQuestions().stream()
                     .filter(q -> q.getId().equals(questionId))
                     .findFirst()
                     .orElse(null);
 
             if (question == null)
-                continue; // Seguridad
+                continue; 
             totalQuestions++;
 
             QuizAnswer answer = new QuizAnswer();
@@ -208,26 +208,26 @@ public class QuizService {
                     .findFirst()
                     .orElse(null);
 
-            // Verificamos corrección
+            
             boolean isCorrect = selectedOpt != null && selectedOpt.isCorrect();
             answer.setSelectedOption(selectedOpt);
             answer.setCorrect(isCorrect);
 
             attempt.getAnswers().add(answer);
 
-            // Datos para el Feedback
+            
             questionResults.put(questionId, isCorrect);
             if (isCorrect)
                 correctCount++;
 
-            // Guardamos la opción correcta para mostrársela si falló
+            
             question.getOptions().stream()
                     .filter(Option::isCorrect)
                     .findFirst()
                     .ifPresent(opt -> correctOptions.put(questionId, opt.getId()));
         }
 
-        // Cálculo de nota
+        
         double score = totalQuestions > 0 ? ((double) correctCount / totalQuestions) * 100 : 0;
         attempt.setScore(score);
         attempt.setPassed(score >= 50.0);
@@ -237,22 +237,22 @@ public class QuizService {
         return new QuizResultDTO(score, attempt.isPassed(), questionResults, correctOptions);
     }
 
-    // =========================================================================
-    // 4. ALUMNO: SMART RETRY (BANCO DE FALLOS)
-    // =========================================================================
+    
+    
+    
     @Transactional(readOnly = true)
     public QuizDTO getSmartFailedQuiz(UUID quizId, CustomUserDetails userDetails) {
         UUID userId = userDetails.getId();
         Quiz quiz = quizRepository.findById(quizId).orElseThrow();
 
-        // 1. Obtener IDs que el usuario debe (último intento fue fallo)
+        
         List<UUID> failedIds = attemptRepository.findFailedQuestionIds(userRepository.getReferenceById(userId), quizId);
 
         if (failedIds.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NO_CONTENT, "No tienes fallos pendientes.");
         }
 
-        // 2. Filtrar preguntas del Quiz original
+        
         List<QuestionDTO> failedQuestions = quiz.getQuestions().stream()
                 .filter(q -> failedIds.contains(q.getId()))
                 .map(q -> new QuestionDTO(
@@ -272,15 +272,15 @@ public class QuizService {
                 failedQuestions);
     }
 
-    // =========================================================================
-    // 5. ADMIN: OBTENER POR MÓDULO (Para Edición)
-    // =========================================================================
+    
+    
+    
     @Transactional(readOnly = true)
     public Optional<QuizDTO> getQuizByModuleId(UUID moduleId) {
         return quizRepository.findByModuleId(moduleId).map(this::mapQuizToDTO);
     }
 
-    // Mapper Auxiliar
+    
     private QuizDTO mapQuizToDTO(Quiz quiz) {
         List<QuestionDTO> questions = quiz.getQuestions().stream()
                 .filter(Question::isActive)
@@ -289,9 +289,9 @@ public class QuizService {
                         q.getContent(),
                         q.getOptions().stream()
                                 .filter(Option::isActive)
-                                .map(o -> new OptionDTO(o.getId(), o.getText(), o.isCorrect())) // Aquí SÍ mostramos
-                                                                                                // correctas (es para
-                                                                                                // admin/guardado)
+                                .map(o -> new OptionDTO(o.getId(), o.getText(), o.isCorrect())) 
+                                                                                                
+                                                                                                
                                 .toList(),
                         q.getPoints()))
                 .toList();

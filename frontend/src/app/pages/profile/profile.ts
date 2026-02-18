@@ -21,13 +21,13 @@ export class ProfileComponent implements OnInit {
   private cd = inject(ChangeDetectorRef);
   public mediaService = inject(MediaService);
 
-  // Estados reactivos
+  
   currentEmail = signal<string>('');
   avatarUrl = signal<string | null>(null);
   loading = signal<boolean>(false);
   isUploading = signal<boolean>(false);
 
-  // Mensajes de feedback
+  
   successMessage = signal<string>('');
   errorMessage = signal<string>('');
 
@@ -42,7 +42,7 @@ export class ProfileComponent implements OnInit {
       currentPassword: [''],
       newPassword: ['', [Validators.minLength(6)]],
       confirmPassword: [''],
-      avatar: [''], // Guardamos el path relativo (uploads/...)
+      avatar: [''], 
     });
   }
 
@@ -60,7 +60,7 @@ export class ProfileComponent implements OnInit {
         next: (user) => {
           this.currentEmail.set(user.email);
 
-          // Convertimos path relativo a URL pública para mostrar
+          
           const publicAvatar = this.mediaService.toPublicUrl(user.avatar);
           this.avatarUrl.set(publicAvatar);
 
@@ -79,7 +79,7 @@ export class ProfileComponent implements OnInit {
       });
   }
 
-  // Si la imagen falla (404), ponemos un avatar generado por iniciales
+  
   handleImageError() {
     const name = this.profileForm.get('name')?.value || 'U';
     const fallback = `https://ui-avatars.com/api/?name=${name}&background=random&color=fff&size=128`;
@@ -98,18 +98,18 @@ export class ProfileComponent implements OnInit {
     this.isUploading.set(true);
     this.errorMessage.set('');
 
-    // Especificamos la carpeta 'users' para organizar mejor las fotos
+    
     this.mediaService.uploadFile(file, 'users').subscribe({
       next: (relativePath) => {
         console.log('✅ Avatar subido:', relativePath);
 
-        // 1. Actualizamos visualmente
+        
         this.avatarUrl.set(this.mediaService.toPublicUrl(relativePath));
 
-        // 2. Actualizamos el formulario con el path relativo
+        
         this.profileForm.patchValue({ avatar: relativePath });
 
-        // 3. Guardamos en BD inmediatamente (UX mejora)
+        
         this.saveAvatarToDatabase(relativePath);
       },
       error: (err) => {
@@ -137,7 +137,7 @@ export class ProfileComponent implements OnInit {
         next: () => {
           this.successMessage.set('¡Foto de perfil actualizada!');
 
-          // Actualizamos estado global de Auth para que el navbar se entere
+          
           this.authService.updateUserFields({
             ...dto,
             avatar: relativePath,
@@ -160,7 +160,7 @@ export class ProfileComponent implements OnInit {
 
     const formValues = this.profileForm.value;
 
-    // Validaciones extra de contraseña
+    
     if (formValues.newPassword && formValues.newPassword !== formValues.confirmPassword) {
       this.errorMessage.set('Las contraseñas no coinciden.');
       return;
@@ -190,21 +190,21 @@ export class ProfileComponent implements OnInit {
         next: () => {
           this.successMessage.set('¡Perfil actualizado correctamente!');
 
-          // Limpiamos campos de password
+          
           this.profileForm.patchValue({
             currentPassword: '',
             newPassword: '',
             confirmPassword: '',
           });
 
-          // Si cambió el email, forzamos logout
+          
           if (dto.email !== this.currentEmail()) {
             alert(
               'Has cambiado tu correo electrónico. Por seguridad, debes iniciar sesión de nuevo.',
             );
             this.authService.logout();
           } else {
-            // Actualizamos estado global
+            
             this.authService.updateUserFields({
               name: dto.name,
               surname: dto.surname,
